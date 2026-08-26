@@ -7,3 +7,4 @@
 - 页面右上角可手动触发一次同步
 
 > 本 README 由 Favorites 仓库的 deploy 流程自动维护。
+
