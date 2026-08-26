@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Workspace · 我的收藏夹</title>
+  <meta name="description" content="跨平台收藏夹工作台：自动同步抖音点赞与收藏" />
+  <link rel="stylesheet" href="assets/style.css" />
+  <!-- 内联 favicon：一个渐变书签图标，免额外请求 -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%237c5cff'/><stop offset='1' stop-color='%2300c2ff'/></linearGradient></defs><path fill='url(%23g)' d='M6 2h12a2 2 0 0 1 2 2v18l-8-4.8L4 22V4a2 2 0 0 1 2-2z'/></svg>" />
+</head>
+<body>
+
+  <!-- ══════════════ 顶栏 ══════════════ -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <span class="brand-mark">W</span>
+        <div class="brand-text">
+          <h1>Workspace</h1>
+          <span class="brand-sub">我的跨平台收藏夹</span>
+        </div>
+      </div>
+
+      <div class="topbar-actions">
+        <!-- 最近同步时间（app.js 从 data/meta.json 读取填充） -->
+        <span class="sync-time" id="syncTime" title="数据最近同步时间">—</span>
+        <!-- 立即同步按钮：触发 Favorites 私有仓库的 GitHub Actions 工作流 -->
+        <button class="btn-sync" id="btnSync" title="手动触发一次云端同步（约 1~2 分钟）">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg>
+          <span id="btnSyncText">立即同步</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ══════════════ 筛选工具栏 ══════════════ -->
+  <nav class="toolbar">
+    <div class="toolbar-inner">
+      <!-- 来源 Tab：全部 / 点赞 / 收藏 -->
+      <div class="tabs" id="tabs" role="tablist">
+        <button class="tab is-active" data-source="all">全部</button>
+        <button class="tab" data-source="like">点赞</button>
+        <button class="tab" data-source="collect">收藏</button>
+      </div>
+
+      <div class="filters">
+        <!-- 类型筛选：全部 / 视频 / 图文 -->
+        <div class="chips" id="typeChips">
+          <button class="chip is-active" data-type="all">全部类型</button>
+          <button class="chip" data-type="video">视频</button>
+          <button class="chip" data-type="image">图文</button>
+        </div>
+        <!-- 关键词搜索：匹配标题和作者 -->
+        <input type="search" id="searchBox" class="search" placeholder="搜索标题或作者…" />
+      </div>
+    </div>
+  </nav>
+
+  <!-- ══════════════ 卡片瀑布区 ══════════════ -->
+  <main class="main">
+    <p class="count-line" id="countLine"></p>
+    <section class="grid" id="grid" aria-live="polite"></section>
+
+    <!-- 空状态 / 加载失败提示 -->
+    <div class="empty" id="emptyBox" hidden></div>
+
+    <!-- 无限滚动哨兵：滚进视口时 app.js 自动追加下一批卡片 -->
+    <div id="sentinel" style="height:1px;"></div>
+  </main>
+
+  <footer class="footer">
+    <p>数据来源：本人抖音点赞 / 收藏 · 由 GitHub Actions 每日自动同步</p>
+    <p class="footer-dim">点击卡片跳转原作品 · 仅作个人收藏索引使用</p>
+  </footer>
+
+  <!-- ══════════════ PAT 设置弹窗（首次点「立即同步」时出现）══════════════ -->
+  <dialog class="modal" id="patModal">
+    <form method="dialog" class="modal-box">
+      <h3>配置同步凭据</h3>
+      <p class="modal-desc">
+        首次使用需粘贴一个 GitHub Token（仅保存在<b>本机浏览器</b> localStorage，
+        不上传、不进仓库）。<br>
+        创建路径：GitHub → Settings → Developer settings →
+        Fine-grained tokens → 新建，仅授权
+        <code>Anthony-hcy/Favorites</code> 仓库的 <code>Actions: Read and write</code> 权限。
+      </p>
+      <input type="password" id="patInput" class="modal-input" placeholder="github_pat_… 或 ghp_…" autocomplete="off" />
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" id="patCancel">取消</button>
+        <button type="button" class="btn-primary" id="patSave">保存并同步</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- 全局轻提示 -->
+  <div class="toast" id="toast" hidden></div>
+
+  <script src="assets/app.js"></script>
+</body>
+</html>
