@@ -71,11 +71,11 @@ async function loadData() {
   //    否则同步完成后打开页面可能仍看到旧数据）
   const bust = `t=${Date.now()}`;
   const [metaRes, likeRes, collectRes, biliRes, foldersRes] = await Promise.allSettled([
-    fetch(`data/meta.json?${bust}`).then((r) => r.json()),
-    fetch(`data/douyin-like.json?${bust}`).then((r) => r.json()),
-    fetch(`data/douyin-collect.json?${bust}`).then((r) => r.json()),
-    fetch(`data/bilibili-collect.json?${bust}`).then((r) => r.json()),
-    fetch(`data/bilibili-folders.json?${bust}`).then((r) => r.json()),
+    fetch(`data/meta.json?${bust}`, { cache: 'no-store' }).then((r) => r.json()),
+    fetch(`data/douyin-like.json?${bust}`, { cache: 'no-store' }).then((r) => r.json()),
+    fetch(`data/douyin-collect.json?${bust}`, { cache: 'no-store' }).then((r) => r.json()),
+    fetch(`data/bilibili-collect.json?${bust}`, { cache: 'no-store' }).then((r) => r.json()),
+    fetch(`data/bilibili-folders.json?${bust}`, { cache: 'no-store' }).then((r) => r.json()),
   ]);
 
   // meta：顶栏显示"最近同步时间 + 本次模式"
