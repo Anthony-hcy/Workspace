@@ -71,10 +71,11 @@ async function loadData() {
     fetch('data/douyin-collect.json').then((r) => r.json()),
   ]);
 
-  // meta：顶栏显示"最近同步时间"
+  // meta：顶栏显示"最近同步时间 + 本次模式"
   if (metaRes.status === 'fulfilled' && metaRes.value?.lastSync) {
     const d = new Date(metaRes.value.lastSync);
-    $('#syncTime').textContent = `最近同步：${d.toLocaleString('zh-CN', { hour12: false })}`;
+    const mode = metaRes.value.mode === 'full' ? '全量' : '增量';
+    $('#syncTime').textContent = `最近同步：${d.toLocaleString('zh-CN', { hour12: false })} · ${mode}`;
   }
 
   // 给每个列表的数据打上来源标记，便于筛选和徽章显示
