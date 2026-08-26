@@ -239,6 +239,7 @@ function buildCard(item) {
 
   // 左下角标签：平台（按平台配色）+ 类型（类型分色，见 style.css）
   const isBili = item.platform === 'bilibili';
+  if (isBili) a.classList.add('card--wide'); // B站视频为横屏封面
   cover.insertAdjacentHTML('beforeend', `
     <div class="card-tags">
       <span class="tag ${isBili ? 'tag-bilibili' : 'tag-platform'}">${isBili ? '哔哩' : '抖音'}</span>
@@ -443,6 +444,13 @@ $('#sideNav').addEventListener('click', (e) => {
   state.view = btn.dataset.view;
   state.sub = 'all';                       // 切视图后二级筛选重置
   $('#viewTitle').textContent = VIEW_TITLES[state.view] ?? '';
+  // 布局模式随视图切换：
+  //   总览 → 瀑布流（抖音竖屏卡与B站横屏卡穿插，类似 kiseki.blog/library）
+  //   B站 → 宽列网格（统一 16:9 横屏）
+  //   抖音 → 标准网格（统一竖屏）
+  const grid = $('#grid');
+  grid.classList.toggle('masonry', state.view === 'all');
+  grid.classList.toggle('wide', state.view === 'bilibili');
   renderSubFilters();
   applyFilter();
 });
@@ -497,6 +505,8 @@ $('#pageInput').addEventListener('keydown', (e) => {
   } catch (err) {
     console.error(err);
   }
+  // 默认总览视图 → 瀑布流布局
+  $('#grid').classList.add('masonry');
   renderSubFilters();
   applyFilter();
 
