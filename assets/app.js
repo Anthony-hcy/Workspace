@@ -362,6 +362,7 @@ async function triggerSync(pat) {
       headers: {
         Authorization: `Bearer ${pat}`,
         Accept: 'application/vnd.github+json',
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({ ref: CONFIG.BRANCH }),
     });
