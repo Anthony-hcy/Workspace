@@ -152,12 +152,13 @@ function renderPage() {
   }
 }
 
-/** 翻到指定页（自动夹取到合法范围），并滚回列表顶部 */
+/** 翻到指定页（自动夹取到合法范围），并滚回工具栏顶部 */
 function goToPage(p) {
   state.page = Math.min(Math.max(1, Math.round(p) || 1), totalPages());
   renderPage();
-  // 滚回工具栏位置，让用户从第一行开始看
-  countLine.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  // 瞬时滚到工具栏（含 Tab/筛选/排序），scroll-margin-top 补偿 sticky 顶栏高度；
+  // 不用 smooth：翻页后图片加载会改变页面高度，平滑滚动容易停错位置
+  document.querySelector('.toolbar').scrollIntoView({ behavior: 'auto', block: 'start' });
 }
 
 /** 刷新分页控件的显示状态 */
