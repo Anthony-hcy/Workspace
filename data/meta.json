@@ -1,20 +1,13 @@
 {
-  "lastSync": "2026-08-26T11:03:01.720Z",
-  "mode": "full",
+  "lastSync": "2026-08-26T11:10:50.730Z",
   "sources": {
     "douyin-like": {
       "count": 663,
-      "ok": true,
-      "added": 663,
-      "removed": 0,
-      "incremental": false
+      "ok": true
     },
     "douyin-collect": {
       "count": 416,
-      "ok": true,
-      "added": 416,
-      "removed": 0,
-      "incremental": false
+      "ok": true
     }
   },
   "ok": true
