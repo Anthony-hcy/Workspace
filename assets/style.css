@@ -21,15 +21,73 @@
 
 html { scroll-behavior: smooth; }
 
+/* 页面骨架：左侧固定导航 + 右侧内容区 */
 body {
   margin: 0;
   background: var(--bg);
   color: var(--ink);
   font: 14px/1.5 system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
   -webkit-font-smoothing: antialiased;
+  display: flex;
+  min-height: 100vh;
 }
 
 button { font-family: inherit; cursor: pointer; }
+
+/* ---------- 左侧平台导航 ---------- */
+.sidebar {
+  width: 176px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  background: #eceef2;
+  border-right: 1px solid var(--line);
+  padding: 18px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.side-nav { display: flex; flex-direction: column; gap: 4px; }
+
+.side-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 11px 14px;
+  border: none;
+  border-radius: 11px;
+  background: transparent;
+  font-size: 13.5px;
+  color: #4b5563;
+  transition: all .15s ease;
+  text-align: left;
+}
+.side-item svg { width: 19px; height: 19px; flex-shrink: 0; }
+.side-item:hover { background: rgba(255, 255, 255, .75); color: var(--ink); }
+/* 选中态：白底浮起，与参考图一致 */
+.side-item.is-active {
+  background: #fff;
+  color: var(--ink);
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(16, 24, 40, .08);
+}
+/* 置灰占位（小红书） */
+.side-item.is-disabled { opacity: .45; cursor: not-allowed; }
+.side-item.is-disabled:hover { background: transparent; color: #4b5563; }
+
+.side-foot {
+  margin-top: auto;
+  padding-left: 14px;
+  font-size: 11px;
+  color: #9ca3af;
+  letter-spacing: .5px;
+}
+
+/* ---------- 右侧内容区 ---------- */
+.page { flex: 1; min-width: 0; }
 
 /* ---------- 顶栏 ---------- */
 .topbar {
@@ -287,8 +345,9 @@ button { font-family: inherit; cursor: pointer; }
   text-shadow: 0 1px 2px rgba(0, 0, 0, .35);   /* 轻描边感，提升可读性 */
 }
 
-/* 平台标签：黑底 + 抖音品牌双色圆点，低调但有辨识度 */
+/* 平台标签：抖音黑底+双色点；B站粉底 */
 .tag-platform { background: rgba(0, 0, 0, .82); }
+.tag-bilibili { background: rgba(251, 114, 153, .92); }   /* B站品牌粉 #fb7299 */
 .tag-platform::before {
   content: '';
   width: 7px;
@@ -475,6 +534,29 @@ button { font-family: inherit; cursor: pointer; }
 }
 
 /* ---------- 移动端适配 ---------- */
+@media (max-width: 900px) {
+  /* 窄屏：侧边栏折叠为顶部横向滑动条 */
+  body { flex-direction: column; }
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: sticky;
+    top: 0;
+    z-index: 60;
+    flex-direction: row;
+    align-items: center;
+    padding: 8px 12px;
+    overflow-x: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--line);
+  }
+  .side-nav { flex-direction: row; gap: 6px; }
+  .side-item { width: auto; padding: 8px 14px; white-space: nowrap; }
+  .side-foot { display: none; }
+  .page { width: 100%; }
+  .topbar { position: static; }  /* 顶栏不再 sticky，避免与侧边条双重吸附 */
+}
+
 @media (max-width: 640px) {
   .topbar-inner, .toolbar, .main { padding-left: 14px; padding-right: 14px; }
   .brand-text .brand-sub { display: none; }

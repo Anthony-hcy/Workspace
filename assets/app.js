@@ -34,10 +34,12 @@ const PAT_KEY = 'ws_github_pat';      // localStorage 键名
  * 全局状态
  * ------------------------------------------------------------------------- */
 const state = {
-  all: [],            // 合并后的全量数据 [{...item, sources:['like'|'collect']}]
+  all: [],            // 合并后的全量数据 [{...item, sources:['like'|'collect'], folderId?}]
+  folders: [],        // B站收藏夹列表 [{id, title, count}]
   filtered: [],       // 当前筛选条件下的数据
   page: 1,            // 当前页码（从 1 开始）
-  source: 'all',      // 当前 Tab：all | like | collect
+  view: 'all',        // 侧边栏视图：all | bilibili | douyin | xhs
+  sub: 'all',         // 二级筛选：all | like | collect（抖音）或 收藏夹id（B站）
   type: 'all',        // 当前类型：all | video | image
   keyword: '',        // 搜索关键词
   sort: 'default',    // 排序：default | newest | oldest | likes
@@ -68,10 +70,12 @@ async function loadData() {
   // ⚠️ 加时间戳参数绕过浏览器/CDN 缓存（Pages 对静态资源缓存 10 分钟，
   //    否则同步完成后打开页面可能仍看到旧数据）
   const bust = `t=${Date.now()}`;
-  const [metaRes, likeRes, collectRes] = await Promise.allSettled([
+  const [metaRes, likeRes, collectRes, biliRes, foldersRes] = await Promise.allSettled([
     fetch(`data/meta.json?${bust}`).then((r) => r.json()),
     fetch(`data/douyin-like.json?${bust}`).then((r) => r.json()),
     fetch(`data/douyin-collect.json?${bust}`).then((r) => r.json()),
+    fetch(`data/bilibili-collect.json?${bust}`).then((r) => r.json()),
+    fetch(`data/bilibili-folders.json?${bust}`).then((r) => r.json()),
   ]);
 
   // meta：顶栏显示"最近同步时间 + 本次模式"
@@ -84,8 +88,10 @@ async function loadData() {
   // 给每个列表的数据打上来源标记，便于筛选和徽章显示
   const like = likeRes.status === 'fulfilled' && Array.isArray(likeRes.value) ? likeRes.value : [];
   const collect = collectRes.status === 'fulfilled' && Array.isArray(collectRes.value) ? collectRes.value : [];
+  const bili = biliRes.status === 'fulfilled' && Array.isArray(biliRes.value) ? biliRes.value : [];
+  state.folders = foldersRes.status === 'fulfilled' && Array.isArray(foldersRes.value) ? foldersRes.value : [];
 
-  /** 按 id 合并：同一条作品既点赞又收藏时，合并来源而不是重复展示两张卡 */
+  /** 按 id 合并：同一条抖音作品既点赞又收藏时，合并来源而不是重复展示 */
   const map = new Map();
   const push = (item, src) => {
     if (!item?.id) return;
@@ -97,6 +103,8 @@ async function loadData() {
   };
   like.forEach((i) => push(i, 'like'));
   collect.forEach((i) => push(i, 'collect'));
+  // B站条目已自带 folderId，直接并入（id 命名空间与抖音天然不冲突）
+  bili.forEach((i) => { if (i?.id) map.set(i.id, { ...i, sources: ['collect'] }); });
 
   state.all = [...map.values()];
 }
@@ -107,8 +115,13 @@ async function loadData() {
 function applyFilter() {
   const kw = state.keyword.trim().toLowerCase();
   state.filtered = state.all.filter((it) => {
-    // Tab：当前视图是否包含该来源
-    if (state.source !== 'all' && !it.sources.includes(state.source)) return false;
+    // 侧边栏视图：平台级过滤
+    if (state.view === 'douyin' && it.platform !== 'douyin') return false;
+    if (state.view === 'bilibili' && it.platform !== 'bilibili') return false;
+    if (state.view === 'xhs') return false; // 小红书暂未接入
+    // 二级筛选：抖音的点赞/收藏，或 B站的收藏夹
+    if (state.view === 'douyin' && state.sub !== 'all' && !it.sources.includes(state.sub)) return false;
+    if (state.view === 'bilibili' && state.sub !== 'all' && it.folderId !== state.sub) return false;
     // 类型筛选
     if (state.type !== 'all' && it.type !== state.type) return false;
     // 关键词匹配标题或作者
@@ -224,26 +237,30 @@ function buildCard(item) {
     cover.appendChild(img);
   }
 
-  // 左下角标签：平台 + 类型（类型分色，见 style.css）
+  // 左下角标签：平台（按平台配色）+ 类型（类型分色，见 style.css）
+  const isBili = item.platform === 'bilibili';
   cover.insertAdjacentHTML('beforeend', `
     <div class="card-tags">
-      <span class="tag tag-platform">抖音</span>
+      <span class="tag ${isBili ? 'tag-bilibili' : 'tag-platform'}">${isBili ? '哔哩' : '抖音'}</span>
       <span class="tag tag-type ${item.type === 'video' ? 'is-video' : 'is-image'}">${item.type === 'video' ? '视频' : '图文'}</span>
     </div>`);
 
   /* -- 文字区 ---------------------------------------------------------- */
   const body = document.createElement('div');
   body.className = 'card-body';
-  const srcBadge = item.sources.includes('collect') && state.source === 'all'
-    ? `<span class="src-badge">收藏</span>`
-    : item.sources.includes('like') && state.source === 'all'
-      ? `<span class="src-badge">赞</span>` : '';
+  // 抖音显示点赞数；B站显示播放量。总览视图下抖音卡带来源徽章（赞/收藏）
+  const statText = isBili
+    ? `${formatCount(item.stats?.digg)} 播放`
+    : `${formatCount(item.stats?.digg)} 赞`;
+  const srcBadge = !isBili && state.view === 'all'
+    ? item.sources.includes('collect') ? '<span class="src-badge">收藏</span>'
+      : '<span class="src-badge">赞</span>' : '';
   body.innerHTML = `
     <p class="card-title">${escapeHtml(item.title || '无标题')}</p>
     <div class="card-meta">
       <span class="author">@${escapeHtml(item.author || '未知作者')}</span>
       <span class="dot">·</span>
-      <span>${formatCount(item.stats?.digg)} 赞</span>
+      <span>${statText}</span>
       ${srcBadge}
     </div>`;
 
@@ -383,12 +400,59 @@ function showToast(msg, isError = false) {
 /* ---------------------------------------------------------------------------
  * 七、事件绑定 & 启动
  * ------------------------------------------------------------------------- */
-// Tab 切换（事件委托：监听父容器，避免给每个按钮单独绑）
-$('#tabs').addEventListener('click', (e) => {
-  const btn = e.target.closest('.tab');
+/* ---------------------------------------------------------------------------
+ * 七、侧边栏视图 + 二级筛选
+ * ------------------------------------------------------------------------- */
+const VIEW_TITLES = {
+  all: '我的跨平台收藏夹',
+  bilibili: 'B站 · 我的收藏',
+  douyin: '抖音 · 点赞与收藏',
+  xhs: '小红书 · 敬请期待',
+};
+
+/** 根据当前视图动态生成二级筛选 chips（抖音：点赞/收藏；B站：各收藏夹） */
+function renderSubFilters() {
+  const box = $('#subFilters');
+  let chips = [];
+  if (state.view === 'douyin') {
+    chips = [
+      { sub: 'all', label: '全部' },
+      { sub: 'like', label: '点赞' },
+      { sub: 'collect', label: '收藏' },
+    ];
+  } else if (state.view === 'bilibili' && state.folders.length > 0) {
+    chips = [
+      { sub: 'all', label: '全部' },
+      ...state.folders.map((f) => ({ sub: f.id, label: `${f.title} ${f.count}` })),
+    ];
+  }
+  box.hidden = chips.length === 0;
+  box.innerHTML = chips.map((c, i) =>
+    `<button class="chip ${i === 0 ? 'is-active' : ''}" data-sub="${c.sub}">${escapeHtml(c.label)}</button>`,
+  ).join('');
+}
+
+// 侧边栏切换（事件委托）
+$('#sideNav').addEventListener('click', (e) => {
+  const btn = e.target.closest('.side-item');
   if (!btn) return;
-  document.querySelectorAll('#tabs .tab').forEach((t) => t.classList.toggle('is-active', t === btn));
-  state.source = btn.dataset.source;
+  if (btn.classList.contains('is-disabled')) {
+    return showToast('小红书接入筹备中，敬请期待');
+  }
+  document.querySelectorAll('#sideNav .side-item').forEach((b) => b.classList.toggle('is-active', b === btn));
+  state.view = btn.dataset.view;
+  state.sub = 'all';                       // 切视图后二级筛选重置
+  $('#viewTitle').textContent = VIEW_TITLES[state.view] ?? '';
+  renderSubFilters();
+  applyFilter();
+});
+
+// 二级筛选点击（事件委托）
+$('#subFilters').addEventListener('click', (e) => {
+  const btn = e.target.closest('.chip');
+  if (!btn) return;
+  document.querySelectorAll('#subFilters .chip').forEach((c) => c.classList.toggle('is-active', c === btn));
+  state.sub = btn.dataset.sub;
   applyFilter();
 });
 
@@ -433,6 +497,7 @@ $('#pageInput').addEventListener('keydown', (e) => {
   } catch (err) {
     console.error(err);
   }
+  renderSubFilters();
   applyFilter();
 
   // 数据为空时给出首次部署引导
