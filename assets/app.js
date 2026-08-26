@@ -189,11 +189,11 @@ function buildCard(item) {
     cover.appendChild(img);
   }
 
-  // 左下角标签：平台 + 类型
+  // 左下角标签：平台 + 类型（类型分色，见 style.css）
   cover.insertAdjacentHTML('beforeend', `
     <div class="card-tags">
       <span class="tag tag-platform">抖音</span>
-      <span class="tag tag-type">${item.type === 'video' ? '视频' : '图文'}</span>
+      <span class="tag tag-type ${item.type === 'video' ? 'is-video' : 'is-image'}">${item.type === 'video' ? '视频' : '图文'}</span>
     </div>`);
 
   /* -- 文字区 ---------------------------------------------------------- */
