@@ -42,7 +42,7 @@ const state = {
   sub: 'all',         // 二级筛选：all | like | collect（抖音）或 收藏夹id（B站）
   type: 'all',        // 当前类型：all | video | image
   keyword: '',        // 搜索关键词
-  sort: 'default',    // 排序：default(最近收藏) | oldest(最早收藏) | likes(点赞最多)
+  sort: 'default',    // 排序：default(最近更新) | oldest(最早更新) | likes(点赞最多)
   syncing: false,     // 是否正在云端同步
 };
 
@@ -129,15 +129,15 @@ function applyFilter() {
     return true;
   });
 
-  // 排序（default = 最近收藏时间倒序）
+  // 排序（default = 最近更新时间倒序）
   if (state.sort !== 'default') {
     const by = {
-      oldest: (a, b) => (a.favTime || 0) - (b.favTime || 0), // 收藏时间 正序
+      oldest: (a, b) => (a.createdAt || 0) - (b.createdAt || 0), // 发布时间 正序
       likes:  (a, b) => (b.stats?.digg || 0) - (a.stats?.digg || 0), // 点赞量 倒序
     }[state.sort];
     state.filtered.sort(by);
   } else {
-    state.filtered.sort((a, b) => (b.favTime || 0) - (a.favTime || 0)); // 默认：收藏时间 倒序
+    state.filtered.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)); // 默认：发布时间 倒序
   }
 
   resetRender();
