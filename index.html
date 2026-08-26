@@ -51,6 +51,13 @@
           <button class="chip" data-type="video">视频</button>
           <button class="chip" data-type="image">图文</button>
         </div>
+        <!-- 排序：默认(抓取顺序=最新收藏在前) / 发布时间 / 点赞量 -->
+        <select id="sortSelect" class="sort-select" title="排序方式">
+          <option value="default">默认排序</option>
+          <option value="newest">最新发布在前</option>
+          <option value="oldest">最早发布在前</option>
+          <option value="likes">最多点赞在前</option>
+        </select>
         <!-- 关键词搜索：匹配标题和作者 -->
         <input type="search" id="searchBox" class="search" placeholder="搜索标题或作者…" />
       </div>

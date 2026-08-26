@@ -39,6 +39,7 @@ const state = {
   source: 'all',      // 当前 Tab：all | like | collect
   type: 'all',        // 当前类型：all | video | image
   keyword: '',        // 搜索关键词
+  sort: 'default',    // 排序：default | newest | oldest | likes
   syncing: false,     // 是否正在云端同步
 };
 
@@ -110,6 +111,17 @@ function applyFilter() {
     if (kw && !(it.title || '').toLowerCase().includes(kw) && !(it.author || '').toLowerCase().includes(kw)) return false;
     return true;
   });
+
+  // 排序（default = 保持抓取顺序，即抖音"最新收藏/点赞在前"的原始顺序）
+  if (state.sort !== 'default') {
+    const by = {
+      newest: (a, b) => (b.createdAt || 0) - (a.createdAt || 0), // 发布时间 倒序
+      oldest: (a, b) => (a.createdAt || 0) - (b.createdAt || 0), // 发布时间 正序
+      likes:  (a, b) => (b.stats?.digg || 0) - (a.stats?.digg || 0), // 点赞量 倒序
+    }[state.sort];
+    state.filtered.sort(by);
+  }
+
   resetRender();
 }
 
@@ -374,6 +386,12 @@ $('#searchBox').addEventListener('input', (e) => {
     state.keyword = e.target.value;
     applyFilter();
   }, 300);
+});
+
+// 排序切换
+$('#sortSelect').addEventListener('change', (e) => {
+  state.sort = e.target.value;
+  applyFilter();
 });
 
 // 启动无限滚动观察
