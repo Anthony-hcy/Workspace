@@ -7,10 +7,11 @@
  * 功能清单：
  *   1. 并行加载 点赞 / 收藏 / 元信息 三份数据
  *   2. 来源 Tab（全部/点赞/收藏）× 类型筛选（视频/图文）× 关键词搜索
- *   3. 大数据量优化：IntersectionObserver 无限滚动分批渲染（每批 60 张）
- *   4. 封面热链直连抖音 CDN（referrerpolicy=no-referrer 绕过防盗链），
+ *   3. 排序：默认 / 最近更新 / 最早发布 / 点赞最多
+ *   4. 分页浏览：每页 24 张，支持上一页/下一页/跳转指定页
+ *   5. 封面热链直连抖音 CDN（referrerpolicy=no-referrer 绕过防盗链），
  *      加载失败自动回退为按 id 生成的渐变占位图
- *   5. 「立即同步」按钮 → 调 GitHub API 触发私有仓库的 Actions 工作流，
+ *   6. 「立即同步」按钮 → 调 GitHub API 触发私有仓库的 Actions 工作流，
  *      Token 只存本机 localStorage，不进代码仓库
  * ============================================================================
  */
@@ -23,7 +24,7 @@ const CONFIG = {
   PRIVATE_REPO: 'Favorites',          // 私有仓库（抓取端，workflow 所在地）
   WORKFLOW_FILE: 'sync.yml',          // 要触发的工作流文件名
   BRANCH: 'main',                     // 工作流所在分支
-  BATCH_SIZE: 60,                     // 每批渲染的卡片数量
+  PAGE_SIZE: 24,                      // 每页显示的卡片数量
 };
 
 const API_BASE = `https://api.github.com/repos/${CONFIG.GITHUB_OWNER}/${CONFIG.PRIVATE_REPO}`;
@@ -35,7 +36,7 @@ const PAT_KEY = 'ws_github_pat';      // localStorage 键名
 const state = {
   all: [],            // 合并后的全量数据 [{...item, sources:['like'|'collect']}]
   filtered: [],       // 当前筛选条件下的数据
-  rendered: 0,        // 已渲染的卡片数（用于分批追加）
+  page: 1,            // 当前页码（从 1 开始）
   source: 'all',      // 当前 Tab：all | like | collect
   type: 'all',        // 当前类型：all | video | image
   keyword: '',        // 搜索关键词
@@ -56,7 +57,6 @@ const GRADIENTS = [
 /* DOM 引用 */
 const $ = (sel) => document.querySelector(sel);
 const grid = $('#grid');
-const sentinel = $('#sentinel');
 const emptyBox = $('#emptyBox');
 const countLine = $('#countLine');
 
@@ -126,32 +126,50 @@ function applyFilter() {
 }
 
 /* ---------------------------------------------------------------------------
- * 三、分批渲染（2000+ 条不卡的秘诀：先画一屏，滚到底再补下一批）
+ * 三、分页渲染（每页 24 张；筛选/排序变化时自动回到第 1 页）
  * ------------------------------------------------------------------------- */
-const observer = new IntersectionObserver((entries) => {
-  // 哨兵元素进入视口 → 追加下一批
-  if (entries[0].isIntersecting) renderBatch();
-}, { rootMargin: '800px 0px' });   // 提前 800px 预加载，滚动体验更顺
+const totalPages = () => Math.max(1, Math.ceil(state.filtered.length / CONFIG.PAGE_SIZE));
 
 function resetRender() {
-  grid.innerHTML = '';
-  state.rendered = 0;
-  updateCountLine();
-  renderBatch();
+  state.page = 1;      // 条件变化后回到第一页
+  renderPage();
 }
 
-function renderBatch() {
-  const batch = state.filtered.slice(state.rendered, state.rendered + CONFIG.BATCH_SIZE);
-  const frag = document.createDocumentFragment();
-  for (const item of batch) frag.appendChild(buildCard(item));
-  grid.appendChild(frag);
-  state.rendered += batch.length;
+function renderPage() {
+  const start = (state.page - 1) * CONFIG.PAGE_SIZE;
+  const slice = state.filtered.slice(start, start + CONFIG.PAGE_SIZE);
 
-  // 空状态提示
+  grid.innerHTML = '';
+  const frag = document.createDocumentFragment();
+  for (const item of slice) frag.appendChild(buildCard(item));
+  grid.appendChild(frag);
+
+  updatePager();
+  updateCountLine();
   emptyBox.hidden = state.filtered.length !== 0;
   if (state.filtered.length === 0) {
     emptyBox.innerHTML = '<strong>◌</strong>没有匹配的作品<br><span style="font-size:12px">试试切换筛选条件，或先点右上角「立即同步」拉取数据</span>';
   }
+}
+
+/** 翻到指定页（自动夹取到合法范围），并滚回列表顶部 */
+function goToPage(p) {
+  state.page = Math.min(Math.max(1, Math.round(p) || 1), totalPages());
+  renderPage();
+  // 滚回工具栏位置，让用户从第一行开始看
+  countLine.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/** 刷新分页控件的显示状态 */
+function updatePager() {
+  const total = totalPages();
+  $('#pagination').hidden = state.filtered.length === 0;
+  $('#pageTotal').textContent = total;
+  const input = $('#pageInput');
+  input.value = state.page;
+  input.max = total;
+  $('#prevPage').disabled = state.page <= 1;
+  $('#nextPage').disabled = state.page >= total;
 }
 
 /** 更新顶部统计行："共 N 条 · 视频 x · 图文 y" */
@@ -159,7 +177,7 @@ function updateCountLine() {
   const v = state.filtered.filter((i) => i.type === 'video').length;
   const m = state.filtered.length - v;
   countLine.textContent = state.filtered.length
-    ? `共 ${state.filtered.length} 条 · 视频 ${v} · 图文 ${m}`
+    ? `共 ${state.filtered.length} 条 · 视频 ${v} · 图文 ${m} · 第 ${state.page}/${totalPages()} 页`
     : '';
 }
 
@@ -394,8 +412,14 @@ $('#sortSelect').addEventListener('change', (e) => {
   applyFilter();
 });
 
-// 启动无限滚动观察
-observer.observe(sentinel);
+// 分页：上一页 / 下一页 / 跳转
+$('#prevPage').addEventListener('click', () => goToPage(state.page - 1));
+$('#nextPage').addEventListener('click', () => goToPage(state.page + 1));
+$('#jumpBtn').addEventListener('click', () => goToPage(Number($('#pageInput').value)));
+// 输入框里按回车直接跳转
+$('#pageInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') goToPage(Number(e.target.value));
+});
 
 // 入口：加载数据 → 应用默认筛选
 (async function init() {

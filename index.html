@@ -53,10 +53,10 @@
         </div>
         <!-- 排序：默认(抓取顺序=最新收藏在前) / 发布时间 / 点赞量 -->
         <select id="sortSelect" class="sort-select" title="排序方式">
-          <option value="default">默认排序</option>
-          <option value="newest">最新发布在前</option>
-          <option value="oldest">最早发布在前</option>
-          <option value="likes">最多点赞在前</option>
+          <option value="default">默认</option>
+          <option value="newest">最近更新</option>
+          <option value="oldest">最早发布</option>
+          <option value="likes">点赞最多</option>
         </select>
         <!-- 关键词搜索：匹配标题和作者 -->
         <input type="search" id="searchBox" class="search" placeholder="搜索标题或作者…" />
@@ -72,8 +72,16 @@
     <!-- 空状态 / 加载失败提示 -->
     <div class="empty" id="emptyBox" hidden></div>
 
-    <!-- 无限滚动哨兵：滚进视口时 app.js 自动追加下一批卡片 -->
-    <div id="sentinel" style="height:1px;"></div>
+    <!-- 分页控件：上一页/下一页 + 页码 + 跳转 -->
+    <div class="pagination" id="pagination" hidden>
+      <button class="page-btn" id="prevPage">‹ 上一页</button>
+      <span class="page-info">
+        第 <input type="number" id="pageInput" class="page-input" min="1" value="1" /> /
+        <span id="pageTotal">1</span> 页
+      </span>
+      <button class="page-btn" id="jumpBtn">跳转</button>
+      <button class="page-btn" id="nextPage">下一页 ›</button>
+    </div>
   </main>
 
   <footer class="footer">

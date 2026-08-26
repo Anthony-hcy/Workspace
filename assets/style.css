@@ -337,6 +337,50 @@ button { font-family: inherit; cursor: pointer; }
   color: var(--ink-2);
 }
 
+/* ---------- 分页控件 ---------- */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 30px;
+}
+
+.page-btn {
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: 999px;
+  padding: 8px 18px;
+  font-size: 13px;
+  color: var(--ink);
+  transition: all .15s ease;
+}
+.page-btn:hover:not(:disabled) { border-color: var(--accent); background: var(--accent); color: #fff; }
+.page-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+.page-info {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--ink-2);
+}
+
+.page-input {
+  width: 58px;
+  padding: 6px 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  text-align: center;
+  font-size: 13px;
+  outline: none;
+  -moz-appearance: textfield;           /* 隐藏 Firefox 的上下箭头 */
+}
+.page-input::-webkit-outer-spin-button,
+.page-input::-webkit-inner-spin-button { -webkit-appearance: none; }  /* 隐藏 WebKit 上下箭头 */
+.page-input:focus { border-color: #9aa3b2; box-shadow: 0 0 0 3px rgba(17, 19, 24, .06); }
+
 /* ---------- 空状态 ---------- */
 .empty {
   text-align: center;
