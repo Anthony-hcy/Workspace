@@ -272,18 +272,22 @@ button { font-family: inherit; cursor: pointer; }
 /* B站视图：横屏卡更宽，列宽相应加大 */
 .grid.wide { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
 
-/* 总览视图：瀑布流（columns 多列），竖屏卡与横屏卡自然穿插补位
-   参考效果：kiseki.blog/library —— 列宽自适应、最多 5 列 */
+/* 总览视图：JS 瀑布流 —— 多列等宽容器，最短列优先放置，消除空隙 */
 .grid.masonry {
-  display: block;
-  columns: 200px 5;
-  column-gap: 16px;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+.grid.masonry .masonry-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
 }
 .grid.masonry .card {
-  display: block;
   width: 100%;
-  margin: 0 0 16px;
-  break-inside: avoid;   /* 防止卡片被拦腰截断到两列 */
+  margin: 0;
 }
 
 /* B站横屏卡：16:9 封面（抖音卡保持 2:3 竖屏） */
@@ -585,7 +589,7 @@ button { font-family: inherit; cursor: pointer; }
   .search { flex: 1; width: auto; }
   .grid { grid-template-columns: repeat(auto-fill, minmax(158px, 1fr)); gap: 12px; }
   .grid.wide { grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
-  .grid.masonry { columns: 150px 2; column-gap: 12px; }
-  .grid.masonry .card { margin-bottom: 12px; }
+  .grid.masonry { gap: 12px; }
+  .grid.masonry .masonry-col { gap: 12px; }
   .card-body { padding: 9px 11px 10px; }
 }

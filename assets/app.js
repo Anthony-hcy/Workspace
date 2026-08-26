@@ -156,10 +156,16 @@ function renderPage() {
   const start = (state.page - 1) * CONFIG.PAGE_SIZE;
   const slice = state.filtered.slice(start, start + CONFIG.PAGE_SIZE);
 
-  grid.innerHTML = '';
-  const frag = document.createDocumentFragment();
-  for (const item of slice) frag.appendChild(buildCard(item));
-  grid.appendChild(frag);
+  if (state.view === 'all') {
+    // 瀑布流模式：先构建卡片 DOM 数组，再由 JS 分配到列
+    const cards = slice.map((item) => buildCard(item));
+    applyMasonry(cards);
+  } else {
+    grid.innerHTML = '';
+    const frag = document.createDocumentFragment();
+    for (const item of slice) frag.appendChild(buildCard(item));
+    grid.appendChild(frag);
+  }
 
   updatePager();
   updateCountLine();
@@ -290,6 +296,40 @@ function formatCount(n) {
 function escapeHtml(s) {
   return s.replace(/[&<>"']/g, (ch) =>
     ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+}
+
+/* ---------------------------------------------------------------------------
+ * 瀑布流布局（JS 实现，最短列优先放置，消除 columns 的空白间隙）
+ * ------------------------------------------------------------------------- */
+/** 获取瀑布流列数（按容器宽度自适应） */
+function masonryColCount() {
+  const w = grid.clientWidth;
+  if (w >= 920) return 5;
+  if (w >= 720) return 4;
+  if (w >= 500) return 3;
+  return 2;
+}
+
+/** 将卡片列表重新分配到最短列 */
+function applyMasonry(cardEls) {
+  const cols = masonryColCount();
+  grid.innerHTML = '';
+
+  const columns = [];
+  const heights = [];
+  for (let i = 0; i < cols; i++) {
+    const col = document.createElement('div');
+    col.className = 'masonry-col';
+    columns.push(col);
+    heights.push(0);
+    grid.appendChild(col);
+  }
+
+  for (const card of cardEls) {
+    const shortest = heights.indexOf(Math.min(...heights));
+    columns[shortest].appendChild(card);
+    heights[shortest] += card.offsetHeight + 16; // 16 = gap
+  }
 }
 
 /* ---------------------------------------------------------------------------
@@ -517,4 +557,13 @@ $('#pageInput').addEventListener('keydown', (e) => {
       '首次部署请参考 README 配置 Cookie 与 Secrets，然后点击右上角「立即同步」</span>';
     emptyBox.hidden = false;
   }
+
+  // 窗口 resize 时重新计算瀑布流列数
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      if (state.view === 'all') renderPage();
+    }, 200);
+  });
 })();
