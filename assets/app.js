@@ -65,10 +65,13 @@ const countLine = $('#countLine');
  * ------------------------------------------------------------------------- */
 async function loadData() {
   // Promise.allSettled：任何一个 JSON 缺失都不影响其他数据展示
+  // ⚠️ 加时间戳参数绕过浏览器/CDN 缓存（Pages 对静态资源缓存 10 分钟，
+  //    否则同步完成后打开页面可能仍看到旧数据）
+  const bust = `t=${Date.now()}`;
   const [metaRes, likeRes, collectRes] = await Promise.allSettled([
-    fetch('data/meta.json').then((r) => r.json()),
-    fetch('data/douyin-like.json').then((r) => r.json()),
-    fetch('data/douyin-collect.json').then((r) => r.json()),
+    fetch(`data/meta.json?${bust}`).then((r) => r.json()),
+    fetch(`data/douyin-like.json?${bust}`).then((r) => r.json()),
+    fetch(`data/douyin-collect.json?${bust}`).then((r) => r.json()),
   ]);
 
   // meta：顶栏显示"最近同步时间 + 本次模式"
