@@ -212,15 +212,93 @@ function updateCountLine() {
 }
 
 /* ---------------------------------------------------------------------------
+ * 移动端深链跳转（平板/手机：优先唤起 B站/抖音 App，叫不醒再回退网页）
+ * 浏览器隐私规则不允许网页"探测"App 是否安装，只能尽力拉起 + 失败回退：
+ *   - Android Chrome：intent:// 指令自带 S.browser_fallback_url，
+ *     未装 App 时由系统自动改开备用网页，无需 JS 参与；
+ *   - iOS：B站的 www.bilibili.com 本身是 Universal Link，直接点击即优先
+ *     拉起 App；抖音网页域没有此能力，走 snssdk1128:// scheme +
+ *     兜底计时器（约 2.2s 内没切换出去就转网页版）。
+ * 仅移动端生效；桌面一律保持原有行为（新标签页打开网页）。
+ * ------------------------------------------------------------------------- */
+const isIOSDevice = () =>
+  /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);  // iPadOS 的 UA 伪装成 Mac
+
+const isAndroidDevice = () => /Android/.test(navigator.userAgent);
+
+/** 从 item.url 提取作品 id（抖音数字 id / B站 BV 号）；提不出来返回 null，则退回网页链接 */
+function extractVideoId(url) {
+  const m = url.match(/(?:douyin\.com\/video\/|bilibili\.com\/video\/)([A-Za-z0-9]+)/);
+  return m ? m[1] : null;
+}
+
+/**
+ * 计算某张卡片"点击后去哪"。
+ * 返回 { href, target, needsFallbackTimer } —— needsFallbackTimer 仅 iOS 抖音为 true。
+ */
+function resolveOpenTarget(item) {
+  const webUrl = item.url;
+  if (!isIOSDevice() && !isAndroidDevice()) {
+    return { href: webUrl, target: '_blank', needsFallbackTimer: false };   // 桌面：维持现状
+  }
+
+  const id = extractVideoId(webUrl);
+  if (!id) return { href: webUrl, target: '_self', needsFallbackTimer: false };
+
+  if (item.platform === 'bilibili') {
+    if (isIOSDevice()) {
+      // iOS：Universal Link，普通链接点击即优先进 App（未装则 Safari 正常开网页）
+      return { href: webUrl, target: '_self', needsFallbackTimer: false };
+    }
+    // Android：意图直达 B站客户端；fallback_url 由 Chrome 在未安装时接管
+    return {
+      href: `intent://www.bilibili.com/video/${id}?jumpFromWebSite=1#Intent;scheme=https;package=tv.danmaku.bili;S.browser_fallback_url=${encodeURIComponent(webUrl)};end`,
+      target: '_self',
+      needsFallbackTimer: false,
+    };
+  }
+
+  // 抖音
+  if (isIOSDevice()) {
+    return { href: `snssdk1128://aweme/detail/${id}`, target: '_self', needsFallbackTimer: true };
+  }
+  return {
+    href: `intent://aweme/detail/${id}#Intent;scheme=snssdk1128;package=com.ss.android.ugc.aweme;S.browser_fallback_url=${encodeURIComponent(webUrl)};end`,
+    target: '_self',
+    needsFallbackTimer: false,
+  };
+}
+
+/** iOS 抖音 scheme 的兜底：点开后约 2.2s 内页面从未失焦（多半没装 App），转到网页版 */
+function attachIosFallback(cardEl, webUrl) {
+  cardEl.addEventListener('click', () => {
+    const timer = setTimeout(() => { window.location.href = webUrl; }, 2200);
+    document.addEventListener('visibilitychange', function onHide() {
+      // 一旦切去了别的 App / 标签页，说明唤起成功（或用户自行处理），撤销兜底
+      if (document.hidden) {
+        clearTimeout(timer);
+        document.removeEventListener('visibilitychange', onHide);
+      }
+    });
+    window.addEventListener('pagehide', () => clearTimeout(timer), { once: true });
+  });
+}
+
+/* ---------------------------------------------------------------------------
  * 四、卡片构建
  * ------------------------------------------------------------------------- */
 function buildCard(item) {
   // 整张卡片是一个 <a>：点击新标签页打开原作品
   const a = document.createElement('a');
   a.className = 'card';
-  a.href = item.url;
-  a.target = '_blank';
   a.rel = 'noopener noreferrer';
+
+  // 手机/平板上改为优先唤起对应 App（见上方深链说明）
+  const openTarget = resolveOpenTarget(item);
+  a.href = openTarget.href;
+  a.target = openTarget.target;
+  if (openTarget.needsFallbackTimer) attachIosFallback(a, item.url);
 
   /* -- 封面区 ---------------------------------------------------------- */
   const cover = document.createElement('div');
