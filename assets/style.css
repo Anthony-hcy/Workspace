@@ -382,9 +382,10 @@ button { font-family: inherit; cursor: pointer; }
   text-shadow: 0 1px 2px rgba(0, 0, 0, .35);   /* 轻描边感，提升可读性 */
 }
 
-/* 平台标签：抖音黑底+双色点；B站粉底 */
+/* 平台标签：抖音黑底+双色点；B站粉底；小红书品牌红 */
 .tag-platform { background: rgba(0, 0, 0, .82); }
 .tag-bilibili { background: rgba(251, 114, 153, .92); }   /* B站品牌粉 #fb7299 */
+.tag-xhs { background: rgba(255, 36, 66, .92); }          /* 小红书品牌红 #ff2442 */
 .tag-platform::before {
   content: '';
   width: 7px;

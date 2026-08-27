@@ -71,12 +71,14 @@ async function loadData() {
   // ⚠️ 加时间戳参数绕过浏览器/CDN 缓存（Pages 对静态资源缓存 10 分钟，
   //    否则同步完成后打开页面可能仍看到旧数据）
   const bust = `t=${Date.now()}`;
-  const [metaRes, likeRes, collectRes, biliRes, foldersRes] = await Promise.allSettled([
+  const [metaRes, likeRes, collectRes, biliRes, foldersRes, xhsLikeRes, xhsCollectRes] = await Promise.allSettled([
     fetch(`data/meta.json?${bust}`, { cache: 'no-store' }).then((r) => r.json()),
     fetch(`data/douyin-like.json?${bust}`, { cache: 'no-store' }).then((r) => r.json()),
     fetch(`data/douyin-collect.json?${bust}`, { cache: 'no-store' }).then((r) => r.json()),
     fetch(`data/bilibili-collect.json?${bust}`, { cache: 'no-store' }).then((r) => r.json()),
     fetch(`data/bilibili-folders.json?${bust}`, { cache: 'no-store' }).then((r) => r.json()),
+    fetch(`data/xhs-like.json?${bust}`, { cache: 'no-store' }).then((r) => r.json()),
+    fetch(`data/xhs-collect.json?${bust}`, { cache: 'no-store' }).then((r) => r.json()),
   ]);
 
   // meta：顶栏显示"最近同步时间 + 本次模式"
@@ -90,9 +92,11 @@ async function loadData() {
   const like = likeRes.status === 'fulfilled' && Array.isArray(likeRes.value) ? likeRes.value : [];
   const collect = collectRes.status === 'fulfilled' && Array.isArray(collectRes.value) ? collectRes.value : [];
   const bili = biliRes.status === 'fulfilled' && Array.isArray(biliRes.value) ? biliRes.value : [];
+  const xhsLike = xhsLikeRes.status === 'fulfilled' && Array.isArray(xhsLikeRes.value) ? xhsLikeRes.value : [];
+  const xhsCollect = xhsCollectRes.status === 'fulfilled' && Array.isArray(xhsCollectRes.value) ? xhsCollectRes.value : [];
   state.folders = foldersRes.status === 'fulfilled' && Array.isArray(foldersRes.value) ? foldersRes.value : [];
 
-  /** 按 id 合并：同一条抖音作品既点赞又收藏时，合并来源而不是重复展示 */
+  /** 按 id 合并：同一条作品既点赞又收藏时，合并来源而不是重复展示 */
   const map = new Map();
   const push = (item, src) => {
     if (!item?.id) return;
@@ -104,8 +108,11 @@ async function loadData() {
   };
   like.forEach((i) => push(i, 'like'));
   collect.forEach((i) => push(i, 'collect'));
-  // B站条目已自带 folderId，直接并入（id 命名空间与抖音天然不冲突）
+  // B站条目已自带 folderId，直接并入（id 命名空间与抖音/小红书天然不冲突）
   bili.forEach((i) => { if (i?.id) map.set(i.id, { ...i, sources: ['collect'] }); });
+  // 小红书：与抖音一样按 id 合并点赞/收藏来源
+  xhsLike.forEach((i) => push(i, 'like'));
+  xhsCollect.forEach((i) => push(i, 'collect'));
 
   state.all = [...map.values()];
 }
@@ -119,9 +126,9 @@ function applyFilter() {
     // 侧边栏视图：平台级过滤
     if (state.view === 'douyin' && it.platform !== 'douyin') return false;
     if (state.view === 'bilibili' && it.platform !== 'bilibili') return false;
-    if (state.view === 'xhs') return false; // 小红书暂未接入
-    // 二级筛选：抖音的点赞/收藏，或 B站的收藏夹
-    if (state.view === 'douyin' && state.sub !== 'all' && !it.sources.includes(state.sub)) return false;
+    if (state.view === 'xhs' && it.platform !== 'xhs') return false;
+    // 二级筛选：抖音/小红书的点赞、收藏，或 B站的收藏夹
+    if ((state.view === 'douyin' || state.view === 'xhs') && state.sub !== 'all' && !it.sources.includes(state.sub)) return false;
     if (state.view === 'bilibili' && state.sub !== 'all' && it.folderId !== state.sub) return false;
     // 类型筛选
     if (state.type !== 'all' && it.type !== state.type) return false;
@@ -338,17 +345,18 @@ function buildCard(item) {
 
   // 左下角标签：平台（按平台配色）+ 类型（类型分色，见 style.css）
   const isBili = item.platform === 'bilibili';
-  if (isBili) a.classList.add('card--wide'); // B站视频为横屏封面
+  const isXhs = item.platform === 'xhs';
+  if (isBili) a.classList.add('card--wide'); // 仅B站横屏卡占 2 格
   cover.insertAdjacentHTML('beforeend', `
     <div class="card-tags">
-      <span class="tag ${isBili ? 'tag-bilibili' : 'tag-platform'}">${isBili ? '哔哩' : '抖音'}</span>
+      <span class="tag ${isBili ? 'tag-bilibili' : isXhs ? 'tag-xhs' : 'tag-platform'}">${isBili ? '哔哩' : isXhs ? '小红书' : '抖音'}</span>
       <span class="tag tag-type ${item.type === 'video' ? 'is-video' : 'is-image'}">${item.type === 'video' ? '视频' : '图文'}</span>
     </div>`);
 
   /* -- 文字区 ---------------------------------------------------------- */
   const body = document.createElement('div');
   body.className = 'card-body';
-  // 抖音显示点赞数；B站显示播放量。总览视图下抖音卡带来源徽章（赞/收藏）
+  // B站显示播放量；抖音/小红书显示点赞数。总览视图下抖音与小红书卡带来源徽章（赞/收藏）
   const statText = isBili
     ? `${formatCount(item.stats?.digg)} 播放`
     : `${formatCount(item.stats?.digg)} 赞`;
@@ -637,14 +645,14 @@ const VIEW_TITLES = {
   all: '我的跨平台收藏夹',
   bilibili: 'B站 · 我的收藏',
   douyin: '抖音 · 点赞与收藏',
-  xhs: '小红书 · 敬请期待',
+  xhs: '小红书 · 点赞与收藏',
 };
 
-/** 根据当前视图动态生成二级筛选 chips（抖音：点赞/收藏；B站：各收藏夹） */
+/** 根据当前视图动态生成二级筛选 chips（抖音/小红书：点赞、收藏；B站：各收藏夹） */
 function renderSubFilters() {
   const box = $('#subFilters');
   let chips = [];
-  if (state.view === 'douyin') {
+  if (state.view === 'douyin' || state.view === 'xhs') {
     chips = [
       { sub: 'all', label: '全部' },
       { sub: 'like', label: '点赞' },
