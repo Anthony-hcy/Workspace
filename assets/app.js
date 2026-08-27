@@ -214,18 +214,26 @@ function updateCountLine() {
 /* ---------------------------------------------------------------------------
  * 移动端深链跳转（平板/手机：优先唤起 B站/抖音 App，叫不醒再回退网页）
  * 浏览器隐私规则不允许网页"探测"App 是否安装，只能尽力拉起 + 失败回退：
- *   - Android Chrome：intent:// 指令自带 S.browser_fallback_url，
- *     未装 App 时由系统自动改开备用网页，无需 JS 参与；
+ *   - Android Chrome：intent:// 自有协议唤起；未装 App 由系统自动改开备用网页；
+ *     故意不锁定 package（B站手机/HD/概念版、抖音各版本的包名不同，
+ *     只匹配各自注册的自定义协议即可通吃）；
  *   - iOS：B站的 www.bilibili.com 本身是 Universal Link，直接点击即优先
  *     拉起 App；抖音网页域没有此能力，走 snssdk1128:// scheme +
  *     兜底计时器（约 2.2s 内没切换出去就转网页版）。
- * 仅移动端生效；桌面一律保持原有行为（新标签页打开网页）。
+ * 设备识别不能只看 UA 关键字：不少安卓平板的 Chrome 默认上报桌面式 UA
+ * （"请求桌面版网站"），需叠加 userAgentData 与触控特征兜底。
+ * 仅移动端生效；确认无误的桌面一律保持原行为（新标签页打开网页）。
  * ------------------------------------------------------------------------- */
 const isIOSDevice = () =>
   /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);  // iPadOS 的 UA 伪装成 Mac
+  navigator.userAgentData?.platform === 'iOS' ||
+  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);   // iPadOS 的 UA 伪装成 Mac
 
-const isAndroidDevice = () => /Android/.test(navigator.userAgent);
+const isAndroidDevice = () =>
+  /Android/.test(navigator.userAgent) ||
+  navigator.userAgentData?.platform === 'Android' ||
+  // 桌面式 UA 的安卓平板：Linux 标记 + 多点触控（Windows 触屏笔电不带 Linux 标记）
+  ((navigator.platform || '').includes('Linux') && navigator.maxTouchPoints > 1);
 
 /** 从 item.url 提取作品 id（抖音数字 id / B站 BV 号）；提不出来返回 null，则退回网页链接 */
 function extractVideoId(url) {
@@ -251,10 +259,10 @@ function resolveOpenTarget(item) {
       // iOS：Universal Link，普通链接点击即优先进 App（未装则 Safari 正常开网页）
       return { href: webUrl, target: '_self', needsFallbackTimer: false };
     }
-    // Android：经 bilibili:// 自有协议唤起客户端（安装即注册，比 https 直通可靠）；
-    // 未装 App 时由 Chrome 打开备用网页
+    // Android：经 bilibili:// 自有协议唤起客户端（手机版/HD版/概念版都注册了它）；
+    // 不锁 package 以兼容任意版本；未装 App 时由 Chrome 打开备用网页
     return {
-      href: `intent://video/${id}#Intent;scheme=bilibili;package=tv.danmaku.bili;S.browser_fallback_url=${encodeURIComponent(webUrl)};end`,
+      href: `intent://video/${id}#Intent;scheme=bilibili;S.browser_fallback_url=${encodeURIComponent(webUrl)};end`,
       target: '_self',
       needsFallbackTimer: false,
     };
@@ -265,7 +273,7 @@ function resolveOpenTarget(item) {
     return { href: `snssdk1128://aweme/detail/${id}`, target: '_self', needsFallbackTimer: true };
   }
   return {
-    href: `intent://aweme/detail/${id}#Intent;scheme=snssdk1128;package=com.ss.android.ugc.aweme;S.browser_fallback_url=${encodeURIComponent(webUrl)};end`,
+    href: `intent://aweme/detail/${id}#Intent;scheme=snssdk1128;S.browser_fallback_url=${encodeURIComponent(webUrl)};end`,
     target: '_self',
     needsFallbackTimer: false,
   };
