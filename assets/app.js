@@ -364,10 +364,13 @@ function buildCard(item) {
   /* -- 文字区 ---------------------------------------------------------- */
   const body = document.createElement('div');
   body.className = 'card-body';
-  // B站显示播放量；抖音/小红书显示点赞数。总览视图下抖音与小红书卡带来源徽章（赞/收藏）
+  // B站显示播放量；小黑盒显示奖励数（无点赞字段）；抖音/小红书显示点赞数。
+  // 总览视图下抖音与小红书卡带来源徽章（赞/收藏）
   const statText = isBili
     ? `${formatCount(item.stats?.digg)} 播放`
-    : `${formatCount(item.stats?.digg)} 赞`;
+    : isXhh
+      ? `${formatCount(item.stats?.digg)} 奖励`
+      : `${formatCount(item.stats?.digg)} 赞`;
   const srcBadge = !isBili && state.view === 'all'
     ? item.sources.includes('collect') ? '<span class="src-badge">收藏</span>'
       : '<span class="src-badge">赞</span>' : '';
