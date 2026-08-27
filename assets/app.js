@@ -8,8 +8,8 @@
  *   1. 并行加载 点赞 / 收藏 / 元信息 三份数据
  *   2. 来源 Tab（全部/点赞/收藏）× 类型筛选（视频/图文）× 关键词搜索
  *   3. 排序：默认 / 最近更新 / 最早发布 / 点赞最多
- *   4. 总览视图 = 行填充布局（Justified Rows）：每行铺满宽度、约一屏高
- *      即自动分页（每页条数动态）；抖音/B站单平台视图仍为固定每页 24 张
+ *   4. 总览视图 = 拼贴网格（4 行格板，竖卡 1 格 / B站横卡跨 2 格，
+ *      每页恰好装满一块板，条数动态）；抖音/B站单平台视图仍为固定每页 24 张
  *   5. 封面热链直连抖音 CDN（referrerpolicy=no-referrer 绕过防盗链），
  *      加载失败自动回退为按 id 生成的渐变占位图
  *   6. 「立即同步」按钮 → 调 GitHub API 触发私有仓库的 Actions 工作流，
@@ -305,117 +305,89 @@ function escapeHtml(s) {
 }
 
 /* ---------------------------------------------------------------------------
- * 行填充布局（Justified Rows，类似 Google Photos）
+ * 拼贴网格布局（Mosaic Grid，参考 kiseki.blog/library 的封面墙）
  * ---------------------------------------------------------------------------
- * 规则：按现有顺序逐卡累加封面宽高比，凑成一行后整行统一封面高度——
- *   封面高 = 可用宽度 ÷ 该行宽高比之和，每张卡按自己的比例分宽度。
- * 每一行都精确铺满容器（无空缺），横卡（B站 16:9）同行内天然更宽大；
- * 累计约一屏高就切为一页，因此每页条数是动态的，页面永远饱满。
+ * 规则：固定的 4 行 × N 列格板；
+ *   - 抖音竖卡占 1 格，B站横卡跨 2 格（面积约为竖卡两倍）；
+ *   - 按顺序放置，横卡留下的单个空位由后面的竖卡回填（dense），板内无空洞；
+ *   - 当前卡在整个板上找不到空位 → 本页结束，开新板 → **每页恰好 4 行**，
+ *     条数随内容浮动；最后一页装不满 4 行时自然收尾。
+ * 封面以 object-fit 裁切适配格子（横版图略裁上下、竖版裁左右），所有格子尺寸
+ * 统一锁定，卡片在格内弹性伸缩，文字区不会被压缩。
  * ------------------------------------------------------------------------- */
 
-const ROW_LAYOUT = {
-  BODY_H: 66,      // 卡片文字区高度（单行省略标题 + meta 行 + 内边距），用于估算页高
-  TARGET_COVER_H: 235,   // 目标封面高：桌面端一行 5~6 张竖卡 / 2~3 张混排
-  NARROW_COVER_H: 185,   // 窄屏目标封面高
-  MAX_STRETCH: 1.25,     // 页尾行最多拉伸 25% 填满宽度，超过则保持自然宽靠左
+const MOSAIC = {
+  ROWS_PER_PAGE: 4,   // 每页恒定 4 行
+  BODY_H: 66,         // 卡片文字区自然高度（单行省略标题 + meta 行 + 内边距）
 };
 
-/** 封面宽高比：抖音竖屏 2:3；B站横屏 16:9（与 CSS 中 .card-cover 的 aspect-ratio 对应） */
-function coverRatioOf(item) {
-  return item.platform === 'bilibili' ? 16 / 9 : 2 / 3;
+/** B站视频为横屏封面 → 占 2 格 */
+function isWideItem(item) {
+  return item.platform === 'bilibili';
 }
 
-/** 行间距（与 style.css 中 .grid.rows 的 gap 保持一致） */
+/** 格子间距（与 style.css 中 .grid.mosaic 的 gap 保持一致） */
 function rowGapPx() {
   return window.matchMedia('(max-width: 640px)').matches ? 12 : 16;
 }
 
-/** 当前视口下的目标封面高 */
-function targetCoverH() {
-  return window.innerWidth <= 640 ? ROW_LAYOUT.NARROW_COVER_H : ROW_LAYOUT.TARGET_COVER_H;
+/** 拼贴网格列数（按容器宽度自适应） */
+function mosaicCols() {
+  const w = grid.clientWidth;
+  if (w >= 1150) return 6;
+  if (w >= 900) return 5;
+  if (w >= 650) return 4;
+  if (w >= 430) return 3;
+  return 2;
 }
 
 /**
- * 把 items 从 start 下标开始贪心分成若干"视觉行"。
- * 返回 [{first, last, covH}]：行的起止下标与统一封面高。
+ * 在 4×cols 的板上从 start 下标起贪心装箱一批卡片（first-fit + dense 回填）。
+ * 返回 { placed:[{idx,row,col,span}], next }：next 为下一个未放置的下标。
  */
-function splitRows(items, start = 0) {
-  const gap = rowGapPx();
-  const width = grid.clientWidth;
-  const tgt = targetCoverH();
-  const rows = [];
-  let buf = [];        // 当前行内已累积的下标
-  let bufRatio = 0;    // 当前行宽高比之和
-  let cur = start;     // 下一个待放置的下标
+function packBoard(items, start, cols) {
+  const occ = Array.from({ length: MOSAIC.ROWS_PER_PAGE }, () => new Array(cols).fill(false));
+  const fits = (r, c, span) =>
+    c + span <= cols && occ[r][c] === false && (span === 1 || occ[r][c + 1] === false);
+  const place = (r, c, span) => {
+    for (let k = 0; k < span; k++) occ[r][c + k] = true;
+  };
+  const findSpot = (span) => {
+    for (let r = 0; r < MOSAIC.ROWS_PER_PAGE; r++)
+      for (let c = 0; c + span <= cols; c++)
+        if (fits(r, c, span)) return { row: r, col: c };
+    return null;
+  };
 
-  while (cur < items.length) {
-    buf.push(cur);
-    bufRatio += coverRatioOf(items[cur]);
-    cur++;
-    const covH = (width - gap * (buf.length - 1)) / bufRatio;
-    // 高度首次压到目标及以下即结算：此后 covH 只会更小，必须在当下决策。
-    // 若「不含这张」的前一个断点更接近目标，就把这张退回（cur--），
-    // 它会自然成为下一行的第一张，绝不能凭空丢弃
-    if (covH <= tgt) {
-      const tail = cur - 1;
-      const prevCovH = buf.length > 1
-        ? (width - gap * (buf.length - 2)) / (bufRatio - coverRatioOf(items[tail]))
-        : Infinity;   // 行内首张没有更短的备选断点
-      if (Math.abs(prevCovH - tgt) < Math.abs(covH - tgt)) {
-        cur--;
-        buf.pop();
-        bufRatio -= coverRatioOf(items[cur]);
-        rows.push({ first: buf[0], last: buf[buf.length - 1], covH: prevCovH });
-      } else {
-        rows.push({ first: buf[0], last: buf[buf.length - 1], covH });
-      }
-      buf = [];
-      bufRatio = 0;
+  const placed = [];
+  let i = start;
+  while (i < items.length) {
+    // 横卡默认跨 2 格；若板上只剩孤立的单格（如页尾连续两张横卡），
+    // 降级为占 1 格放置，封面居中裁切——保证板内绝无空缺
+    let span = isWideItem(items[i]) ? 2 : 1;
+    let spot = findSpot(span);
+    if (!spot && span === 2) {
+      span = 1;
+      spot = findSpot(1);
     }
+    if (!spot) break;               // 板真的满了 → 换页
+    place(spot.row, spot.col, span);
+    placed.push({ idx: i, row: spot.row, col: spot.col, span });
+    i++;
   }
-
-  // 收不了尾的零头
-  if (buf.length === 1 && rows.length > 0) {
-    // 只剩孤张且不成行 → 并回上一行重新均分（避免一行一张拉出超高卡片）
-    const prev = rows[rows.length - 1];
-    const merged = [];
-    for (let i = prev.first; i <= prev.last; i++) merged.push(i);
-    merged.push(cur - 1);
-    merged.sort((a, b) => a - b);
-    prev.last = merged[merged.length - 1];
-    const rSum = merged.reduce((s, i) => s + coverRatioOf(items[i]), 0);
-    prev.covH = (width - gap * (merged.length - 1)) / rSum;
-  } else if (buf.length > 0) {
-    // ≥2 张残余直接作为最后一行（渲染端会做页尾拉伸/靠左处理）
-    rows.push({ first: buf[0], last: buf[buf.length - 1], covH: (width - gap * (buf.length - 1)) / bufRatio });
-  }
-  return rows;
+  return { placed, next: i };
 }
 
-/**
- * 预计算所有分页边界：按行累积高度达到约一屏即切页。
- * 返回 { pages: [{start, end}] }，start/end 为 state.filtered 中的切片下标。
- * 跳转任意页无需重放前面各页（O(1) 定位），窗口 resize 时整体重算也只需 O(N)。
- */
+/** 预计算所有分页边界（每页 = 一块装满的 4 行板）。结构沿用 {pages:[{start,end}]}，跳页 O(1)。 */
 function computeRowPages(items) {
-  const rows = splitRows(items);
-  const pageTarget = Math.max(window.innerHeight * 1.15, 900);
-  const gapStep = ROW_LAYOUT.BODY_H + rowGapPx();
+  const cols = mosaicCols();
   const pages = [];
-  let acc = 0;
-  let startRow = 0;
-
-  for (let i = 0; i < rows.length; i++) {
-    acc += rows[i].covH + gapStep;
-    // 至少满两行才允许切页，防止极端数据下出现"一行一页"
-    if (acc >= pageTarget && i - startRow >= 1) {
-      pages.push({ start: rows[startRow].first, end: rows[i].last + 1 });
-      startRow = i + 1;
-      acc = 0;
-    }
-  }
-  if (startRow < rows.length) {
-    pages.push({ start: rows[startRow].first, end: rows[rows.length - 1].last + 1 });
+  let s = 0;
+  while (s < items.length) {
+    const { next } = packBoard(items, s, cols);
+    if (next === s) break;          // 防御：空板必然可放，一般不会触发
+    pages.push({ start: s, end: next });
+    s = next;
   }
   return { pages };
 }
@@ -429,34 +401,35 @@ function rebuildRowLayout() {
 }
 
 /**
- * 渲染总览视图的一页：局部重现行切分并给每张卡分配精确宽度。
- * 页尾一行若拉伸增幅不超过上限则铺满整行，否则保持自然宽度靠左。
+ * 渲染总览视图的一页：对切片重放同一装箱过程，把每张卡的格位写进
+ * inline gridColumn/gridRow（dense 回填下视觉顺序 ≠ DOM 顺序属正常现象）。
  */
 function renderRows(slice) {
-  const cards = slice.map((item) => buildCard(item));
-  const rows = splitRows(slice);
-  const gap = rowGapPx();
-  const width = grid.clientWidth;
-  const frag = document.createDocumentFragment();
+  grid.innerHTML = '';
+  if (!slice.length) return;
 
-  rows.forEach((row, idx) => {
-    const isLastRow = idx === rows.length - 1;
-    let covH = Math.min(row.covH, 620);          // 兜底：极端情况下限制行高不失控
-    // 行内宽高比之和 → 拉伸到刚满容器宽所需的高度
-    let ratioSum = 0;
-    for (let i = row.first; i <= row.last; i++) ratioSum += coverRatioOf(slice[i]);
-    if (isLastRow) {
-      const fullH = (width - gap * (row.last - row.first)) / ratioSum;
-      if (fullH / covH <= ROW_LAYOUT.MAX_STRETCH) covH = fullH;   // 增幅可接受 → 拉伸铺满
-    }
-    for (let i = row.first; i <= row.last; i++) {
-      const card = cards[i];
-      card.style.width = `${Math.max(covH * coverRatioOf(slice[i]), 100)}px`;
+  const cols = mosaicCols();
+  const gap = rowGapPx();
+  // 单元格宽 ≈ 容器减去列间隙后平分；行高 = 竖版封面高(宽×1.5) + 文字区
+  const cellW = Math.floor((grid.clientWidth - gap * (cols - 1)) / cols);
+
+  grid.style.display = 'grid';
+  grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+  grid.style.gridAutoRows = `${cellW * 1.5 + MOSAIC.BODY_H}px`;
+
+  const frag = document.createDocumentFragment();
+  let s = 0;
+  while (s < slice.length) {
+    const { placed, next } = packBoard(slice, s, cols);
+    if (!placed.length) break;
+    for (const p of placed) {
+      const card = buildCard(slice[p.idx]);
+      card.style.gridColumn = `${p.col + 1} / span ${p.span}`;
+      card.style.gridRow = `${p.row + 1}`;
       frag.appendChild(card);
     }
-  });
-
-  grid.innerHTML = '';
+    s = next;
+  }
   grid.appendChild(frag);
 }
 
@@ -614,12 +587,16 @@ $('#sideNav').addEventListener('click', (e) => {
   state.sub = 'all';                       // 切视图后二级筛选重置
   $('#viewTitle').textContent = VIEW_TITLES[state.view] ?? '';
   // 布局模式随视图切换：
-  //   总览 → 行填充布局（每行铺满宽度，横竖卡按原始比例混排）
+  //   总览 → 拼贴网格（4 行格板，竖卡 1 格 / 横卡 2 格，dense 回填无空缺）
   //   B站 → 宽列网格（统一 16:9 横屏）
   //   抖音 → 标准网格（统一竖屏）
   const grid = $('#grid');
-  grid.classList.toggle('rows', state.view === 'all');
+  grid.classList.toggle('mosaic', state.view === 'all');
   grid.classList.toggle('wide', state.view === 'bilibili');
+  if (state.view !== 'all') {
+    // 清除拼贴渲染器写入的内联 grid 列/行样式，避免污染其他视图
+    grid.removeAttribute('style');
+  }
   renderSubFilters();
   applyFilter();
 });
@@ -674,8 +651,8 @@ $('#pageInput').addEventListener('keydown', (e) => {
   } catch (err) {
     console.error(err);
   }
-  // 默认总览视图 → 行填充布局
-  $('#grid').classList.add('rows');
+  // 默认总览视图 → 拼贴网格
+  $('#grid').classList.add('mosaic');
   renderSubFilters();
   applyFilter();
 

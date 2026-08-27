@@ -272,16 +272,35 @@ button { font-family: inherit; cursor: pointer; }
 /* B站视图：横屏卡更宽，列宽相应加大 */
 .grid.wide { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
 
-/* 总览视图：行填充布局（Justified Rows）——
-   卡片按原始宽高比（抖音 2:3 / B站 16:9）混排成行，
-   每行的卡片总宽精确铺满容器，由 JS 内联指定每张卡的宽度 */
-.grid.rows {
-  display: flex;
-  flex-wrap: wrap;
+/* 总览视图：拼贴网格（Mosaic）——
+   JS 设定列数与行高（gridTemplateColumns / gridAutoRows 内联），
+   竖卡占 1 格、B站横卡跨 2 格；封面以 object-fit 裁切适配格子，
+   卡片在格内 height:100% 弹性伸缩，文字区永远有固定空间不被挤压 */
+.grid.mosaic {
+  display: grid;
   gap: 16px;
 }
-.grid.rows .card {
+.grid.mosaic .card {
   margin: 0;
+  width: auto;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+/* 封面吃掉格子里除文字区外的全部高度；不再使用 aspect-ratio */
+.grid.mosaic .card-cover {
+  aspect-ratio: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.grid.mosaic .card--wide .card-cover { aspect-ratio: auto; }
+/* 文字区固定高度兜底，内容超出即裁剪，绝不变换卡高 */
+.grid.mosaic .card-body {
+  flex: 0 0 auto;
+  min-height: 66px;
+  max-height: 66px;
+  overflow: hidden;
 }
 
 /* B站横屏卡：16:9 封面（抖音卡保持 2:3 竖屏） */
@@ -583,6 +602,6 @@ button { font-family: inherit; cursor: pointer; }
   .search { flex: 1; width: auto; }
   .grid { grid-template-columns: repeat(auto-fill, minmax(158px, 1fr)); gap: 12px; }
   .grid.wide { grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
-  .grid.rows { gap: 12px; }   /* 行填充布局的间距与窄屏目标行高由 JS 同步调整 */
+  .grid.mosaic { gap: 12px; }   /* 格子间距；列数与行高由 JS 同步调整 */
   .card-body { padding: 9px 11px 10px; }
 }
