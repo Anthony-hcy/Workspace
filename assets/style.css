@@ -84,10 +84,18 @@ button { font-family: inherit; cursor: pointer; }
 }
 .side-group.is-expanded .side-arrow { transform: rotate(90deg); }
 .side-group:not(.is-expanded) .side-children { display: none; }
-.side-children { display: flex; flex-direction: column; gap: 2px; margin-top: 2px; }
+/* 二级平台：整体右移 + 左侧浅色竖线，突出「Favorites 一级 → 平台二级」的层级 */
+.side-children {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 2px 0 0 10px;
+  padding-left: 10px;
+  border-left: 1px solid rgba(17, 24, 39, .1);
+}
 
-/* 二级平台项：略缩进、字号更小 */
-.side-child { padding: 8px 14px 8px 24px; font-size: 13px; color: #5b6472; }
+/* 二级平台项：字号更小、颜色更浅 */
+.side-child { padding: 8px 14px 8px 18px; font-size: 13px; color: #5b6472; }
 .side-child svg, .side-child img { width: 16px; height: 16px; }
 
 .side-item {
@@ -646,7 +654,7 @@ button { font-family: inherit; cursor: pointer; }
   .sidebar-brand .brand-name { display: none; }
   .side-group { flex-direction: row; align-items: center; gap: 6px; }
   .side-group .side-arrow { margin-left: 2px; }
-  .side-children { flex-direction: row; gap: 6px; margin-top: 0; }
+  .side-children { flex-direction: row; gap: 6px; margin: 0; padding-left: 0; border-left: none; }
   .side-child { padding: 8px 14px; }
   .side-foot { display: none; }
   .page { width: 100%; }
