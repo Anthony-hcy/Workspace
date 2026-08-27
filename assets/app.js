@@ -678,7 +678,22 @@ function renderSubFilters() {
   ).join('');
 }
 
-// 侧边栏切换（事件委托）：箭头展开/收起 Favorites 二级平台；Blog 为外链 <a> 走原生跳转
+/** 进入 Blog 视图：站内 iframe 展示 Study 站首页（也作为站点默认首页） */
+function enterBlog() {
+  document.querySelectorAll('#sideNav .side-item[data-view]').forEach((b) =>
+    b.classList.toggle('is-active', b.dataset.view === 'blog'));
+  state.view = 'blog';
+  $('#viewTitle').textContent = 'Blog';
+  $('#toolbar').hidden = true;
+  $('#grid').hidden = true;
+  $('#pagination').hidden = true;
+  $('#emptyBox').hidden = true;
+  $('#countLine').textContent = '';
+  $('#blogFrame').hidden = false;
+  document.body.classList.add('is-blog');   // 隐藏顶栏/页脚、放大框架，Blog 视图无外层滚动条
+}
+
+// 侧边栏切换（事件委托）：箭头展开/收起 Favorites 二级平台；Blog 为站内视图
 $('#sideNav').addEventListener('click', (e) => {
   const arrow = e.target.closest('.side-arrow');
   if (arrow) {
@@ -689,19 +704,9 @@ $('#sideNav').addEventListener('click', (e) => {
   const btn = e.target.closest('.side-item');
   if (!btn || !btn.dataset.view) return;
 
-  // Blog 视图：站内 iframe 展示 Study 站首页（不跳转外部）
+  // Blog 视图
   if (btn.dataset.view === 'blog') {
-    document.querySelectorAll('#sideNav .side-item[data-view]').forEach((b) =>
-      b.classList.toggle('is-active', b.dataset.view === 'blog'));
-    state.view = 'blog';
-    $('#viewTitle').textContent = 'Blog';
-    $('#toolbar').hidden = true;
-    $('#grid').hidden = true;
-    $('#pagination').hidden = true;
-    $('#emptyBox').hidden = true;
-    $('#countLine').textContent = '';
-    $('#blogFrame').hidden = false;
-    document.body.classList.add('is-blog');   // 隐藏页脚、放大框架，Blog 视图无外层滚动条
+    enterBlog();
     return;
   }
 
@@ -784,18 +789,16 @@ $('#pageInput').addEventListener('keydown', (e) => {
   } catch (err) {
     console.error(err);
   }
-  // 默认总览视图 → 拼贴网格
-  $('#grid').classList.add('mosaic');
-  renderSubFilters();
-  applyFilter();
-
-  // 数据为空时给出首次部署引导
+  // 数据为空时给出首次部署引导（进入收藏视图时会显示）
   if (state.all.length === 0) {
     emptyBox.innerHTML =
       '<strong>◌</strong>还没有数据<br><span style="font-size:12px">' +
       '首次部署请参考 README 配置 Cookie 与 Secrets，然后点击右上角「立即同步」</span>';
     emptyBox.hidden = false;
   }
+
+  // 默认打开 Blog 作为首页（收藏数据已就绪，切回 Favorites 时正常显示）
+  enterBlog();
 
   // 窗口 resize 时重算行与分页边界，并尽量停在包含原首条作品的页上
   let resizeTimer;
