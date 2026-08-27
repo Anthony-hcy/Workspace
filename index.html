@@ -5,44 +5,56 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Workspace · 我的收藏夹</title>
   <meta name="description" content="跨平台收藏夹工作台：自动同步抖音、B站与小 红书的收藏内容" />
-  <link rel="stylesheet" href="assets/style.css?v=20260827i" />
+  <link rel="stylesheet" href="assets/style.css?v=20260827l" />
   <!-- 内联 favicon：一个渐变书签图标，免额外请求 -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%237c5cff'/><stop offset='1' stop-color='%2300c2ff'/></linearGradient></defs><path fill='url(%23g)' d='M6 2h12a2 2 0 0 1 2 2v18l-8-4.8L4 22V4a2 2 0 0 1 2-2z'/></svg>" />
 </head>
 <body>
 
-  <!-- ══════════════ 左侧平台导航 ══════════════ -->
+  <!-- ══════════════ 左侧导航 ══════════════ -->
   <aside class="sidebar">
+    <!-- 品牌：固定在侧边栏顶部（Workspace 与图标） -->
+    <div class="sidebar-brand">
+      <span class="brand-mark">W</span>
+      <span class="brand-name">Workspace</span>
+    </div>
+
     <nav class="side-nav" id="sideNav">
-      <!-- 总览：全平台混排 -->
-      <button class="side-item is-active" data-view="all" title="全部平台内容">
-        <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="2" fill="#7c5cff"/><rect x="13" y="3" width="8" height="8" rx="2" fill="#00c2ff"/><rect x="3" y="13" width="8" height="8" rx="2" fill="#ffb020"/><rect x="13" y="13" width="8" height="8" rx="2" fill="#ff5c8a"/></svg>
-        <span>总览</span>
-      </button>
-      <!-- B站 -->
-      <button class="side-item" data-view="bilibili" title="哔哩哔哩收藏">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#00a1d6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="3"/><path d="M8 3.5 10.5 7M16 3.5 13.5 7"/><path d="M8.5 12v3M15.5 12v3"/></svg>
-        <span>B站</span>
-      </button>
-      <!-- 抖音：官方音符 logo（青/红/白三层错位，公认样式） -->
-      <button class="side-item" data-view="douyin" title="抖音点赞与收藏">
-        <svg viewBox="0 0 24 24" fill="none">
-          <path fill="#25f4ee" transform="translate(-1.2,-0.6)" d="M12.53.02C13.84 0 15.14.01 16.44 0c.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
-          <path fill="#fe2c55" transform="translate(1.2,0.6)" d="M12.53.02C13.84 0 15.14.01 16.44 0c.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
-          <path fill="#111318" d="M12.53.02C13.84 0 15.14.01 16.44 0c.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
-        </svg>
-        <span>抖音</span>
-      </button>
-      <!-- 小黑盒：官方 logo -->
-      <button class="side-item" data-view="xiaoheihe" title="小黑盒收藏">
-        <img src="assets/img/xiaoheihe.png" alt="小黑盒" />
-        <span>黑盒</span>
-      </button>
-      <!-- 小红书：书签图标，品牌红 -->
-      <button class="side-item" data-view="xhs" title="小红书点赞与收藏">
-        <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="3" width="16" height="18" rx="3" fill="#ff2442" opacity=".9"/><path d="M9 8.5h6M9 12h6M9 15.5h4" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>
-        <span>小红书</span>
-      </button>
+      <!-- Blog：跳转 Study 站（与 Favorites 并列，放其上方） -->
+      <a class="side-item side-blog" href="https://anthony-hcy.github.io/Study/" target="_blank" rel="noopener noreferrer" title="博客">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        <span>Blog</span>
+      </a>
+
+      <!-- Favorites：一级标题，带展开箭头；展开后出现各平台（二级） -->
+      <div class="side-group is-expanded" id="favGroup">
+        <button class="side-item side-parent is-active" data-view="all" title="全部平台内容">
+          <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="2" fill="#7c5cff"/><rect x="13" y="3" width="8" height="8" rx="2" fill="#00c2ff"/><rect x="3" y="13" width="8" height="8" rx="2" fill="#ffb020"/><rect x="13" y="13" width="8" height="8" rx="2" fill="#ff5c8a"/></svg>
+          <span>Favorites</span>
+          <svg class="side-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+        </button>
+        <div class="side-children" id="favChildren">
+          <button class="side-item side-child" data-view="bilibili" title="哔哩哔哩收藏">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#00a1d6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="3"/><path d="M8 3.5 10.5 7M16 3.5 13.5 7"/><path d="M8.5 12v3M15.5 12v3"/></svg>
+            <span>B站</span>
+          </button>
+          <button class="side-item side-child" data-view="douyin" title="抖音点赞与收藏">
+            <svg viewBox="0 0 24 24" fill="none"><path fill="#25f4ee" transform="translate(-1.2,-0.6)" d="M12.53.02C13.84 0 15.14.01 16.44 0c.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
+              <path fill="#fe2c55" transform="translate(1.2,0.6)" d="M12.53.02C13.84 0 15.14.01 16.44 0c.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
+              <path fill="#111318" d="M12.53.02C13.84 0 15.14.01 16.44 0c.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
+            </svg>
+            <span>抖音</span>
+          </button>
+          <button class="side-item side-child" data-view="xiaoheihe" title="小黑盒收藏">
+            <img src="assets/img/xiaoheihe.png" alt="小黑盒" />
+            <span>黑盒</span>
+          </button>
+          <button class="side-item side-child" data-view="xhs" title="小红书点赞与收藏">
+            <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="3" width="16" height="18" rx="3" fill="#ff2442" opacity=".9"/><path d="M9 8.5h6M9 12h6M9 15.5h4" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>
+            <span>小红书</span>
+          </button>
+        </div>
+      </div>
     </nav>
     <p class="side-foot">Workspace</p>
   </aside>
@@ -50,17 +62,10 @@
   <!-- ══════════════ 右侧主区域 ══════════════ -->
   <div class="page">
 
-    <!-- 顶栏 -->
+    <!-- 顶栏（品牌已移入侧边栏顶部，这里只留同步操作） -->
     <header class="topbar">
       <div class="topbar-inner">
-        <div class="brand">
-          <span class="brand-mark">W</span>
-          <div class="brand-text">
-            <h1>Workspace</h1>
-            <span class="brand-sub" id="viewTitle">我的跨平台收藏夹</span>
-          </div>
-        </div>
-
+        <span class="view-title" id="viewTitle">Favorites · 我的收藏夹</span>
         <div class="topbar-actions">
           <span class="sync-time" id="syncTime" title="数据最近同步时间">—</span>
           <button class="btn-sync" id="btnSync" title="手动触发一次云端同步（约 1~2 分钟）">
@@ -142,6 +147,6 @@
 
   <div class="toast" id="toast" hidden></div>
 
-  <script src="assets/app.js?v=20260827k"></script>
+  <script src="assets/app.js?v=20260827l"></script>
 </body>
 </html>

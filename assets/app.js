@@ -71,14 +71,12 @@ async function loadData() {
   // ⚠️ 加时间戳参数绕过浏览器/CDN 缓存（Pages 对静态资源缓存 10 分钟，
   //    否则同步完成后打开页面可能仍看到旧数据）
   const bust = `t=${Date.now()}`;
-  const [metaRes, likeRes, collectRes, biliRes, foldersRes, xhsLikeRes, xhsCollectRes, xhhRes] = await Promise.allSettled([
+  const [metaRes, likeRes, collectRes, biliRes, foldersRes, xhhRes] = await Promise.allSettled([
     fetch(`data/meta.json?${bust}`, { cache: 'no-store' }).then((r) => r.json()),
     fetch(`data/douyin-like.json?${bust}`, { cache: 'no-store' }).then((r) => r.json()),
     fetch(`data/douyin-collect.json?${bust}`, { cache: 'no-store' }).then((r) => r.json()),
     fetch(`data/bilibili-collect.json?${bust}`, { cache: 'no-store' }).then((r) => r.json()),
     fetch(`data/bilibili-folders.json?${bust}`, { cache: 'no-store' }).then((r) => r.json()),
-    fetch(`data/xhs-like.json?${bust}`, { cache: 'no-store' }).then((r) => r.json()),
-    fetch(`data/xhs-collect.json?${bust}`, { cache: 'no-store' }).then((r) => r.json()),
     fetch(`data/xiaoheihe-collect.json?${bust}`, { cache: 'no-store' }).then((r) => r.json()),
   ]);
 
@@ -93,8 +91,8 @@ async function loadData() {
   const like = likeRes.status === 'fulfilled' && Array.isArray(likeRes.value) ? likeRes.value : [];
   const collect = collectRes.status === 'fulfilled' && Array.isArray(collectRes.value) ? collectRes.value : [];
   const bili = biliRes.status === 'fulfilled' && Array.isArray(biliRes.value) ? biliRes.value : [];
-  const xhsLike = xhsLikeRes.status === 'fulfilled' && Array.isArray(xhsLikeRes.value) ? xhsLikeRes.value : [];
-  const xhsCollect = xhsCollectRes.status === 'fulfilled' && Array.isArray(xhsCollectRes.value) ? xhsCollectRes.value : [];
+  const xhsLike = [];      // 小红书内容已按需求剔除（保留代码结构）
+  const xhsCollect = [];   // 侧边栏入口保留，但不再加载小红书数据
   const xhh = xhhRes.status === 'fulfilled' && Array.isArray(xhhRes.value) ? xhhRes.value : [];
   state.folders = foldersRes.status === 'fulfilled' && Array.isArray(foldersRes.value) ? foldersRes.value : [];
 
@@ -651,7 +649,7 @@ function showToast(msg, isError = false) {
  * 七、侧边栏视图 + 二级筛选
  * ------------------------------------------------------------------------- */
 const VIEW_TITLES = {
-  all: '我的跨平台收藏夹',
+  all: 'Favorites · 我的收藏夹',
   bilibili: 'B站 · 我的收藏',
   douyin: '抖音 · 点赞与收藏',
   xhs: '小红书 · 点赞与收藏',
@@ -680,14 +678,21 @@ function renderSubFilters() {
   ).join('');
 }
 
-// 侧边栏切换（事件委托）
+// 侧边栏切换（事件委托）：箭头展开/收起 Favorites 二级平台；Blog 为外链 <a> 走原生跳转
 $('#sideNav').addEventListener('click', (e) => {
-  const btn = e.target.closest('.side-item');
-  if (!btn) return;
-  if (btn.classList.contains('is-disabled')) {
-    return showToast('小红书接入筹备中，敬请期待');
+  const arrow = e.target.closest('.side-arrow');
+  if (arrow) {
+    const group = arrow.closest('.side-group');
+    if (group) group.classList.toggle('is-expanded');
+    return;
   }
-  document.querySelectorAll('#sideNav .side-item').forEach((b) => b.classList.toggle('is-active', b === btn));
+  const btn = e.target.closest('.side-item');
+  if (!btn || !btn.dataset.view) return;   // Blog 无 data-view，交给 <a> 原生跳转
+  if (btn.classList.contains('is-disabled')) {
+    return showToast('暂未开放');
+  }
+  document.querySelectorAll('#sideNav .side-item[data-view]').forEach((b) =>
+    b.classList.toggle('is-active', b.dataset.view === btn.dataset.view));
   state.view = btn.dataset.view;
   state.sub = 'all';                       // 切视图后二级筛选重置
   $('#viewTitle').textContent = VIEW_TITLES[state.view] ?? '';

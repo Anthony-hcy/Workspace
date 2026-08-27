@@ -49,7 +49,45 @@ button { font-family: inherit; cursor: pointer; }
   gap: 6px;
 }
 
+/* 品牌区：固定在侧边栏顶部（Workspace 与图标） */
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 2px 6px 16px;
+}
+.sidebar-brand .brand-mark {
+  width: 30px;
+  height: 30px;
+  font-size: 15px;
+  border-radius: 9px;
+}
+.sidebar-brand .brand-name {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: .3px;
+  white-space: nowrap;
+}
+
 .side-nav { display: flex; flex-direction: column; gap: 4px; }
+
+/* Favorites 一级组：带展开箭头，展开显示二级平台 */
+.side-group { display: flex; flex-direction: column; gap: 4px; }
+.side-arrow {
+  margin-left: auto;
+  width: 14px;
+  height: 14px;
+  color: #9ca3af;
+  transition: transform .18s ease;
+  flex-shrink: 0;
+}
+.side-group:not(.is-expanded) .side-arrow { transform: rotate(-90deg); }
+.side-group:not(.is-expanded) .side-children { display: none; }
+.side-children { display: flex; flex-direction: column; gap: 2px; margin-top: 2px; }
+
+/* 二级平台项：略缩进、字号更小 */
+.side-child { padding: 8px 14px 8px 24px; font-size: 13px; color: #5b6472; }
+.side-child svg, .side-child img { width: 16px; height: 16px; }
 
 .side-item {
   display: flex;
@@ -108,6 +146,13 @@ button { font-family: inherit; cursor: pointer; }
   align-items: center;
   justify-content: space-between;
   gap: 16px;
+}
+
+/* 当前视图标题（品牌已移入侧边栏顶部） */
+.view-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
 }
 
 .brand { display: flex; align-items: center; gap: 12px; }
@@ -383,19 +428,11 @@ button { font-family: inherit; cursor: pointer; }
   text-shadow: 0 1px 2px rgba(0, 0, 0, .35);   /* 轻描边感，提升可读性 */
 }
 
-/* 平台标签：抖音黑底+双色点；B站粉底；小红书品牌红；小黑盒黑白 */
+/* 平台标签：抖音黑底；B站淡粉；小红书品牌红；小黑盒黑白 */
 .tag-platform { background: rgba(0, 0, 0, .82); }
-.tag-bilibili { background: rgba(251, 114, 153, .92); }   /* B站品牌粉 #fb7299 */
+.tag-bilibili { background: rgba(255, 182, 193, .95); color: #7a3b46; }   /* B站 淡粉 */
 .tag-xhs { background: rgba(255, 36, 66, .92); }          /* 小红书品牌红 #ff2442 */
 .tag-xiaoheihe { background: rgba(22, 24, 27, .92); }     /* 小黑盒：黑白 */
-.tag-platform::before {
-  content: '';
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #25f4ee 0 50%, #fe2c55 50% 100%);
-  box-shadow: 0 0 5px rgba(254, 44, 85, .75);
-}
 
 /* 类型标签：蓝=视频 / 橙=图文，一眼区分 */
 .tag-type.is-video { background: rgba(0, 132, 255, .88); }
@@ -592,6 +629,12 @@ button { font-family: inherit; cursor: pointer; }
   }
   .side-nav { flex-direction: row; gap: 6px; }
   .side-item { width: auto; padding: 8px 14px; white-space: nowrap; }
+  .sidebar-brand { padding: 0 10px 0 0; }
+  .sidebar-brand .brand-name { display: none; }
+  .side-group { flex-direction: row; align-items: center; gap: 6px; }
+  .side-group .side-arrow { margin-left: 2px; }
+  .side-children { flex-direction: row; gap: 6px; margin-top: 0; }
+  .side-child { padding: 8px 14px; }
   .side-foot { display: none; }
   .page { width: 100%; }
   .topbar { position: static; }  /* 顶栏不再 sticky，避免与侧边条双重吸附 */
