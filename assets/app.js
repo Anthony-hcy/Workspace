@@ -352,7 +352,7 @@ function buildCard(item) {
   const isBili = item.platform === 'bilibili';
   const isXhs = item.platform === 'xhs';
   const isXhh = item.platform === 'xiaoheihe';
-  if (isBili) a.classList.add('card--wide'); // 仅B站横屏卡占 2 格
+  if (isBili || isXhh) a.classList.add('card--wide'); // B站/黑盒为横屏封面（16:9）
   const tagClass = isBili ? 'tag-bilibili' : isXhs ? 'tag-xhs' : isXhh ? 'tag-xiaoheihe' : 'tag-platform';
   const tagText = isBili ? '哔哩' : isXhs ? '小红书' : isXhh ? '黑盒' : '抖音';
   cover.insertAdjacentHTML('beforeend', `
@@ -692,11 +692,11 @@ $('#sideNav').addEventListener('click', (e) => {
   $('#viewTitle').textContent = VIEW_TITLES[state.view] ?? '';
   // 布局模式随视图切换：
   //   总览 → 拼贴网格（4 行格板，竖卡 1 格 / 横卡 2 格，dense 回填无空缺）
-  //   B站 → 宽列网格（统一 16:9 横屏）
-  //   抖音 → 标准网格（统一竖屏）
+  //   B站/黑盒 → 宽列网格（统一 16:9 横屏）
+  //   抖音/小红书 → 标准网格（统一竖屏）
   const grid = $('#grid');
   grid.classList.toggle('mosaic', state.view === 'all');
-  grid.classList.toggle('wide', state.view === 'bilibili');
+  grid.classList.toggle('wide', state.view === 'bilibili' || state.view === 'xiaoheihe');
   if (state.view !== 'all') {
     // 清除拼贴渲染器写入的内联 grid 列/行样式，避免污染其他视图
     grid.removeAttribute('style');
