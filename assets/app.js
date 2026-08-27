@@ -142,15 +142,18 @@ function applyFilter() {
     return true;
   });
 
-  // 排序（default = 最近更新时间倒序）
+  // 排序（default = 最近更新倒序）。黑盒官方按收藏时间展示（列表接口即收藏时间
+  // 倒序），且其发布时间在收藏序列里是乱的，故黑盒条目用 favTime（收藏顺序近似）
+  // 参与排序；其余平台按 createdAt（发布时间）排序。
+  const sortKey = (it) => it.platform === 'xiaoheihe' ? (it.favTime || 0) : (it.createdAt || 0);
   if (state.sort !== 'default') {
     const by = {
-      oldest: (a, b) => (a.createdAt || 0) - (b.createdAt || 0), // 发布时间 正序
-      likes:  (a, b) => (b.stats?.digg || 0) - (a.stats?.digg || 0), // 点赞量 倒序
+      oldest: (a, b) => sortKey(a) - sortKey(b), // 最早更新（黑盒=最早收藏）
+      likes:  (a, b) => (b.stats?.digg || 0) - (a.stats?.digg || 0), // 互动最多
     }[state.sort];
     state.filtered.sort(by);
   } else {
-    state.filtered.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)); // 默认：发布时间 倒序
+    state.filtered.sort((a, b) => sortKey(b) - sortKey(a));
   }
 
   resetRender();
@@ -364,13 +367,11 @@ function buildCard(item) {
   /* -- 文字区 ---------------------------------------------------------- */
   const body = document.createElement('div');
   body.className = 'card-body';
-  // B站显示播放量；小黑盒显示奖励数（无点赞字段）；抖音/小红书显示点赞数。
-  // 总览视图下抖音与小红书卡带来源徽章（赞/收藏）
+  // B站显示播放量；其余平台统一显示「赞」数（小黑盒的 digg 存的是奖励数，
+  // 按用户要求同样标注为「赞」）。总览视图下抖音/小红书/黑盒卡带来源徽章
   const statText = isBili
     ? `${formatCount(item.stats?.digg)} 播放`
-    : isXhh
-      ? `${formatCount(item.stats?.digg)} 奖励`
-      : `${formatCount(item.stats?.digg)} 赞`;
+    : `${formatCount(item.stats?.digg)} 赞`;
   const srcBadge = !isBili && state.view === 'all'
     ? item.sources.includes('collect') ? '<span class="src-badge">收藏</span>'
       : '<span class="src-badge">赞</span>' : '';
