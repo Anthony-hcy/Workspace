@@ -251,9 +251,10 @@ function resolveOpenTarget(item) {
       // iOS：Universal Link，普通链接点击即优先进 App（未装则 Safari 正常开网页）
       return { href: webUrl, target: '_self', needsFallbackTimer: false };
     }
-    // Android：意图直达 B站客户端；fallback_url 由 Chrome 在未安装时接管
+    // Android：经 bilibili:// 自有协议唤起客户端（安装即注册，比 https 直通可靠）；
+    // 未装 App 时由 Chrome 打开备用网页
     return {
-      href: `intent://www.bilibili.com/video/${id}?jumpFromWebSite=1#Intent;scheme=https;package=tv.danmaku.bili;S.browser_fallback_url=${encodeURIComponent(webUrl)};end`,
+      href: `intent://video/${id}#Intent;scheme=bilibili;package=tv.danmaku.bili;S.browser_fallback_url=${encodeURIComponent(webUrl)};end`,
       target: '_self',
       needsFallbackTimer: false,
     };
