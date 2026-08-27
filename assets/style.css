@@ -320,17 +320,22 @@ button { font-family: inherit; cursor: pointer; }
   color: var(--ink-2);
 }
 
-/* Blog 视图：站内 iframe 展示 Study 站 */
+/* Blog 视图：站内 iframe 展示 Study 站。
+   is-blog（JS 切换）时隐藏页脚、压缩内容区底部留白、框架高度填满视口，
+   使 Blog 视图本身不出现外层滚动条 */
 .blog-frame {
   display: block;
   width: 100%;
-  height: calc(100vh - 150px);
+  height: calc(100vh - 96px);
   min-height: 480px;
   border: 1px solid var(--line);
   border-radius: 12px;
   background: #fff;
   box-shadow: var(--shadow);
 }
+body.is-blog .main { padding-bottom: 12px; }
+body.is-blog .footer { display: none; }
+body.is-blog .blog-frame { height: calc(100vh - 104px); }
 
 .grid {
   display: grid;

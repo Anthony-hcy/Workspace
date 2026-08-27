@@ -701,6 +701,7 @@ $('#sideNav').addEventListener('click', (e) => {
     $('#emptyBox').hidden = true;
     $('#countLine').textContent = '';
     $('#blogFrame').hidden = false;
+    document.body.classList.add('is-blog');   // 隐藏页脚、放大框架，Blog 视图无外层滚动条
     return;
   }
 
@@ -708,6 +709,7 @@ $('#sideNav').addEventListener('click', (e) => {
   $('#toolbar').hidden = false;
   $('#grid').hidden = false;
   $('#blogFrame').hidden = true;
+  document.body.classList.remove('is-blog');
 
   if (btn.classList.contains('is-disabled')) {
     return showToast('暂未开放');
