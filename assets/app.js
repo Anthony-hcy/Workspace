@@ -142,18 +142,15 @@ function applyFilter() {
     return true;
   });
 
-  // 排序（default = 最近更新倒序）。黑盒官方按收藏时间展示（列表接口即收藏时间
-  // 倒序），且其发布时间在收藏序列里是乱的，故黑盒条目用 favTime（收藏顺序近似）
-  // 参与排序；其余平台按 createdAt（发布时间）排序。
-  const sortKey = (it) => it.platform === 'xiaoheihe' ? (it.favTime || 0) : (it.createdAt || 0);
+  // 排序（default = 最近更新倒序，统一按发布时间；黑盒同此）
   if (state.sort !== 'default') {
     const by = {
-      oldest: (a, b) => sortKey(a) - sortKey(b), // 最早更新（黑盒=最早收藏）
+      oldest: (a, b) => (a.createdAt || 0) - (b.createdAt || 0), // 最早更新（发布时间 正序）
       likes:  (a, b) => (b.stats?.digg || 0) - (a.stats?.digg || 0), // 互动最多
     }[state.sort];
     state.filtered.sort(by);
   } else {
-    state.filtered.sort((a, b) => sortKey(b) - sortKey(a));
+    state.filtered.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)); // 默认：发布时间 倒序
   }
 
   resetRender();
@@ -428,9 +425,9 @@ const MOSAIC = {
   BODY_H: 66,         // 卡片文字区自然高度（单行省略标题 + meta 行 + 内边距）
 };
 
-/** B站视频为横屏封面 → 占 2 格 */
+/** B站/小黑盒为横屏封面 → 拼贴网格中占 2 格（与竖屏 1 格形成 2:1 面积比） */
 function isWideItem(item) {
-  return item.platform === 'bilibili';
+  return item.platform === 'bilibili' || item.platform === 'xiaoheihe';
 }
 
 /** 格子间距（与 style.css 中 .grid.mosaic 的 gap 保持一致） */
