@@ -1,11 +1,11 @@
 {
-  "lastSync": "2026-08-27T11:27:25.202Z",
+  "lastSync": "2026-08-27T11:36:37.965Z",
   "mode": "incremental",
   "sources": {
     "douyin-like": {
       "count": 667,
       "ok": true,
-      "added": 4,
+      "added": 0,
       "removed": null,
       "incremental": true
     },
@@ -17,26 +17,22 @@
       "incremental": true
     },
     "bilibili-collect": {
-      "count": 481,
+      "count": 483,
       "ok": true,
-      "added": 481,
+      "added": 483,
       "removed": null,
       "incremental": false
     },
     "xhs-collect": {
-      "count": 20,
-      "ok": true,
-      "added": 0,
-      "removed": 0,
-      "incremental": false
+      "count": 0,
+      "ok": false,
+      "error": "找不到「undefined」Tab。页面片段：首页\n点点\nai\nRED\n直播\n发布\n通知\n消息\n我\n\n沪ICP备13030189号 | 营业执照 | 2026沪公网安备31010102002533号 | 增值电信业务经营许可证：沪B2-20150021 | 医疗器械网络交易服务第三方平台备案：(沪)网械平台备字[2019]第00006号 | 互联网药品信息服务资格证书：(沪)-经营性-2023-0144 | 违法不良信息举报电话：4006676810 | 上海市互联网举报中心 | 网上有害信息举报专区 | 自营经营者信息 | 网络文化经营许可证：沪网文[2021]1545-113号 | 个性化推荐算法 网信算备31010121660130"
     },
     "xhs-like": {
-      "count": 9,
-      "ok": true,
-      "added": 9,
-      "removed": 0,
-      "incremental": false
+      "count": 0,
+      "ok": false,
+      "error": "找不到「undefined」Tab。页面片段：首页\n点点\nai\nRED\n直播\n发布\n通知\n消息\n我\n\n沪ICP备13030189号 | 营业执照 | 2026沪公网安备31010102002533号 | 增值电信业务经营许可证：沪B2-20150021 | 医疗器械网络交易服务第三方平台备案：(沪)网械平台备字[2019]第00006号 | 互联网药品信息服务资格证书：(沪)-经营性-2023-0144 | 违法不良信息举报电话：4006676810 | 上海市互联网举报中心 | 网上有害信息举报专区 | 自营经营者信息 | 网络文化经营许可证：沪网文[2021]1545-113号 | 个性化推荐算法 网信算备31010121660130"
     }
   },
-  "ok": true
+  "ok": false
 }
