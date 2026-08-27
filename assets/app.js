@@ -8,7 +8,8 @@
  *   1. 并行加载 点赞 / 收藏 / 元信息 三份数据
  *   2. 来源 Tab（全部/点赞/收藏）× 类型筛选（视频/图文）× 关键词搜索
  *   3. 排序：默认 / 最近更新 / 最早发布 / 点赞最多
- *   4. 分页浏览：每页 24 张，支持上一页/下一页/跳转指定页
+ *   4. 总览视图 = 行填充布局（Justified Rows）：每行铺满宽度、约一屏高
+ *      即自动分页（每页条数动态）；抖音/B站单平台视图仍为固定每页 24 张
  *   5. 封面热链直连抖音 CDN（referrerpolicy=no-referrer 绕过防盗链），
  *      加载失败自动回退为按 id 生成的渐变占位图
  *   6. 「立即同步」按钮 → 调 GitHub API 触发私有仓库的 Actions 工作流，
@@ -144,24 +145,28 @@ function applyFilter() {
 }
 
 /* ---------------------------------------------------------------------------
- * 三、分页渲染（每页 24 张；筛选/排序变化时自动回到第 1 页）
+ * 三、分页渲染（总览=行填充动态分页；抖音/B站视图=固定每页 24 张）
  * ------------------------------------------------------------------------- */
-const totalPages = () => Math.max(1, Math.ceil(state.filtered.length / CONFIG.PAGE_SIZE));
+const totalPages = () => state.view === 'all'
+  ? Math.max(1, rowLayout.pages.length)
+  : Math.max(1, Math.ceil(state.filtered.length / CONFIG.PAGE_SIZE));
 
 function resetRender() {
   state.page = 1;      // 条件变化后回到第一页
+  if (state.view === 'all') rebuildRowLayout();   // 过滤结果变化 → 重算行与页边界
   renderPage();
 }
 
 function renderPage() {
-  const start = (state.page - 1) * CONFIG.PAGE_SIZE;
-  const slice = state.filtered.slice(start, start + CONFIG.PAGE_SIZE);
-
   if (state.view === 'all') {
-    // 瀑布流模式：先构建卡片 DOM 数组，再由 JS 分配到列
-    const cards = slice.map((item) => buildCard(item));
-    applyMasonry(cards);
+    // 行填充模式：页边界已预计算，任意跳页都是 O(1) 切片
+    const pg = rowLayout.pages[state.page - 1];
+    const slice = pg ? state.filtered.slice(pg.start, pg.end) : [];
+    grid.innerHTML = '';
+    renderRows(slice);
   } else {
+    const start = (state.page - 1) * CONFIG.PAGE_SIZE;
+    const slice = state.filtered.slice(start, start + CONFIG.PAGE_SIZE);
     grid.innerHTML = '';
     const frag = document.createDocumentFragment();
     for (const item of slice) frag.appendChild(buildCard(item));
@@ -300,37 +305,159 @@ function escapeHtml(s) {
 }
 
 /* ---------------------------------------------------------------------------
- * 瀑布流布局（JS 实现，最短列优先放置，消除 columns 的空白间隙）
+ * 行填充布局（Justified Rows，类似 Google Photos）
+ * ---------------------------------------------------------------------------
+ * 规则：按现有顺序逐卡累加封面宽高比，凑成一行后整行统一封面高度——
+ *   封面高 = 可用宽度 ÷ 该行宽高比之和，每张卡按自己的比例分宽度。
+ * 每一行都精确铺满容器（无空缺），横卡（B站 16:9）同行内天然更宽大；
+ * 累计约一屏高就切为一页，因此每页条数是动态的，页面永远饱满。
  * ------------------------------------------------------------------------- */
-/** 获取瀑布流列数（按容器宽度自适应） */
-function masonryColCount() {
-  const w = grid.clientWidth;
-  if (w >= 920) return 5;
-  if (w >= 720) return 4;
-  if (w >= 500) return 3;
-  return 2;
+
+const ROW_LAYOUT = {
+  BODY_H: 66,      // 卡片文字区高度（单行省略标题 + meta 行 + 内边距），用于估算页高
+  TARGET_COVER_H: 235,   // 目标封面高：桌面端一行 5~6 张竖卡 / 2~3 张混排
+  NARROW_COVER_H: 185,   // 窄屏目标封面高
+  MAX_STRETCH: 1.25,     // 页尾行最多拉伸 25% 填满宽度，超过则保持自然宽靠左
+};
+
+/** 封面宽高比：抖音竖屏 2:3；B站横屏 16:9（与 CSS 中 .card-cover 的 aspect-ratio 对应） */
+function coverRatioOf(item) {
+  return item.platform === 'bilibili' ? 16 / 9 : 2 / 3;
 }
 
-/** 将卡片列表重新分配到最短列 */
-function applyMasonry(cardEls) {
-  const cols = masonryColCount();
+/** 行间距（与 style.css 中 .grid.rows 的 gap 保持一致） */
+function rowGapPx() {
+  return window.matchMedia('(max-width: 640px)').matches ? 12 : 16;
+}
+
+/** 当前视口下的目标封面高 */
+function targetCoverH() {
+  return window.innerWidth <= 640 ? ROW_LAYOUT.NARROW_COVER_H : ROW_LAYOUT.TARGET_COVER_H;
+}
+
+/**
+ * 把 items 从 start 下标开始贪心分成若干"视觉行"。
+ * 返回 [{first, last, covH}]：行的起止下标与统一封面高。
+ */
+function splitRows(items, start = 0) {
+  const gap = rowGapPx();
+  const width = grid.clientWidth;
+  const tgt = targetCoverH();
+  const rows = [];
+  let buf = [];        // 当前行内已累积的下标
+  let bufRatio = 0;    // 当前行宽高比之和
+  let cur = start;     // 下一个待放置的下标
+
+  while (cur < items.length) {
+    buf.push(cur);
+    bufRatio += coverRatioOf(items[cur]);
+    cur++;
+    const covH = (width - gap * (buf.length - 1)) / bufRatio;
+    // 高度首次压到目标及以下即结算：此后 covH 只会更小，必须在当下决策。
+    // 若「不含这张」的前一个断点更接近目标，就把这张退回（cur--），
+    // 它会自然成为下一行的第一张，绝不能凭空丢弃
+    if (covH <= tgt) {
+      const tail = cur - 1;
+      const prevCovH = buf.length > 1
+        ? (width - gap * (buf.length - 2)) / (bufRatio - coverRatioOf(items[tail]))
+        : Infinity;   // 行内首张没有更短的备选断点
+      if (Math.abs(prevCovH - tgt) < Math.abs(covH - tgt)) {
+        cur--;
+        buf.pop();
+        bufRatio -= coverRatioOf(items[cur]);
+        rows.push({ first: buf[0], last: buf[buf.length - 1], covH: prevCovH });
+      } else {
+        rows.push({ first: buf[0], last: buf[buf.length - 1], covH });
+      }
+      buf = [];
+      bufRatio = 0;
+    }
+  }
+
+  // 收不了尾的零头
+  if (buf.length === 1 && rows.length > 0) {
+    // 只剩孤张且不成行 → 并回上一行重新均分（避免一行一张拉出超高卡片）
+    const prev = rows[rows.length - 1];
+    const merged = [];
+    for (let i = prev.first; i <= prev.last; i++) merged.push(i);
+    merged.push(cur - 1);
+    merged.sort((a, b) => a - b);
+    prev.last = merged[merged.length - 1];
+    const rSum = merged.reduce((s, i) => s + coverRatioOf(items[i]), 0);
+    prev.covH = (width - gap * (merged.length - 1)) / rSum;
+  } else if (buf.length > 0) {
+    // ≥2 张残余直接作为最后一行（渲染端会做页尾拉伸/靠左处理）
+    rows.push({ first: buf[0], last: buf[buf.length - 1], covH: (width - gap * (buf.length - 1)) / bufRatio });
+  }
+  return rows;
+}
+
+/**
+ * 预计算所有分页边界：按行累积高度达到约一屏即切页。
+ * 返回 { pages: [{start, end}] }，start/end 为 state.filtered 中的切片下标。
+ * 跳转任意页无需重放前面各页（O(1) 定位），窗口 resize 时整体重算也只需 O(N)。
+ */
+function computeRowPages(items) {
+  const rows = splitRows(items);
+  const pageTarget = Math.max(window.innerHeight * 1.15, 900);
+  const gapStep = ROW_LAYOUT.BODY_H + rowGapPx();
+  const pages = [];
+  let acc = 0;
+  let startRow = 0;
+
+  for (let i = 0; i < rows.length; i++) {
+    acc += rows[i].covH + gapStep;
+    // 至少满两行才允许切页，防止极端数据下出现"一行一页"
+    if (acc >= pageTarget && i - startRow >= 1) {
+      pages.push({ start: rows[startRow].first, end: rows[i].last + 1 });
+      startRow = i + 1;
+      acc = 0;
+    }
+  }
+  if (startRow < rows.length) {
+    pages.push({ start: rows[startRow].first, end: rows[rows.length - 1].last + 1 });
+  }
+  return { pages };
+}
+
+/** 当前总览视图的布局缓存：{pages:[{start,end}]} */
+let rowLayout = { pages: [] };
+
+/** filtered 变化或窗口尺寸变化后重建分页边界 */
+function rebuildRowLayout() {
+  rowLayout = computeRowPages(state.filtered);
+}
+
+/**
+ * 渲染总览视图的一页：局部重现行切分并给每张卡分配精确宽度。
+ * 页尾一行若拉伸增幅不超过上限则铺满整行，否则保持自然宽度靠左。
+ */
+function renderRows(slice) {
+  const cards = slice.map((item) => buildCard(item));
+  const rows = splitRows(slice);
+  const gap = rowGapPx();
+  const width = grid.clientWidth;
+  const frag = document.createDocumentFragment();
+
+  rows.forEach((row, idx) => {
+    const isLastRow = idx === rows.length - 1;
+    let covH = Math.min(row.covH, 620);          // 兜底：极端情况下限制行高不失控
+    // 行内宽高比之和 → 拉伸到刚满容器宽所需的高度
+    let ratioSum = 0;
+    for (let i = row.first; i <= row.last; i++) ratioSum += coverRatioOf(slice[i]);
+    if (isLastRow) {
+      const fullH = (width - gap * (row.last - row.first)) / ratioSum;
+      if (fullH / covH <= ROW_LAYOUT.MAX_STRETCH) covH = fullH;   // 增幅可接受 → 拉伸铺满
+    }
+    for (let i = row.first; i <= row.last; i++) {
+      const card = cards[i];
+      card.style.width = `${Math.max(covH * coverRatioOf(slice[i]), 100)}px`;
+      frag.appendChild(card);
+    }
+  });
+
   grid.innerHTML = '';
-
-  const columns = [];
-  const heights = [];
-  for (let i = 0; i < cols; i++) {
-    const col = document.createElement('div');
-    col.className = 'masonry-col';
-    columns.push(col);
-    heights.push(0);
-    grid.appendChild(col);
-  }
-
-  for (const card of cardEls) {
-    const shortest = heights.indexOf(Math.min(...heights));
-    columns[shortest].appendChild(card);
-    heights[shortest] += card.offsetHeight + 16; // 16 = gap
-  }
+  grid.appendChild(frag);
 }
 
 /* ---------------------------------------------------------------------------
@@ -487,11 +614,11 @@ $('#sideNav').addEventListener('click', (e) => {
   state.sub = 'all';                       // 切视图后二级筛选重置
   $('#viewTitle').textContent = VIEW_TITLES[state.view] ?? '';
   // 布局模式随视图切换：
-  //   总览 → 瀑布流（抖音竖屏卡与B站横屏卡穿插，类似 kiseki.blog/library）
+  //   总览 → 行填充布局（每行铺满宽度，横竖卡按原始比例混排）
   //   B站 → 宽列网格（统一 16:9 横屏）
   //   抖音 → 标准网格（统一竖屏）
   const grid = $('#grid');
-  grid.classList.toggle('masonry', state.view === 'all');
+  grid.classList.toggle('rows', state.view === 'all');
   grid.classList.toggle('wide', state.view === 'bilibili');
   renderSubFilters();
   applyFilter();
@@ -547,8 +674,8 @@ $('#pageInput').addEventListener('keydown', (e) => {
   } catch (err) {
     console.error(err);
   }
-  // 默认总览视图 → 瀑布流布局
-  $('#grid').classList.add('masonry');
+  // 默认总览视图 → 行填充布局
+  $('#grid').classList.add('rows');
   renderSubFilters();
   applyFilter();
 
@@ -560,12 +687,17 @@ $('#pageInput').addEventListener('keydown', (e) => {
     emptyBox.hidden = false;
   }
 
-  // 窗口 resize 时重新计算瀑布流列数
+  // 窗口 resize 时重算行与分页边界，并尽量停在包含原首条作品的页上
   let resizeTimer;
   window.addEventListener('resize', () => {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => {
-      if (state.view === 'all') renderPage();
+      if (state.view !== 'all') return;
+      const firstItemIdx = rowLayout.pages[state.page - 1]?.start ?? 0;
+      rebuildRowLayout();
+      const hit = rowLayout.pages.findIndex((p) => firstItemIdx >= p.start && firstItemIdx < p.end);
+      state.page = Math.max(1, hit + 1);
+      renderPage();
     }, 200);
   });
 })();
