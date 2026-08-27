@@ -333,9 +333,13 @@ button { font-family: inherit; cursor: pointer; }
   background: #fff;
   box-shadow: var(--shadow);
 }
-body.is-blog .main { padding-bottom: 12px; }
+body.is-blog .main { padding: 6px 8px 10px; max-width: none; }   /* Blog 视图撑满内容区，去掉居中限宽与留白 */
+body.is-blog .topbar { display: none; }                          /* Blog 视图不需要顶栏，画面上边空白归零 */
 body.is-blog .footer { display: none; }
-body.is-blog .blog-frame { height: calc(100vh - 104px); }
+body.is-blog .blog-frame {
+  height: calc(100vh - 40px);
+  border-radius: 8px;
+}
 
 .grid {
   display: grid;
