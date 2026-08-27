@@ -1,11 +1,11 @@
 {
-  "lastSync": "2026-08-27T11:55:09.338Z",
+  "lastSync": "2026-08-27T11:50:06.912Z",
   "mode": "incremental",
   "sources": {
     "douyin-like": {
       "count": 667,
       "ok": true,
-      "added": 0,
+      "added": 4,
       "removed": null,
       "incremental": true
     },
@@ -17,12 +17,22 @@
       "incremental": true
     },
     "bilibili-collect": {
-      "count": 483,
+      "count": 481,
       "ok": true,
-      "added": 483,
+      "added": 481,
       "removed": null,
       "incremental": false
+    },
+    "xhs-collect": {
+      "count": 0,
+      "ok": false,
+      "error": "无法进入个人主页。常见原因：Cookie 已失效，或连续抓取触发小红书风控（页面片段：首页\n点点\nai\nRED\n直播\n发布\n通知\n消息\n我\n\n沪ICP备13030189号 | 营业执照 | 2026沪公网安备31010102002533号 | 增值电信业务经营许可证：沪B2-20150）。请重新复制 Cookie 并间隔一段时间再试"
+    },
+    "xhs-like": {
+      "count": 0,
+      "ok": false,
+      "error": "无法进入个人主页。常见原因：Cookie 已失效，或连续抓取触发小红书风控（页面片段：首页\n点点\nai\nRED\n直播\n发布\n通知\n消息\n我\n\n沪ICP备13030189号 | 营业执照 | 2026沪公网安备31010102002533号 | 增值电信业务经营许可证：沪B2-20150）。请重新复制 Cookie 并间隔一段时间再试"
     }
   },
-  "ok": true
+  "ok": false
 }
