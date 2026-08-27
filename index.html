@@ -9,7 +9,7 @@
   <!-- 内联 favicon：一个渐变书签图标，免额外请求 -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%237c5cff'/><stop offset='1' stop-color='%2300c2ff'/></linearGradient></defs><path fill='url(%23g)' d='M6 2h12a2 2 0 0 1 2 2v18l-8-4.8L4 22V4a2 2 0 0 1 2-2z'/></svg>" />
 </head>
-<body>
+<body class="is-blog">
 
   <!-- ══════════════ 左侧导航 ══════════════ -->
   <aside class="sidebar">
@@ -20,15 +20,15 @@
     </div>
 
     <nav class="side-nav" id="sideNav">
-      <!-- Blog：站内 iframe 展示 Study 站（不跳转，与 Favorites 并列） -->
-      <button class="side-item side-blog" data-view="blog" title="博客">
+      <!-- Blog：站内 iframe 展示 Study 站（站点默认首页，初始即激活） -->
+      <button class="side-item side-blog is-active" data-view="blog" title="博客">
         <svg viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
         <span>Blog</span>
       </button>
 
       <!-- Favorites：一级标题，带展开箭头；展开后出现各平台（二级） -->
       <div class="side-group is-expanded" id="favGroup">
-        <button class="side-item side-parent is-active" data-view="all" title="全部平台内容">
+        <button class="side-item side-parent" data-view="all" title="全部平台内容">
           <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="2" fill="#7c5cff"/><rect x="13" y="3" width="8" height="8" rx="2" fill="#00c2ff"/><rect x="3" y="13" width="8" height="8" rx="2" fill="#ffb020"/><rect x="13" y="13" width="8" height="8" rx="2" fill="#ff5c8a"/></svg>
           <span>Favorites</span>
           <svg class="side-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
@@ -65,7 +65,7 @@
     <!-- 顶栏（品牌已移入侧边栏顶部，这里只留同步操作） -->
     <header class="topbar">
       <div class="topbar-inner">
-        <span class="view-title" id="viewTitle">Favorites · 我的收藏夹</span>
+        <span class="view-title" id="viewTitle">Blog</span>
         <div class="topbar-actions">
           <span class="sync-time" id="syncTime" title="数据最近同步时间">—</span>
           <button class="btn-sync" id="btnSync" title="手动触发一次云端同步（约 1~2 分钟）">
@@ -76,8 +76,8 @@
       </div>
     </header>
 
-    <!-- 筛选工具栏 -->
-    <nav class="toolbar" id="toolbar">
+    <!-- 筛选工具栏（Blog 首页默认隐藏，进入收藏视图时显示） -->
+    <nav class="toolbar" id="toolbar" hidden>
       <div class="toolbar-inner">
         <!-- 二级筛选：随侧边栏视图动态生成（抖音的点赞/收藏、B站的各收藏夹） -->
         <div class="chips" id="subFilters" hidden></div>
@@ -101,13 +101,13 @@
       </div>
     </nav>
 
-    <!-- 卡片瀑布区 -->
+    <!-- 卡片区（Blog 首页默认隐藏，进入收藏视图时显示） -->
     <main class="main">
       <p class="count-line" id="countLine"></p>
-      <section class="grid" id="grid" aria-live="polite"></section>
+      <section class="grid" id="grid" aria-live="polite" hidden></section>
 
-      <!-- Blog 视图：站内展示 Study 站首页 -->
-      <iframe class="blog-frame" id="blogFrame" src="https://anthony-hcy.github.io/Study/" title="Blog" loading="lazy" hidden></iframe>
+      <!-- Blog 视图：站内展示 Study 站首页（默认首页，初始可见） -->
+      <iframe class="blog-frame" id="blogFrame" src="https://anthony-hcy.github.io/Study/" title="Blog"></iframe>
 
       <div class="empty" id="emptyBox" hidden></div>
 
