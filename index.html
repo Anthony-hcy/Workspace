@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Workspace · 我的收藏夹</title>
   <meta name="description" content="跨平台收藏夹工作台：自动同步抖音、B站与小 红书的收藏内容" />
-  <link rel="stylesheet" href="assets/style.css?v=20260827l" />
+  <link rel="stylesheet" href="assets/style.css?v=20260827m" />
   <!-- 内联 favicon：一个渐变书签图标，免额外请求 -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%237c5cff'/><stop offset='1' stop-color='%2300c2ff'/></linearGradient></defs><path fill='url(%23g)' d='M6 2h12a2 2 0 0 1 2 2v18l-8-4.8L4 22V4a2 2 0 0 1 2-2z'/></svg>" />
 </head>
@@ -20,11 +20,11 @@
     </div>
 
     <nav class="side-nav" id="sideNav">
-      <!-- Blog：跳转 Study 站（与 Favorites 并列，放其上方） -->
-      <a class="side-item side-blog" href="https://anthony-hcy.github.io/Study/" target="_blank" rel="noopener noreferrer" title="博客">
+      <!-- Blog：站内 iframe 展示 Study 站（不跳转，与 Favorites 并列） -->
+      <button class="side-item side-blog" data-view="blog" title="博客">
         <svg viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
         <span>Blog</span>
-      </a>
+      </button>
 
       <!-- Favorites：一级标题，带展开箭头；展开后出现各平台（二级） -->
       <div class="side-group is-expanded" id="favGroup">
@@ -77,7 +77,7 @@
     </header>
 
     <!-- 筛选工具栏 -->
-    <nav class="toolbar">
+    <nav class="toolbar" id="toolbar">
       <div class="toolbar-inner">
         <!-- 二级筛选：随侧边栏视图动态生成（抖音的点赞/收藏、B站的各收藏夹） -->
         <div class="chips" id="subFilters" hidden></div>
@@ -105,6 +105,9 @@
     <main class="main">
       <p class="count-line" id="countLine"></p>
       <section class="grid" id="grid" aria-live="polite"></section>
+
+      <!-- Blog 视图：站内展示 Study 站首页 -->
+      <iframe class="blog-frame" id="blogFrame" src="https://anthony-hcy.github.io/Study/" title="Blog" loading="lazy" hidden></iframe>
 
       <div class="empty" id="emptyBox" hidden></div>
 
@@ -147,6 +150,6 @@
 
   <div class="toast" id="toast" hidden></div>
 
-  <script src="assets/app.js?v=20260827l"></script>
+  <script src="assets/app.js?v=20260827m"></script>
 </body>
 </html>

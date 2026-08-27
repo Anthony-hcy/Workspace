@@ -687,7 +687,28 @@ $('#sideNav').addEventListener('click', (e) => {
     return;
   }
   const btn = e.target.closest('.side-item');
-  if (!btn || !btn.dataset.view) return;   // Blog 无 data-view，交给 <a> 原生跳转
+  if (!btn || !btn.dataset.view) return;
+
+  // Blog 视图：站内 iframe 展示 Study 站首页（不跳转外部）
+  if (btn.dataset.view === 'blog') {
+    document.querySelectorAll('#sideNav .side-item[data-view]').forEach((b) =>
+      b.classList.toggle('is-active', b.dataset.view === 'blog'));
+    state.view = 'blog';
+    $('#viewTitle').textContent = 'Blog';
+    $('#toolbar').hidden = true;
+    $('#grid').hidden = true;
+    $('#pagination').hidden = true;
+    $('#emptyBox').hidden = true;
+    $('#countLine').textContent = '';
+    $('#blogFrame').hidden = false;
+    return;
+  }
+
+  // 收藏视图：显示内容区（隐藏 Blog 框架）
+  $('#toolbar').hidden = false;
+  $('#grid').hidden = false;
+  $('#blogFrame').hidden = true;
+
   if (btn.classList.contains('is-disabled')) {
     return showToast('暂未开放');
   }

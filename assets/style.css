@@ -71,7 +71,8 @@ button { font-family: inherit; cursor: pointer; }
 
 .side-nav { display: flex; flex-direction: column; gap: 4px; }
 
-/* Favorites 一级组：带展开箭头，展开显示二级平台 */
+/* Favorites 一级组：带展开箭头，展开显示二级平台
+   箭头：默认（收起）向右 ▶，展开时旋转 90° 向下 ▾ */
 .side-group { display: flex; flex-direction: column; gap: 4px; }
 .side-arrow {
   margin-left: auto;
@@ -81,7 +82,7 @@ button { font-family: inherit; cursor: pointer; }
   transition: transform .18s ease;
   flex-shrink: 0;
 }
-.side-group:not(.is-expanded) .side-arrow { transform: rotate(-90deg); }
+.side-group.is-expanded .side-arrow { transform: rotate(90deg); }
 .side-group:not(.is-expanded) .side-children { display: none; }
 .side-children { display: flex; flex-direction: column; gap: 2px; margin-top: 2px; }
 
@@ -306,6 +307,18 @@ button { font-family: inherit; cursor: pointer; }
   margin: 4px 2px 12px;
   font-size: 12px;
   color: var(--ink-2);
+}
+
+/* Blog 视图：站内 iframe 展示 Study 站 */
+.blog-frame {
+  display: block;
+  width: 100%;
+  height: calc(100vh - 150px);
+  min-height: 480px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: var(--shadow);
 }
 
 .grid {
