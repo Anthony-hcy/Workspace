@@ -19,6 +19,9 @@
 
 * { box-sizing: border-box; }
 
+/* 强制 hidden 属性生效（否则 display:grid/block 的作者样式会覆盖它） */
+[hidden] { display: none !important; }
+
 html { scroll-behavior: smooth; }
 
 /* 页面骨架：左侧固定导航 + 右侧内容区 */
