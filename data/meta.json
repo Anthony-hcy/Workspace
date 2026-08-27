@@ -1,5 +1,5 @@
 {
-  "lastSync": "2026-08-27T11:50:06.912Z",
+  "lastSync": "2026-08-27T12:06:43.037Z",
   "mode": "incremental",
   "sources": {
     "douyin-like": {
@@ -32,6 +32,13 @@
       "count": 0,
       "ok": false,
       "error": "无法进入个人主页。常见原因：Cookie 已失效，或连续抓取触发小红书风控（页面片段：首页\n点点\nai\nRED\n直播\n发布\n通知\n消息\n我\n\n沪ICP备13030189号 | 营业执照 | 2026沪公网安备31010102002533号 | 增值电信业务经营许可证：沪B2-20150）。请重新复制 Cookie 并间隔一段时间再试"
+    },
+    "xiaoheihe-collect": {
+      "count": 20,
+      "ok": true,
+      "added": 0,
+      "removed": 1,
+      "incremental": false
     }
   },
   "ok": false
