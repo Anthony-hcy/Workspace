@@ -794,10 +794,11 @@ function renderCoverGrid(books) {
       <p class="lib-author">${escapeHtml(b.author || '')}</p>
     </a>`).join('');
 
-  // 分页控件（封面模式一页四行）
+  // 分页控件（封面模式一页四行，支持跳转）
   const pg = $('#libPagination');
   pg.hidden = books.length === 0;
-  $('#libPageCur').textContent = state.libPage;
+  $('#libPageInput').value = state.libPage;
+  $('#libPageInput').max = totalPages;
   $('#libPageTotal').textContent = totalPages;
   $('#libPrev').disabled = state.libPage <= 1;
   $('#libNext').disabled = state.libPage >= totalPages;
@@ -920,6 +921,16 @@ $('#libShelf').addEventListener('click', (e) => {
 // 封面分页
 $('#libPrev').addEventListener('click', () => { state.libPage = Math.max(1, state.libPage - 1); renderLibrary(); });
 $('#libNext').addEventListener('click', () => { state.libPage += 1; renderLibrary(); });
+// 封面分页跳转（页码输入 + 跳转按钮 + 回车）
+function libGoPage(p) {
+  const total = Number($('#libPageTotal').textContent) || 1;
+  state.libPage = Math.min(Math.max(1, Math.round(p) || 1), total);
+  renderLibrary();
+}
+$('#libJump').addEventListener('click', () => libGoPage(Number($('#libPageInput').value)));
+$('#libPageInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') libGoPage(Number(e.target.value));
+});
 
 $('#bookClose').addEventListener('click', () => $('#bookModal').close());
 

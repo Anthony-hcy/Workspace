@@ -150,10 +150,14 @@
         </div>
         <p class="lib-count" id="libCount"></p>
         <div class="lib-shelf" id="libShelf"></div>
-        <!-- 封面模式分页（一页四行） -->
+        <!-- 封面模式分页（一页四行，支持跳转） -->
         <div class="pagination" id="libPagination" hidden>
           <button class="page-btn" id="libPrev">‹ 上一页</button>
-          <span class="page-info">第 <span id="libPageCur">1</span> / <span id="libPageTotal">1</span> 页</span>
+          <span class="page-info">
+            第 <input type="number" id="libPageInput" class="page-input" min="1" value="1" /> /
+            <span id="libPageTotal">1</span> 页
+          </span>
+          <button class="page-btn" id="libJump">跳转</button>
           <button class="page-btn" id="libNext">下一页 ›</button>
         </div>
       </div>
