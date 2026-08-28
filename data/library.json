@@ -1,1 +1,26 @@
-[]
+[
+  {
+    "query": "我的前半生",
+    "coverOverride": "assets/img/books/我的前半生.jpg"
+  },
+  {
+    "query": "庆余年",
+    "coverOverride": "assets/img/books/庆余年.jpg"
+  },
+  {
+    "query": "秦二世必须死",
+    "coverOverride": "assets/img/books/秦二世必须死.jpg"
+  },
+  {
+    "query": "祈祷落幕时",
+    "coverOverride": "assets/img/books/祈祷落幕时.jpg"
+  },
+  {
+    "query": "油炸绿番茄",
+    "coverOverride": "assets/img/books/油炸绿番茄.jpg"
+  },
+  {
+    "query": "窄门",
+    "coverOverride": "assets/img/books/窄门.jpg"
+  }
+]
