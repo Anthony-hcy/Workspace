@@ -806,7 +806,7 @@ body.is-library .main { max-width: none; padding: 14px 24px 40px; }
   width: 32px;
   height: 240px;
   border-radius: 4px 5px 5px 4px;
-  overflow: hidden;
+  /* 不能 overflow:hidden（会裁剪右侧弹出的封面），圆角交给各子元素自己处理 */
   cursor: pointer;
   transition: transform .18s ease;
   box-shadow: 0 4px 10px rgba(0, 0, 0, .22);
@@ -817,11 +817,11 @@ body.is-library .main { max-width: none; padding: 14px 24px 40px; }
   justify-content: flex-start;
 }
 .lib-spine:hover { transform: translateY(-6px); z-index: 4; }
-/* 悬停展开封面：从书脊抽出浮现（仅 transform/opacity 过渡，GPU 合成，鼠标横扫不卡顿） */
+/* 悬停展开封面：从书脊右侧滑出（仅 transform/opacity 过渡，GPU 合成，横扫不卡顿） */
 .lib-spine-pop {
   position: absolute;
-  left: 50%;
-  bottom: 24px;
+  left: calc(100% + 8px);
+  top: 0;
   width: 132px;
   padding: 7px 7px 9px;
   border-radius: 10px;
@@ -829,13 +829,13 @@ body.is-library .main { max-width: none; padding: 14px 24px 40px; }
   box-shadow: 0 16px 36px rgba(0, 0, 0, .32);
   pointer-events: none;
   z-index: 6;
-  transform: translateX(-50%) scale(.35);
-  transform-origin: 50% 100%;
+  transform: translateX(-10px) scale(.55);
+  transform-origin: 0 50%;
   opacity: 0;
   transition: transform .22s cubic-bezier(.2, .7, .3, 1.1), opacity .16s ease;
 }
 .lib-spine:hover .lib-spine-pop {
-  transform: translateX(-50%) translateY(-52%) scale(1);
+  transform: translateX(0) scale(1);
   opacity: 1;
 }
 .lib-spine-pop-cover {
@@ -872,12 +872,14 @@ body.is-library .main { max-width: none; padding: 14px 24px 40px; }
   object-fit: cover;
   object-position: center;
   pointer-events: none;
+  border-radius: 4px 5px 5px 4px;
 }
 /* 压暗渐变保证文字可读 + 左右高光/阴影模拟圆柱感 + 上下书壳 */
 .lib-spine::after {
   content: '';
   position: absolute;
   inset: 0;
+  border-radius: inherit;
   background:
     linear-gradient(180deg, rgba(0, 0, 0, .36), rgba(0, 0, 0, .10) 16%, rgba(0, 0, 0, .16) 84%, rgba(0, 0, 0, .44)),
     linear-gradient(90deg, rgba(255, 255, 255, .2), transparent 22%, transparent 78%, rgba(0, 0, 0, .24));
