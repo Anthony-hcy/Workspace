@@ -816,14 +816,14 @@ body.is-library .main { max-width: none; padding: 14px 24px 40px; }
   align-items: center;
   justify-content: flex-start;
 }
-/* 书脊悬停：自身横向展开成封面（宽度动画，右侧的书被 flex 自动挤开；收回自动归位） */
+/* 书脊悬停：自身横向展开成封面（宽度动画，右侧的书被 flex 自动挤开；收回自动归位。
+   只做水平展开、不上浮，保证封面与相邻书脊平行对齐） */
 .lib-spine {
   width: var(--w, 32px);
-  transition: width .28s cubic-bezier(.25, .8, .3, 1), transform .18s ease;
+  transition: width .28s cubic-bezier(.25, .8, .3, 1);
 }
 .lib-spine:hover {
   width: 150px;
-  transform: translateY(-6px);
   z-index: 5;
 }
 /* 展开后以封面为主，隐藏竖排文字 */
