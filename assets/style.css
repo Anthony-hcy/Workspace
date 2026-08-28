@@ -741,16 +741,18 @@ body.is-library .main { max-width: none; padding: 14px 24px 40px; }
   box-shadow: var(--shadow);
 }
 .lib-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.lib-big {
+/* 封面评分角标（豆瓣评分） */
+.lib-rating {
   position: absolute;
-  left: 6px; bottom: 6px;
-  padding: 2px 8px;
+  right: 6px;
+  bottom: 6px;
+  padding: 2px 7px;
   border-radius: 6px;
-  font-size: 10.5px;
-  font-weight: 600;
-  color: #fff;
-  background: rgba(17, 19, 24, .75);
-  backdrop-filter: blur(3px);
+  font-size: 11px;
+  font-weight: 700;
+  color: #7a5200;
+  background: rgba(255, 214, 130, .94);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .12);
 }
 .lib-title {
   margin: 8px 2px 0;
@@ -775,42 +777,39 @@ body.is-library .main { max-width: none; padding: 14px 24px 40px; }
   font-weight: 600;
   padding-left: 2px;
 }
-/* 书架底板：精致深木 + 顶部前挡板 */
+/* 书架底板：浅色简洁，贴合站点浅色主题 */
 .lib-spine-row {
   position: relative;
   display: flex;
   align-items: flex-end;
-  gap: 10px;
+  gap: 8px;
   flex-wrap: wrap;
-  padding: 20px 14px 10px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, .07), transparent 45%),
-    linear-gradient(180deg, #6b4a2c, #4a3018 70%, #3a2512);
-  border: 1px solid rgba(0, 0, 0, .18);
-  border-radius: 12px;
-  min-height: 254px;
-  box-shadow: inset 0 10px 24px rgba(0, 0, 0, .35), 0 2px 8px rgba(0, 0, 0, .08);
+  padding: 22px 14px 12px;
+  background: linear-gradient(180deg, #f4f1ea, #e9e4d8);
+  border: 1px solid rgba(17, 24, 39, .07);
+  border-radius: 14px;
+  min-height: 270px;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, .04), 0 1px 3px rgba(0, 0, 0, .05);
 }
-/* 书架前挡板横条 */
+/* 顶部书架隔板细线 */
 .lib-spine-row::before {
   content: '';
   position: absolute;
   top: 0;
-  left: 0;
-  right: 0;
-  height: 10px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, .22), rgba(255, 255, 255, .04));
-  border-radius: 12px 12px 0 0;
+  left: 14px;
+  right: 14px;
+  height: 1px;
+  background: rgba(17, 24, 39, .08);
 }
 .lib-spine {
   position: relative;
-  width: 48px;
-  height: 210px;
+  width: 32px;
+  height: 240px;
   border-radius: 4px 5px 5px 4px;
   overflow: hidden;
   cursor: pointer;
   transition: transform .18s ease;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, .32);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, .22);
   background: var(--spine-c, #6b7280);
   display: flex;
   flex-direction: column;
@@ -838,27 +837,51 @@ body.is-library .main { max-width: none; padding: 14px 24px 40px; }
     linear-gradient(90deg, rgba(255, 255, 255, .2), transparent 22%, transparent 78%, rgba(0, 0, 0, .24));
   pointer-events: none;
 }
+/* 书脊左侧书页白边（真实书籍侧面纸页叠层感） */
+.lib-spine::before {
+  content: '';
+  position: absolute;
+  left: 1px;
+  top: 1px;
+  bottom: 1px;
+  width: 2px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, .55);
+  pointer-events: none;
+  z-index: 2;
+}
 .lib-spine-title,
-.lib-spine-author { position: relative; z-index: 1; }
+.lib-spine-author,
+.lib-spine-pub { position: relative; z-index: 1; }
 .lib-spine-title {
   writing-mode: vertical-rl;
   text-orientation: mixed;
-  margin-top: 22px;
-  font-size: 13px;
+  margin-top: 26px;
+  font-size: 11.5px;
   font-weight: 800;
   color: #fff;
   text-shadow: 0 1px 3px rgba(0, 0, 0, .75), 0 0 6px rgba(0, 0, 0, .4);
   letter-spacing: 1.5px;
-  max-height: 140px;
+  max-height: 150px;
   overflow: hidden;
 }
 .lib-spine-author {
   writing-mode: vertical-rl;
   margin-top: 8px;
-  font-size: 9px;
+  font-size: 8.5px;
   color: rgba(255, 255, 255, .92);
   text-shadow: 0 1px 2px rgba(0, 0, 0, .7);
-  max-height: 40px;
+  max-height: 36px;
+  overflow: hidden;
+}
+/* 书脊底部出版社（真实书脊在下方标注出版社） */
+.lib-spine-pub {
+  writing-mode: vertical-rl;
+  margin-top: 6px;
+  font-size: 8px;
+  color: rgba(255, 255, 255, .9);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, .7);
+  max-height: 28px;
   overflow: hidden;
 }
 
@@ -884,6 +907,7 @@ body.is-library .main { max-width: none; padding: 14px 24px 40px; }
 }
 /* 弹窗跳转链接区（豆瓣 / 微信读书） */
 .book-links { display: flex; gap: 10px; flex-wrap: wrap; }
+.book-links a { gap: 6px; }
 .btn-primary, .btn-ghost {
   display: inline-flex;
   align-items: center;
@@ -899,6 +923,6 @@ body.is-library .main { max-width: none; padding: 14px 24px 40px; }
   .book-detail { flex-direction: column; }
   .book-detail-cover img { width: 110px; }
   .lib-shelf.lib-cover-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; }
-  .lib-spine { height: 180px; }
-  .lib-spine-row { min-height: 222px; }
+  .lib-spine { height: 200px; }
+  .lib-spine-row { min-height: 230px; }
 }

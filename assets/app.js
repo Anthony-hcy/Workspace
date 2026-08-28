@@ -47,10 +47,9 @@ const state = {
   syncing: false,     // 是否正在云端同步
   library: [],        // Library 书架书籍（独立于收藏）
   libMode: 'cover',   // 书架模式：cover（封面）| spine（书脊）
-  libSort: 'asc',     // 书名排序：asc（A-Z）| desc（Z-A）
+  libSort: 'title-asc', // 排序：title-asc | title-desc | rating-desc
   libKw: '',          // 书架搜索关键词
-  libBig: 'all',      // 大分类筛选
-  libSub: 'all',      // 小分类筛选
+  libSub: 'all',      // 分类（小分类 tags）筛选
 };
 
 /* 封面占位渐变色板（仿 Collecta 的多彩柔和风） */
@@ -731,39 +730,33 @@ const LIB_BIG_COLORS = {
 };
 const libBigColor = (tag) => LIB_BIG_COLORS[tag] || '#6b7280';
 
-/** 当前筛选下的书（大/小分类 + 关键词；按书名 A-Z/Z-A 排序，中文按拼音） */
+/** 当前筛选下的书（分类 tags + 关键词；按名称或评分排序） */
 const libTitleCollator = new Intl.Collator('zh-CN');
 function libFiltered() {
   const kw = state.libKw.trim().toLowerCase();
   const list = state.library.filter((b) => {
-    if (state.libBig !== 'all' && b.bigTag !== state.libBig) return false;
     if (state.libSub !== 'all' && !(b.tags || []).includes(state.libSub)) return false;
     if (kw && !(b.title || '').toLowerCase().includes(kw) && !(b.author || '').toLowerCase().includes(kw)) return false;
     return true;
   });
-  list.sort((a, b) => state.libSort === 'asc'
-    ? libTitleCollator.compare(a.title || '', b.title || '')
-    : libTitleCollator.compare(b.title || '', a.title || ''));
+  if (state.libSort === 'rating-desc') {
+    list.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+  } else {
+    const dir = state.libSort === 'title-desc' ? -1 : 1;
+    list.sort((a, b) => dir * libTitleCollator.compare(a.title || '', b.title || ''));
+  }
   return list;
 }
 
 function renderLibrary() {
   const filtered = libFiltered();
 
-  // 大分类 chips
-  const bigs = ['all', ...new Set(state.library.map((b) => b.bigTag).filter(Boolean))];
-  $('#libBigTags').innerHTML = bigs.map((t) =>
-    `<button class="chip ${state.libBig === t ? 'is-active' : ''}" data-lib-big="${t}">${t === 'all' ? '全部' : t}</button>`,
-  ).join('');
-
-  // 小分类 chips（当前大分类下的标签）
-  const pool = state.libBig === 'all'
-    ? [...new Set(state.library.flatMap((b) => b.tags || []))]
-    : [...new Set(state.library.filter((b) => b.bigTag === state.libBig).flatMap((b) => b.tags || []))];
+  // 分类 chips = 所有书的 tags 并集（一本书可有多个分类）
+  const pool = [...new Set(state.library.flatMap((b) => b.tags || []))];
   if (pool.length) {
     $('#libSubTags').hidden = false;
-    $('#libSubTags').innerHTML = pool.map((t) =>
-      `<button class="chip ${state.libSub === t ? 'is-active' : ''}" data-lib-sub="${t}">${t}</button>`,
+    $('#libSubTags').innerHTML = ['all', ...pool].map((t) =>
+      `<button class="chip ${state.libSub === t ? 'is-active' : ''}" data-lib-sub="${t}">${t === 'all' ? '全部' : t}</button>`,
     ).join('');
   } else {
     $('#libSubTags').hidden = true;
@@ -774,7 +767,7 @@ function renderLibrary() {
   else renderCoverGrid(filtered);
 }
 
-/** 封面模式：网格排列，本地封面 + 书名 */
+/** 封面模式：网格排列，本地封面 + 书名 + 评分角标 */
 function renderCoverGrid(books) {
   const shelf = $('#libShelf');
   shelf.className = 'lib-shelf lib-cover-grid';
@@ -782,41 +775,29 @@ function renderCoverGrid(books) {
     <a class="lib-book" data-book="${b.id}" title="${escapeHtml(b.title)}">
       <div class="lib-cover">
         <img src="${b.cover || ''}" alt="${escapeHtml(b.title)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none'">
-        <span class="lib-big">${escapeHtml(b.bigTag || '')}</span>
+        ${b.rating ? `<span class="lib-rating">${b.rating}</span>` : ''}
       </div>
       <p class="lib-title">${escapeHtml(b.title)}</p>
       <p class="lib-author">${escapeHtml(b.author || '')}</p>
     </a>`).join('');
 }
 
-/** 书脊模式：仿真书脊（封面图背景 + 竖排书名）。默认全部一排，选中分类后才按大分类分组 */
+/** 书脊模式：仿真书脊（封面图背景 + 竖排书名/作者/出版社），全部一排 */
 function renderSpine(books) {
   const shelf = $('#libShelf');
   shelf.className = 'lib-shelf lib-spine-shelf';
-  const groups = [];
-  if (state.libBig === 'all' && state.libSub === 'all') {
-    groups.push(['全部', books]);
-  } else {
-    const m = new Map();
-    for (const b of books) {
-      const g = b.bigTag || '其他';
-      if (!m.has(g)) m.set(g, []);
-      m.get(g).push(b);
-    }
-    m.forEach((v, k) => groups.push([k, v]));
-  }
-  shelf.innerHTML = groups.map(([g, list]) => `
+  shelf.innerHTML = `
     <section class="lib-spine-section">
-      <h3 class="lib-spine-head">${escapeHtml(g)}</h3>
       <div class="lib-spine-row">
-        ${list.map((b) => `
-          <div class="lib-spine" data-book="${b.id}" style="--spine-c:${libBigColor(b.bigTag)};width:${Math.round(36 + Math.random() * 10)}px" title="${escapeHtml(b.title)}">
+        ${books.map((b) => `
+          <div class="lib-spine" data-book="${b.id}" style="width:${Math.round(28 + Math.random() * 8)}px" title="${escapeHtml(b.title)}">
             ${b.cover ? `<img class="lib-spine-cover" src="${b.cover}" alt="" loading="lazy" onerror="this.remove()">` : ''}
             <span class="lib-spine-title">${escapeHtml(b.title)}</span>
             <span class="lib-spine-author">${escapeHtml(b.author || '')}</span>
+            ${b.publisher ? `<span class="lib-spine-pub">${escapeHtml(b.publisher)}</span>` : ''}
           </div>`).join('')}
       </div>
-    </section>`).join('');
+    </section>`;
 }
 
 /** 从封面图提取主色（缩小采样平均色） */
@@ -856,8 +837,12 @@ function openBook(id) {
         <p class="book-tags">${tagHtml}</p>
         <p class="book-intro">${escapeHtml(b.intro || '暂无简介')}</p>
         <div class="book-links">
-          ${b.doubanUrl ? `<a class="btn-primary btn-douban" href="${b.doubanUrl}" target="_blank" rel="noopener noreferrer">豆瓣读书</a>` : ''}
-          <a class="btn-primary btn-weread" href="https://weread.qq.com/web/search/books?keyword=${encodeURIComponent(b.title)}" target="_blank" rel="noopener noreferrer">微信读书</a>
+          ${b.doubanUrl ? `<a class="btn-primary btn-douban" href="${b.doubanUrl}" target="_blank" rel="noopener noreferrer">
+            <svg viewBox="0 0 16 16" width="14" height="14"><rect width="16" height="16" rx="3.5" fill="#fff"/><text x="8" y="11.6" text-anchor="middle" font-size="10" font-weight="700" fill="#2e963d">豆</text></svg>
+            豆瓣读书</a>` : ''}
+          <a class="btn-primary btn-weread" href="https://weread.qq.com/web/search/books?keyword=${encodeURIComponent(b.title)}" target="_blank" rel="noopener noreferrer">
+            <svg viewBox="0 0 16 16" width="14" height="14"><rect width="16" height="16" rx="3.5" fill="#fff"/><path d="M4.5 3.5h5.5a1.8 1.8 0 0 1 1.8 1.8v7.2" fill="none" stroke="#4b8bff" stroke-width="1.4" stroke-linecap="round"/><path d="M4.5 3.5v8a1.8 1.8 0 0 0 1.8 1.8h5.2" fill="none" stroke="#4b8bff" stroke-width="1.4" stroke-linecap="round"/><path d="M7 7h3.5" stroke="#4b8bff" stroke-width="1.2" stroke-linecap="round"/></svg>
+            微信读书</a>
         </div>
       </div>
     </div>`;
@@ -872,24 +857,14 @@ $('#libMode').addEventListener('click', (e) => {
   state.libMode = btn.dataset.libMode;
   renderLibrary();
 });
-$('#libBigTags').addEventListener('click', (e) => {
-  const btn = e.target.closest('[data-lib-big]');
-  if (!btn) return;
-  state.libBig = btn.dataset.libBig;
-  state.libSub = 'all';
-  renderLibrary();
-});
 $('#libSubTags').addEventListener('click', (e) => {
   const btn = e.target.closest('[data-lib-sub]');
   if (!btn) return;
   state.libSub = btn.dataset.libSub;
   renderLibrary();
 });
-$('#libSort').addEventListener('click', (e) => {
-  const btn = e.target.closest('[data-lib-sort]');
-  if (!btn) return;
-  document.querySelectorAll('#libSort .chip').forEach((c) => c.classList.toggle('is-active', c === btn));
-  state.libSort = btn.dataset.libSort;
+$('#libSortSelect').addEventListener('change', (e) => {
+  state.libSort = e.target.value;
   renderLibrary();
 });
 // 书架搜索（防抖）
