@@ -816,36 +816,21 @@ body.is-library .main { max-width: none; padding: 14px 24px 40px; }
   align-items: center;
   justify-content: flex-start;
 }
-/* 书脊悬停：横向展开成封面（宽封面为书脊的兄弟元素，从书脊位置向右 scaleX 展开，
-   不受书脊自身变换影响，正常比例显示；仅 transform/opacity，GPU 平滑） */
-.lib-spine { transition: transform .18s ease; }
-.lib-spine:hover { z-index: 2; }
-.lib-spine-wide {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 150px;
-  z-index: 6;
-  border-radius: 5px;
-  overflow: hidden;
-  background: #fff;
-  box-shadow: 0 14px 32px rgba(0, 0, 0, .3);
-  opacity: 0;
-  transform: scaleX(.16);
-  transform-origin: left center;
-  transition: transform .26s cubic-bezier(.25, .8, .3, 1), opacity .18s ease;
-  cursor: pointer;
-  pointer-events: auto;
+/* 书脊悬停：自身横向展开成封面（宽度动画，右侧的书被 flex 自动挤开；收回自动归位） */
+.lib-spine {
+  width: var(--w, 32px);
+  transition: width .28s cubic-bezier(.25, .8, .3, 1), transform .18s ease;
 }
-.lib-spine:hover + .lib-spine-wide,
-.lib-spine-wide:hover { opacity: 1; transform: scaleX(1); }
-.lib-spine-cover-wide-img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 5px;
+.lib-spine:hover {
+  width: 150px;
+  transform: translateY(-6px);
+  z-index: 5;
+}
+/* 展开后以封面为主，隐藏竖排文字 */
+.lib-spine:hover .lib-spine-title,
+.lib-spine:hover .lib-spine-author,
+.lib-spine:hover .lib-spine-pub {
+  opacity: 0;
 }
 /* 封面图铺满书脊（竖条裁切封面中部，即真实书脊的封面延续） */
 .lib-spine-cover {

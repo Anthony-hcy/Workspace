@@ -790,32 +790,18 @@ function renderSpine(books) {
     <section class="lib-spine-section">
       <div class="lib-spine-row">
         ${books.map((b) => {
-          // 宽度按书名哈希确定性生成：同一本书永远同宽，重渲染不抖动
+          // 宽度按书名哈希确定性生成（存 CSS 变量，便于 hover 时展开覆盖）
           const w = 28 + (hashId(b.id + b.title) % 8);
           return `
-          <div class="lib-spine" data-book="${b.id}" style="width:${w}px" title="${escapeHtml(b.title)}">
+          <div class="lib-spine" data-book="${b.id}" style="--w:${w}px" title="${escapeHtml(b.title)}">
             ${b.cover ? `<img class="lib-spine-cover" src="${b.cover}" alt="" loading="lazy" onerror="this.remove()">` : ''}
             <span class="lib-spine-title">${escapeHtml(b.title)}</span>
             <span class="lib-spine-author">${escapeHtml(b.author || '')}</span>
             ${b.publisher ? `<span class="lib-spine-pub">${escapeHtml(b.publisher)}</span>` : ''}
-          </div>
-          <div class="lib-spine-wide" data-book="${b.id}">
-            ${b.cover ? `<img class="lib-spine-cover-wide-img" src="${b.cover}" alt="" draggable="false">` : ''}
           </div>`;
         }).join('')}
       </div>
     </section>`;
-  // 把展开封面定位到对应书脊的位置（相对书架行）
-  const spines = shelf.querySelectorAll('.lib-spine');
-  const wides = shelf.querySelectorAll('.lib-spine-wide');
-  spines.forEach((s, i) => {
-    const wd = wides[i];
-    if (wd) {
-      wd.style.left = `${s.offsetLeft}px`;
-      wd.style.top = `${s.offsetTop}px`;
-      wd.style.height = `${s.offsetHeight}px`;
-    }
-  });
 }
 
 /** 从封面图提取主色（缩小采样平均色） */
