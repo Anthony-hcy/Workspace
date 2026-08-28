@@ -142,7 +142,6 @@
               <option value="rating-desc">评分最高</option>
             </select>
             <input type="search" id="libSearch" class="search lib-search" placeholder="搜索书名或作者…" />
-            <button class="btn-ghost" id="libManageBtn" title="添加书 / 上传封面（需管理员 Token）">管理</button>
           </div>
           <div class="lib-toolbar-row lib-tag-row">
             <span class="lib-label">分类</span>
@@ -169,27 +168,7 @@
         </div>
       </dialog>
 
-      <!-- Library 管理弹窗（添加书 / 上传封面，需 PAT 权限） -->
-      <dialog class="modal" id="libManageModal">
-        <div class="modal-box book-modal">
-          <h3 style="margin-top:0">书架管理</h3>
-          <p class="modal-desc">需要管理员 Token 权限。添加书名后，云端会自动抓取作者/简介/评分/封面并发布，约 1~2 分钟生效。</p>
-          <div class="manage-block">
-            <label>添加书（输入书名）：</label>
-            <input type="text" id="libAddTitle" class="modal-input" placeholder="如：三体" />
-            <button class="btn-primary" id="libAddBtn">添加并重建</button>
-          </div>
-          <div class="manage-block">
-            <label>上传封面（选择书架上的书 + 本地图片）：</label>
-            <select id="libPickBook" class="modal-input"></select>
-            <input type="file" id="libPickFile" accept="image/*" />
-            <button class="btn-primary" id="libUploadBtn">上传封面</button>
-          </div>
-          <div class="modal-actions">
-            <button type="button" class="btn-ghost" id="libManageClose">关闭</button>
-          </div>
-        </div>
-      </dialog>
+
     </main>
 
     <footer class="footer">
