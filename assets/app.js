@@ -772,7 +772,7 @@ function renderCoverGrid(books) {
   const shelf = $('#libShelf');
   shelf.className = 'lib-shelf lib-cover-grid';
   shelf.innerHTML = books.map((b) => `
-    <a class="lib-book" data-book="${b.id}" title="${escapeHtml(b.title)}">
+    <a class="lib-book" data-book="${b.id}">
       <div class="lib-cover">
         <img src="${b.cover || ''}" alt="${escapeHtml(b.title)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none'">
         ${b.rating ? `<span class="lib-rating">${b.rating}</span>` : ''}
@@ -793,7 +793,7 @@ function renderSpine(books) {
           // 宽度按书名哈希确定性生成（存 CSS 变量，便于 hover 时展开覆盖）
           const w = 28 + (hashId(b.id + b.title) % 8);
           return `
-          <div class="lib-spine" data-book="${b.id}" style="--w:${w}px" title="${escapeHtml(b.title)}">
+          <div class="lib-spine" data-book="${b.id}" style="--w:${w}px">
             ${b.cover ? `<img class="lib-spine-cover" src="${b.cover}" alt="" loading="lazy" onerror="this.remove()">` : ''}
             <span class="lib-spine-title">${escapeHtml(b.title)}</span>
             <span class="lib-spine-author">${escapeHtml(b.author || '')}</span>
