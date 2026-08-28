@@ -688,14 +688,32 @@ body.is-blog .blog-frame {
 /* ============================================================================
    Library 书架（封面 / 书脊 双模式 + 标签分类 + 详情弹窗）
    ============================================================================ */
+body.is-library { background: #f6f3ee; }   /* 书架页暖米色氛围 */
 body.is-library .main { max-width: none; padding: 14px 24px 40px; }
 
 .lib-toolbar {
   display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.lib-toolbar-row {
+  display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 10px;
-  margin-bottom: 12px;
+}
+.lib-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-2);
+  margin-right: 2px;
+}
+.lib-search { width: 200px; }
+/* 分类行：与上方操作行用分隔线区分 */
+.lib-tag-row {
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
 }
 .lib-mode { background: #ecedf0; padding: 3px; border-radius: 999px; }
 .lib-count { margin: 4px 2px 14px; font-size: 12px; color: var(--ink-2); }
@@ -757,19 +775,32 @@ body.is-library .main { max-width: none; padding: 14px 24px 40px; }
   font-weight: 600;
   padding-left: 2px;
 }
-/* 书架底板：深色木纹质感 */
+/* 书架底板：精致深木 + 顶部前挡板 */
 .lib-spine-row {
+  position: relative;
   display: flex;
   align-items: flex-end;
   gap: 10px;
   flex-wrap: wrap;
-  padding: 14px 12px 8px;
+  padding: 20px 14px 10px;
   background:
-    repeating-linear-gradient(90deg, rgba(0, 0, 0, .12) 0 2px, transparent 2px 8px),
-    linear-gradient(180deg, #7a4e2b, #5d3a1e 55%, #4a2d15);
-  border-radius: 10px;
-  min-height: 252px;
-  box-shadow: inset 0 6px 18px rgba(0, 0, 0, .3);
+    linear-gradient(180deg, rgba(255, 255, 255, .07), transparent 45%),
+    linear-gradient(180deg, #6b4a2c, #4a3018 70%, #3a2512);
+  border: 1px solid rgba(0, 0, 0, .18);
+  border-radius: 12px;
+  min-height: 254px;
+  box-shadow: inset 0 10px 24px rgba(0, 0, 0, .35), 0 2px 8px rgba(0, 0, 0, .08);
+}
+/* 书架前挡板横条 */
+.lib-spine-row::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 10px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .22), rgba(255, 255, 255, .04));
+  border-radius: 12px 12px 0 0;
 }
 .lib-spine {
   position: relative;
@@ -859,6 +890,9 @@ body.is-library .main { max-width: none; padding: 14px 24px 40px; }
   justify-content: center;
   text-decoration: none;
 }
+.btn-douban { background: #2e963d; }   /* 豆瓣读书 官方绿 */
+.btn-weread { background: #4b8bff; }   /* 微信读书 官方蓝 */
+.btn-douban:hover, .btn-weread:hover { opacity: .9; transform: translateY(-1px); }
 
 /* 移动端 */
 @media (max-width: 640px) {

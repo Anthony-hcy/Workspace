@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Workspace · 我的收藏夹</title>
   <meta name="description" content="跨平台收藏夹工作台：自动同步抖音、B站与小 红书的收藏内容" />
-  <link rel="stylesheet" href="assets/style.css?v=20260828b" />
+  <link rel="stylesheet" href="assets/style.css?v=20260828c" />
   <!-- 内联 favicon：一个渐变书签图标，免额外请求 -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%237c5cff'/><stop offset='1' stop-color='%2300c2ff'/></linearGradient></defs><path fill='url(%23g)' d='M6 2h12a2 2 0 0 1 2 2v18l-8-4.8L4 22V4a2 2 0 0 1 2-2z'/></svg>" />
 </head>
@@ -128,19 +128,25 @@
         <button class="page-btn" id="nextPage">下一页 ›</button>
       </div>
 
-      <!-- Library 视图：书架（封面/书脊双模式 + 标签分类） -->
+      <!-- Library 视图：书架（封面/书脊双模式 + 标签分类 + 搜索） -->
       <div class="library" id="libraryView" hidden>
         <div class="lib-toolbar">
-          <div class="chips lib-mode" id="libMode">
-            <button class="chip is-active" data-lib-mode="cover">封面</button>
-            <button class="chip" data-lib-mode="spine">书脊</button>
+          <div class="lib-toolbar-row">
+            <div class="chips lib-mode" id="libMode">
+              <button class="chip is-active" data-lib-mode="cover">封面</button>
+              <button class="chip" data-lib-mode="spine">书脊</button>
+            </div>
+            <div class="chips" id="libSort">
+              <button class="chip is-active" data-lib-sort="asc">A-Z</button>
+              <button class="chip" data-lib-sort="desc">Z-A</button>
+            </div>
+            <input type="search" id="libSearch" class="search lib-search" placeholder="搜索书名或作者…" />
           </div>
-          <div class="chips" id="libSort">
-            <button class="chip is-active" data-lib-sort="asc">A-Z</button>
-            <button class="chip" data-lib-sort="desc">Z-A</button>
+          <div class="lib-toolbar-row lib-tag-row">
+            <span class="lib-label">分类</span>
+            <div class="chips" id="libBigTags"></div>
+            <div class="chips" id="libSubTags" hidden></div>
           </div>
-          <div class="chips" id="libBigTags"></div>
-          <div class="chips" id="libSubTags" hidden></div>
         </div>
         <p class="lib-count" id="libCount"></p>
         <div class="lib-shelf" id="libShelf"></div>

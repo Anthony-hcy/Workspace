@@ -48,6 +48,7 @@ const state = {
   library: [],        // Library 书架书籍（独立于收藏）
   libMode: 'cover',   // 书架模式：cover（封面）| spine（书脊）
   libSort: 'asc',     // 书名排序：asc（A-Z）| desc（Z-A）
+  libKw: '',          // 书架搜索关键词
   libBig: 'all',      // 大分类筛选
   libSub: 'all',      // 小分类筛选
 };
@@ -730,12 +731,14 @@ const LIB_BIG_COLORS = {
 };
 const libBigColor = (tag) => LIB_BIG_COLORS[tag] || '#6b7280';
 
-/** 当前筛选下的书（按书名 A-Z/Z-A 排序，中文按拼音） */
+/** 当前筛选下的书（大/小分类 + 关键词；按书名 A-Z/Z-A 排序，中文按拼音） */
 const libTitleCollator = new Intl.Collator('zh-CN');
 function libFiltered() {
+  const kw = state.libKw.trim().toLowerCase();
   const list = state.library.filter((b) => {
     if (state.libBig !== 'all' && b.bigTag !== state.libBig) return false;
     if (state.libSub !== 'all' && !(b.tags || []).includes(state.libSub)) return false;
+    if (kw && !(b.title || '').toLowerCase().includes(kw) && !(b.author || '').toLowerCase().includes(kw)) return false;
     return true;
   });
   list.sort((a, b) => state.libSort === 'asc'
@@ -786,22 +789,28 @@ function renderCoverGrid(books) {
     </a>`).join('');
 }
 
-/** 书脊模式：仿真书脊（竖条 + 竖排书名），按大分类分组，底色优先取封面主色 */
+/** 书脊模式：仿真书脊（封面图背景 + 竖排书名）。默认全部一排，选中分类后才按大分类分组 */
 function renderSpine(books) {
   const shelf = $('#libShelf');
   shelf.className = 'lib-shelf lib-spine-shelf';
-  const groups = new Map();
-  for (const b of books) {
-    const g = b.bigTag || '其他';
-    if (!groups.has(g)) groups.set(g, []);
-    groups.get(g).push(b);
+  const groups = [];
+  if (state.libBig === 'all' && state.libSub === 'all') {
+    groups.push(['全部', books]);
+  } else {
+    const m = new Map();
+    for (const b of books) {
+      const g = b.bigTag || '其他';
+      if (!m.has(g)) m.set(g, []);
+      m.get(g).push(b);
+    }
+    m.forEach((v, k) => groups.push([k, v]));
   }
-  shelf.innerHTML = [...groups].map(([g, list]) => `
+  shelf.innerHTML = groups.map(([g, list]) => `
     <section class="lib-spine-section">
       <h3 class="lib-spine-head">${escapeHtml(g)}</h3>
       <div class="lib-spine-row">
         ${list.map((b) => `
-          <div class="lib-spine" data-book="${b.id}" style="--spine-c:${libBigColor(b.bigTag)};width:${Math.round(44 + Math.random() * 14)}px" title="${escapeHtml(b.title)}">
+          <div class="lib-spine" data-book="${b.id}" style="--spine-c:${libBigColor(b.bigTag)};width:${Math.round(36 + Math.random() * 10)}px" title="${escapeHtml(b.title)}">
             ${b.cover ? `<img class="lib-spine-cover" src="${b.cover}" alt="" loading="lazy" onerror="this.remove()">` : ''}
             <span class="lib-spine-title">${escapeHtml(b.title)}</span>
             <span class="lib-spine-author">${escapeHtml(b.author || '')}</span>
@@ -847,8 +856,8 @@ function openBook(id) {
         <p class="book-tags">${tagHtml}</p>
         <p class="book-intro">${escapeHtml(b.intro || '暂无简介')}</p>
         <div class="book-links">
-          ${b.doubanUrl ? `<a class="btn-primary" href="${b.doubanUrl}" target="_blank" rel="noopener noreferrer">去豆瓣查看</a>` : ''}
-          <a class="btn-ghost" href="https://weread.qq.com/web/search/books?keyword=${encodeURIComponent(b.title)}" target="_blank" rel="noopener noreferrer">微信读书</a>
+          ${b.doubanUrl ? `<a class="btn-primary btn-douban" href="${b.doubanUrl}" target="_blank" rel="noopener noreferrer">豆瓣读书</a>` : ''}
+          <a class="btn-primary btn-weread" href="https://weread.qq.com/web/search/books?keyword=${encodeURIComponent(b.title)}" target="_blank" rel="noopener noreferrer">微信读书</a>
         </div>
       </div>
     </div>`;
@@ -882,6 +891,15 @@ $('#libSort').addEventListener('click', (e) => {
   document.querySelectorAll('#libSort .chip').forEach((c) => c.classList.toggle('is-active', c === btn));
   state.libSort = btn.dataset.libSort;
   renderLibrary();
+});
+// 书架搜索（防抖）
+let libSearchTimer;
+$('#libSearch').addEventListener('input', (e) => {
+  clearTimeout(libSearchTimer);
+  libSearchTimer = setTimeout(() => {
+    state.libKw = e.target.value;
+    renderLibrary();
+  }, 250);
 });
 // 书架点击（封面或书脊）→ 详情弹窗
 $('#libShelf').addEventListener('click', (e) => {
