@@ -798,6 +798,11 @@ function renderSpine(books) {
             <span class="lib-spine-title">${escapeHtml(b.title)}</span>
             <span class="lib-spine-author">${escapeHtml(b.author || '')}</span>
             ${b.publisher ? `<span class="lib-spine-pub">${escapeHtml(b.publisher)}</span>` : ''}
+            <div class="lib-spine-pop">
+              ${b.cover ? `<img class="lib-spine-pop-cover" src="${b.cover}" alt="" draggable="false">` : ''}
+              <p class="lib-spine-pop-title">${escapeHtml(b.title)}</p>
+              <p class="lib-spine-pop-author">${escapeHtml(b.author || '')}</p>
+            </div>
           </div>`;
         }).join('')}
       </div>

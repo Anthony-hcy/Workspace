@@ -816,7 +816,53 @@ body.is-library .main { max-width: none; padding: 14px 24px 40px; }
   align-items: center;
   justify-content: flex-start;
 }
-.lib-spine:hover { transform: translateY(-6px); }
+.lib-spine:hover { transform: translateY(-6px); z-index: 4; }
+/* 悬停展开封面：从书脊抽出浮现（仅 transform/opacity 过渡，GPU 合成，鼠标横扫不卡顿） */
+.lib-spine-pop {
+  position: absolute;
+  left: 50%;
+  bottom: 24px;
+  width: 132px;
+  padding: 7px 7px 9px;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, .32);
+  pointer-events: none;
+  z-index: 6;
+  transform: translateX(-50%) scale(.35);
+  transform-origin: 50% 100%;
+  opacity: 0;
+  transition: transform .22s cubic-bezier(.2, .7, .3, 1.1), opacity .16s ease;
+}
+.lib-spine:hover .lib-spine-pop {
+  transform: translateX(-50%) translateY(-52%) scale(1);
+  opacity: 1;
+}
+.lib-spine-pop-cover {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border-radius: 6px;
+  background: #eee;
+}
+.lib-spine-pop-title {
+  margin: 7px 2px 1px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.lib-spine-pop-author {
+  margin: 1px 2px 0;
+  font-size: 11px;
+  color: var(--ink-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 /* 封面图铺满书脊（竖条裁切封面中部，即真实书脊的封面延续） */
 .lib-spine-cover {
   position: absolute;
