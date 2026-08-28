@@ -919,13 +919,19 @@ $('#libShelf').addEventListener('click', (e) => {
   if (el) openBook(el.dataset.book);
 });
 // 封面分页
-$('#libPrev').addEventListener('click', () => { state.libPage = Math.max(1, state.libPage - 1); renderLibrary(); });
-$('#libNext').addEventListener('click', () => { state.libPage += 1; renderLibrary(); });
+// 封面分页（翻页后滚回书架工具栏顶部，与抖音/B站一致）
+const scrollLibTop = () => {
+  const t = document.querySelector('.lib-toolbar');
+  if (t) t.scrollIntoView({ behavior: 'auto', block: 'start' });
+};
+$('#libPrev').addEventListener('click', () => { state.libPage = Math.max(1, state.libPage - 1); renderLibrary(); scrollLibTop(); });
+$('#libNext').addEventListener('click', () => { state.libPage += 1; renderLibrary(); scrollLibTop(); });
 // 封面分页跳转（页码输入 + 跳转按钮 + 回车）
 function libGoPage(p) {
   const total = Number($('#libPageTotal').textContent) || 1;
   state.libPage = Math.min(Math.max(1, Math.round(p) || 1), total);
   renderLibrary();
+  scrollLibTop();
 }
 $('#libJump').addEventListener('click', () => libGoPage(Number($('#libPageInput').value)));
 $('#libPageInput').addEventListener('keydown', (e) => {
