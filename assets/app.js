@@ -45,6 +45,10 @@ const state = {
   keyword: '',        // 搜索关键词
   sort: 'default',    // 排序：default(最近更新) | oldest(最早更新) | likes(点赞最多)
   syncing: false,     // 是否正在云端同步
+  library: [],        // Library 书架书籍（独立于收藏）
+  libMode: 'cover',   // 书架模式：cover（封面）| spine（书脊）
+  libBig: 'all',      // 大分类筛选
+  libSub: 'all',      // 小分类筛选
 };
 
 /* 封面占位渐变色板（仿 Collecta 的多彩柔和风） */
@@ -71,13 +75,14 @@ async function loadData() {
   // ⚠️ 加时间戳参数绕过浏览器/CDN 缓存（Pages 对静态资源缓存 10 分钟，
   //    否则同步完成后打开页面可能仍看到旧数据）
   const bust = `t=${Date.now()}`;
-  const [metaRes, likeRes, collectRes, biliRes, foldersRes, xhhRes] = await Promise.allSettled([
+  const [metaRes, likeRes, collectRes, biliRes, foldersRes, xhhRes, libRes] = await Promise.allSettled([
     fetch(`data/meta.json?${bust}`, { cache: 'no-store' }).then((r) => r.json()),
     fetch(`data/douyin-like.json?${bust}`, { cache: 'no-store' }).then((r) => r.json()),
     fetch(`data/douyin-collect.json?${bust}`, { cache: 'no-store' }).then((r) => r.json()),
     fetch(`data/bilibili-collect.json?${bust}`, { cache: 'no-store' }).then((r) => r.json()),
     fetch(`data/bilibili-folders.json?${bust}`, { cache: 'no-store' }).then((r) => r.json()),
     fetch(`data/xiaoheihe-collect.json?${bust}`, { cache: 'no-store' }).then((r) => r.json()),
+    fetch(`data/library-books.json?${bust}`, { cache: 'no-store' }).then((r) => r.json()),
   ]);
 
   // meta：顶栏显示"最近同步时间 + 本次模式"
@@ -95,6 +100,7 @@ async function loadData() {
   const xhsCollect = [];   // 侧边栏入口保留，但不再加载小红书数据
   const xhh = xhhRes.status === 'fulfilled' && Array.isArray(xhhRes.value) ? xhhRes.value : [];
   state.folders = foldersRes.status === 'fulfilled' && Array.isArray(foldersRes.value) ? foldersRes.value : [];
+  state.library = libRes.status === 'fulfilled' && Array.isArray(libRes.value) ? libRes.value : [];
 
   /** 按 id 合并：同一条作品既点赞又收藏时，合并来源而不是重复展示 */
   const map = new Map();
@@ -654,6 +660,7 @@ const VIEW_TITLES = {
   douyin: '抖音 · 点赞与收藏',
   xhs: '小红书 · 点赞与收藏',
   xiaoheihe: '黑盒 · 我的收藏',
+  library: 'Library · 我的书架',
 };
 
 /** 根据当前视图动态生成二级筛选 chips（抖音/小红书：点赞、收藏；B站：各收藏夹） */
@@ -690,8 +697,190 @@ function enterBlog() {
   $('#emptyBox').hidden = true;
   $('#countLine').textContent = '';
   $('#blogFrame').hidden = false;
-  document.body.classList.add('is-blog');   // 隐藏顶栏/页脚、放大框架，Blog 视图无外层滚动条
+  $('#libraryView').hidden = true;
+  document.body.classList.add('is-blog');
+  document.body.classList.remove('is-library');
 }
+
+/** 进入 Library 视图：仿真书架（封面/书脊双模式 + 标签分类） */
+function enterLibrary() {
+  document.querySelectorAll('#sideNav .side-item[data-view]').forEach((b) =>
+    b.classList.toggle('is-active', b.dataset.view === 'library'));
+  state.view = 'library';
+  $('#viewTitle').textContent = 'Library · 我的书架';
+  $('#toolbar').hidden = true;
+  $('#grid').hidden = true;
+  $('#pagination').hidden = true;
+  $('#emptyBox').hidden = true;
+  $('#countLine').textContent = '';
+  $('#blogFrame').hidden = true;
+  $('#libraryView').hidden = false;
+  document.body.classList.add('is-library');
+  document.body.classList.remove('is-blog');
+  renderLibrary();
+}
+
+/* ---------------------------------------------------------------------------
+ * Library 书架渲染（封面 / 书脊 双模式 + 大/小分类标签 + 详情弹窗）
+ * ------------------------------------------------------------------------- */
+const LIB_BIG_COLORS = {
+  小说: '#3b6ea5', 文学: '#7a5c8f', 漫画: '#c2473f', 人文社科: '#2f7d63',
+  科技: '#3a5f8f', 艺术: '#b5651d', 实用: '#8f7a2f', 其他: '#6b7280',
+};
+const libBigColor = (tag) => LIB_BIG_COLORS[tag] || '#6b7280';
+
+/** 当前筛选下的书 */
+function libFiltered() {
+  return state.library.filter((b) => {
+    if (state.libBig !== 'all' && b.bigTag !== state.libBig) return false;
+    if (state.libSub !== 'all' && !(b.tags || []).includes(state.libSub)) return false;
+    return true;
+  });
+}
+
+function renderLibrary() {
+  const filtered = libFiltered();
+
+  // 大分类 chips
+  const bigs = ['all', ...new Set(state.library.map((b) => b.bigTag).filter(Boolean))];
+  $('#libBigTags').innerHTML = bigs.map((t) =>
+    `<button class="chip ${state.libBig === t ? 'is-active' : ''}" data-lib-big="${t}">${t === 'all' ? '全部' : t}</button>`,
+  ).join('');
+
+  // 小分类 chips（当前大分类下的标签）
+  const pool = state.libBig === 'all'
+    ? [...new Set(state.library.flatMap((b) => b.tags || []))]
+    : [...new Set(state.library.filter((b) => b.bigTag === state.libBig).flatMap((b) => b.tags || []))];
+  if (pool.length) {
+    $('#libSubTags').hidden = false;
+    $('#libSubTags').innerHTML = pool.map((t) =>
+      `<button class="chip ${state.libSub === t ? 'is-active' : ''}" data-lib-sub="${t}">${t}</button>`,
+    ).join('');
+  } else {
+    $('#libSubTags').hidden = true;
+  }
+
+  $('#libCount').textContent = state.library.length ? `共 ${filtered.length} 本` : '';
+  if (state.libMode === 'spine') renderSpine(filtered);
+  else renderCoverGrid(filtered);
+}
+
+/** 封面模式：网格排列，本地封面 + 书名 */
+function renderCoverGrid(books) {
+  const shelf = $('#libShelf');
+  shelf.className = 'lib-shelf lib-cover-grid';
+  shelf.innerHTML = books.map((b) => `
+    <a class="lib-book" data-book="${b.id}" title="${escapeHtml(b.title)}">
+      <div class="lib-cover">
+        <img src="${b.cover || ''}" alt="${escapeHtml(b.title)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none'">
+        <span class="lib-big">${escapeHtml(b.bigTag || '')}</span>
+      </div>
+      <p class="lib-title">${escapeHtml(b.title)}</p>
+      <p class="lib-author">${escapeHtml(b.author || '')}</p>
+    </a>`).join('');
+}
+
+/** 书脊模式：仿真书脊（竖条 + 竖排书名），按大分类分组，底色优先取封面主色 */
+function renderSpine(books) {
+  const shelf = $('#libShelf');
+  shelf.className = 'lib-shelf lib-spine-shelf';
+  const groups = new Map();
+  for (const b of books) {
+    const g = b.bigTag || '其他';
+    if (!groups.has(g)) groups.set(g, []);
+    groups.get(g).push(b);
+  }
+  shelf.innerHTML = [...groups].map(([g, list]) => `
+    <section class="lib-spine-section">
+      <h3 class="lib-spine-head">${escapeHtml(g)}</h3>
+      <div class="lib-spine-row">
+        ${list.map((b) => `
+          <div class="lib-spine" data-book="${b.id}" style="--spine-c:${libBigColor(b.bigTag)};width:${Math.round(44 + Math.random() * 14)}px" title="${escapeHtml(b.title)}">
+            <span class="lib-spine-title">${escapeHtml(b.title)}</span>
+            <span class="lib-spine-author">${escapeHtml(b.author || '')}</span>
+          </div>`).join('')}
+      </div>
+    </section>`).join('');
+  // 异步用封面主色刷新书脊底色（本地图片无跨域问题；失败保留分类配色）
+  for (const b of books) {
+    if (!b.cover) continue;
+    extractCoverColor(b.cover).then((c) => {
+      if (!c) return;
+      const el = shelf.querySelector(`[data-book="${b.id}"]`);
+      if (el) el.style.setProperty('--spine-c', c);
+    });
+  }
+}
+
+/** 从封面图提取主色（缩小采样平均色） */
+function extractCoverColor(src) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      try {
+        const cv = document.createElement('canvas');
+        cv.width = 40; cv.height = 60;
+        const ctx = cv.getContext('2d');
+        ctx.drawImage(img, 0, 0, 40, 60);
+        const d = ctx.getImageData(0, 0, 40, 60).data;
+        let r = 0, g = 0, b = 0, n = 0;
+        for (let i = 0; i < d.length; i += 4) { r += d[i]; g += d[i + 1]; b += d[i + 2]; n++; }
+        resolve(`rgb(${Math.round(r / n)},${Math.round(g / n)},${Math.round(b / n)})`);
+      } catch { resolve(null); }
+    };
+    img.onerror = () => resolve(null);
+    img.src = src;
+  });
+}
+
+/** 打开书籍详情弹窗 */
+function openBook(id) {
+  const b = state.library.find((x) => x.id === id);
+  if (!b) return;
+  const tagHtml = (b.tags || []).map((t) =>
+    `<span class="tag tag-platform">${escapeHtml(t)}</span>`).join(' ');
+  $('#bookDetail').innerHTML = `
+    <div class="book-detail">
+      <div class="book-detail-cover"><img src="${b.cover || ''}" alt="${escapeHtml(b.title)}" onerror="this.style.display='none'"></div>
+      <div class="book-detail-info">
+        <h3>${escapeHtml(b.title)}</h3>
+        <p class="book-meta">${escapeHtml(b.author || '')}${b.publisher ? ' · ' + escapeHtml(b.publisher) : ''}</p>
+        ${b.rating ? `<p class="book-rating">豆瓣评分 <b>${b.rating}</b></p>` : ''}
+        <p class="book-tags">${tagHtml}</p>
+        <p class="book-intro">${escapeHtml(b.intro || '暂无简介')}</p>
+        ${b.doubanUrl ? `<a class="btn-primary" href="${b.doubanUrl}" target="_blank" rel="noopener noreferrer">去豆瓣查看</a>` : ''}
+      </div>
+    </div>`;
+  $('#bookModal').showModal();
+}
+
+/* Library 事件绑定 */
+$('#libMode').addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-lib-mode]');
+  if (!btn) return;
+  document.querySelectorAll('#libMode .chip').forEach((c) => c.classList.toggle('is-active', c === btn));
+  state.libMode = btn.dataset.libMode;
+  renderLibrary();
+});
+$('#libBigTags').addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-lib-big]');
+  if (!btn) return;
+  state.libBig = btn.dataset.libBig;
+  state.libSub = 'all';
+  renderLibrary();
+});
+$('#libSubTags').addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-lib-sub]');
+  if (!btn) return;
+  state.libSub = btn.dataset.libSub;
+  renderLibrary();
+});
+// 书架点击（封面或书脊）→ 详情弹窗
+$('#libShelf').addEventListener('click', (e) => {
+  const el = e.target.closest('[data-book]');
+  if (el) openBook(el.dataset.book);
+});
+$('#bookClose').addEventListener('click', () => $('#bookModal').close());
 
 // 侧边栏切换（事件委托）：箭头展开/收起 Favorites 二级平台；Blog 为站内视图
 $('#sideNav').addEventListener('click', (e) => {
@@ -710,11 +899,19 @@ $('#sideNav').addEventListener('click', (e) => {
     return;
   }
 
-  // 收藏视图：显示内容区（隐藏 Blog 框架）
+  // Library 视图
+  if (btn.dataset.view === 'library') {
+    enterLibrary();
+    return;
+  }
+
+  // 收藏视图：显示内容区（隐藏 Blog/Library 视图）
   $('#toolbar').hidden = false;
   $('#grid').hidden = false;
   $('#blogFrame').hidden = true;
+  $('#libraryView').hidden = true;
   document.body.classList.remove('is-blog');
+  document.body.classList.remove('is-library');
 
   if (btn.classList.contains('is-disabled')) {
     return showToast('暂未开放');

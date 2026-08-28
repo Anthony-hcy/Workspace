@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Workspace · 我的收藏夹</title>
   <meta name="description" content="跨平台收藏夹工作台：自动同步抖音、B站与小 红书的收藏内容" />
-  <link rel="stylesheet" href="assets/style.css?v=20260827q" />
+  <link rel="stylesheet" href="assets/style.css?v=20260828a" />
   <!-- 内联 favicon：一个渐变书签图标，免额外请求 -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%237c5cff'/><stop offset='1' stop-color='%2300c2ff'/></linearGradient></defs><path fill='url(%23g)' d='M6 2h12a2 2 0 0 1 2 2v18l-8-4.8L4 22V4a2 2 0 0 1 2-2z'/></svg>" />
 </head>
@@ -24,6 +24,12 @@
       <button class="side-item side-blog is-active" data-view="blog" title="博客">
         <svg viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
         <span>Blog</span>
+      </button>
+
+      <!-- Library：书架（封面/书脊双模式） -->
+      <button class="side-item" data-view="library" title="我的书架">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#8b5e3c" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h4.5v16H4z" opacity=".4"/><path d="M10 4h4.5v16H10z" opacity=".75"/><path d="M16 4h4.5v16H16z"/></svg>
+        <span>Library</span>
       </button>
 
       <!-- Favorites：一级标题，带展开箭头；展开后出现各平台（二级） -->
@@ -121,6 +127,30 @@
         <button class="page-btn" id="jumpBtn">跳转</button>
         <button class="page-btn" id="nextPage">下一页 ›</button>
       </div>
+
+      <!-- Library 视图：书架（封面/书脊双模式 + 标签分类） -->
+      <div class="library" id="libraryView" hidden>
+        <div class="lib-toolbar">
+          <div class="chips lib-mode" id="libMode">
+            <button class="chip is-active" data-lib-mode="cover">封面</button>
+            <button class="chip" data-lib-mode="spine">书脊</button>
+          </div>
+          <div class="chips" id="libBigTags"></div>
+          <div class="chips" id="libSubTags" hidden></div>
+        </div>
+        <p class="lib-count" id="libCount"></p>
+        <div class="lib-shelf" id="libShelf"></div>
+      </div>
+
+      <!-- Library 书籍详情弹窗 -->
+      <dialog class="modal" id="bookModal">
+        <div class="modal-box book-modal">
+          <div id="bookDetail"></div>
+          <div class="modal-actions">
+            <button type="button" class="btn-ghost" id="bookClose">关闭</button>
+          </div>
+        </div>
+      </dialog>
     </main>
 
     <footer class="footer">
