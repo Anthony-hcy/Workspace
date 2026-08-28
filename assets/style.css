@@ -954,3 +954,6 @@ body.is-library .main { max-width: none; padding: 14px 24px 40px; }
   .lib-spine:hover { width: 150px; }   /* 200×3/4，封面完整比例 */
   .lib-spine-row { min-height: 230px; }
 }
+
+/* 临时批量添加弹窗 */
+#libImportTitles { resize: vertical; min-height: 120px; font-family: inherit; }

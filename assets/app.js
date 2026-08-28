@@ -922,6 +922,41 @@ $('#libPrev').addEventListener('click', () => { state.libPage = Math.max(1, stat
 $('#libNext').addEventListener('click', () => { state.libPage += 1; renderLibrary(); });
 
 $('#bookClose').addEventListener('click', () => $('#bookModal').close());
+
+/* 临时批量添加（书名 + 封面 → 生成 JSON 下载，之后下架） */
+$('#libImportBtn').addEventListener('click', () => {
+  $('#libImportTitles').value = '';
+  $('#libImportFiles').value = '';
+  $('#libImportModal').showModal();
+});
+$('#libImportCancel').addEventListener('click', () => $('#libImportModal').close());
+$('#libImportGo').addEventListener('click', async () => {
+  const titles = $('#libImportTitles').value.split('\n').map((s) => s.trim()).filter(Boolean);
+  const files = [...$('#libImportFiles').files];
+  if (!titles.length) return showToast('请输入至少一个书名', true);
+  if (titles.length > 60) return showToast('一次最多 60 本', true);
+  const items = [];
+  for (let i = 0; i < titles.length; i++) {
+    const f = files[i];
+    items.push({ title: titles[i], coverBase64: f ? await readAsDataUrl(f) : '' });
+  }
+  const blob = new Blob([JSON.stringify(items, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'library-import.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  showToast('已生成 library-import.json，把下载的文件发我即可');
+  $('#libImportModal').close();
+});
+function readAsDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(String(r.result));
+    r.onerror = reject;
+    r.readAsDataURL(file);
+  });
+}
 // 点击弹窗空白处（backdrop）自动关闭
 $('#bookModal').addEventListener('click', (e) => {
   if (e.target === $('#bookModal')) $('#bookModal').close();
