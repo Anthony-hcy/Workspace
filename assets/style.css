@@ -688,7 +688,7 @@ body.is-blog .blog-frame {
 /* ============================================================================
    Library 书架（封面 / 书脊 双模式 + 标签分类 + 详情弹窗）
    ============================================================================ */
-body.is-library { background: #f6f3ee; }   /* 书架页暖米色氛围 */
+body.is-library { background: #f7f7f5; }   /* 书架页浅灰，贴合站点主题 */
 body.is-library .main { max-width: none; padding: 14px 24px 40px; }
 
 .lib-toolbar {
@@ -777,7 +777,7 @@ body.is-library .main { max-width: none; padding: 14px 24px 40px; }
   font-weight: 600;
   padding-left: 2px;
 }
-/* 书架底板：浅色简洁，贴合站点浅色主题 */
+/* 书架底板：浅灰调，与站点浅色主题融合 */
 .lib-spine-row {
   position: relative;
   display: flex;
@@ -785,11 +785,11 @@ body.is-library .main { max-width: none; padding: 14px 24px 40px; }
   gap: 8px;
   flex-wrap: wrap;
   padding: 22px 14px 12px;
-  background: linear-gradient(180deg, #f4f1ea, #e9e4d8);
-  border: 1px solid rgba(17, 24, 39, .07);
+  background: linear-gradient(180deg, #f9f9f8, #f0f1f3);
+  border: 1px solid rgba(17, 24, 39, .06);
   border-radius: 14px;
   min-height: 270px;
-  box-shadow: inset 0 2px 8px rgba(0, 0, 0, .04), 0 1px 3px rgba(0, 0, 0, .05);
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, .03), 0 1px 3px rgba(0, 0, 0, .04);
 }
 /* 顶部书架隔板细线 */
 .lib-spine-row::before {
