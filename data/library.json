@@ -22,5 +22,169 @@
   {
     "query": "窄门",
     "coverOverride": "assets/img/books/窄门.jpg"
+  },
+  {
+    "query": "雪国",
+    "coverOverride": "assets/img/books/雪国.jpg"
+  },
+  {
+    "query": "你的名字。",
+    "coverOverride": "assets/img/books/你的名字。.jpg"
+  },
+  {
+    "query": "牧羊少年奇幻之旅",
+    "coverOverride": "assets/img/books/牧羊少年奇幻之旅.jpg"
+  }, 
+  {
+    "query": "小偷家族",
+    "coverOverride": "assets/img/books/小偷家族.jpg"
+  },  
+  {
+    "query": "百年孤独",
+    "coverOverride": "assets/img/books/百年孤独.jpg"
+  },  
+  {
+    "query": "夏日终曲",
+    "coverOverride": "assets/img/books/夏日终曲.jpg"
+  },
+  {
+    "query": "没有人给他写信的上校",
+    "coverOverride": "assets/img/books/没有人给他写信的上校.jpg"
+  },  
+  {
+    "query": "悉达多",
+    "coverOverride": "assets/img/books/悉达多.jpg"
+  },  
+  {
+    "query": "呼啸山庄",
+    "coverOverride": "assets/img/books/呼啸山庄.jpg"
+  },  
+  {
+    "query": "追风筝的人",
+    "coverOverride": "assets/img/books/追风筝的人.jpg"
+  },
+  {
+    "query": "杀死一只知更鸟",
+    "coverOverride": "assets/img/books/杀死一只知更鸟.jpg"
+  },  
+  {
+    "query": "将夜",
+    "coverOverride": "assets/img/books/将夜.jpg"
+  },  
+  {
+    "query": "银河帝国",
+    "coverOverride": "assets/img/books/银河帝国.jpg"
+  },
+  {
+    "query": "球状闪电",
+    "coverOverride": "assets/img/books/球状闪电.jpg"
+  },  
+  {
+    "query": "三体",
+    "coverOverride": "assets/img/books/三体.jpg"
+  },  
+  {
+    "query": "山",
+    "coverOverride": "assets/img/books/山.jpg"
+  },
+  {
+    "query": "流浪地球",
+    "coverOverride": "assets/img/books/流浪地球.jpg"
+  },
+  {
+    "query": "镜子",
+    "coverOverride": "assets/img/books/镜子.jpg"
+  },
+  {
+    "query": "诡秘之主",
+    "coverOverride": "assets/img/books/诡秘之主.jpg"
+  },
+  {
+    "query": "雪中悍刀行",
+    "coverOverride": "assets/img/books/雪中悍刀行.jpg"
+  },
+  {
+    "query": "在细雨中呼喊",
+    "coverOverride": "assets/img/books/在细雨中呼喊.jpg"
+  },
+  {
+    "query": "兄弟",
+    "coverOverride": "assets/img/books/兄弟.jpg"
+  },
+  {
+    "query": "活着",
+    "coverOverride": "assets/img/books/活着.jpg"
+  },
+  {
+    "query": "那些回不去的年少时光",
+    "coverOverride": "assets/img/books/那些回不去的年少时光.jpg"
+  },
+  {
+    "query": "明朝那些事儿",
+    "coverOverride": "assets/img/books/明朝那些事儿.jpg"
+  },
+  {
+    "query": "长安的荔枝",
+    "coverOverride": "assets/img/books/长安的荔枝.jpg"
+  },
+  {
+    "query": "我与地坛",
+    "coverOverride": "assets/img/books/我与地坛.jpg"
+  },
+  {
+    "query": "悟空传",
+    "coverOverride": "assets/img/books/悟空传.jpg"
+  },
+  {
+    "query": "上海堡垒",
+    "coverOverride": "assets/img/books/上海堡垒.jpg"
+  },
+  {
+    "query": "龙族Ⅳ：奥丁之渊",
+    "coverOverride": "assets/img/books/龙族Ⅳ：奥丁之渊.jpg"
+  },
+  {
+    "query": "龙族Ⅱ：悼亡者之瞳",
+    "coverOverride": "assets/img/books/龙族Ⅱ：悼亡者之瞳.jpg"
+  },
+  {
+    "query": "龙族Ⅲ：黑月之潮（下）",
+    "coverOverride": "assets/img/books/龙族Ⅲ：黑月之潮（下）.jpg"
+  },
+  {
+    "query": "龙族Ⅲ：黑月之潮（中）",
+    "coverOverride": "assets/img/books/龙族Ⅲ：黑月之潮（中）.jpg"
+  },
+  {
+    "query": "龙族Ⅲ：黑月之潮（上）",
+    "coverOverride": "assets/img/books/龙族Ⅲ：黑月之潮（上）.jpg"
+  },
+  {
+    "query": "龙与少年游",
+    "coverOverride": "assets/img/books/龙与少年游.jpg"
+  },
+  {
+    "query": "天之炽",
+    "coverOverride": "assets/img/books/天之炽.jpg"
+  },
+  {
+    "query": "九州·缥缈录",
+    "coverOverride": "assets/img/books/九州·缥缈录.jpg"
+  },
+  {
+    "query": "龙族Ⅰ：火之晨曦",
+    "coverOverride": "assets/img/books/龙族Ⅰ：火之晨曦.jpg"
+  },
+  {
+    "query": "知音漫客7期",
+    "coverOverride": "assets/img/books/知音漫客7期.jpg"
+  },
+  {
+    "query": "知音漫客6期",
+    "coverOverride": "assets/img/books/知音漫客6期.jpg"
+  },
+  {
+    "query": "知音漫客5期",
+    "coverOverride": "assets/img/books/知音漫客5期.jpg"
   }
 ]

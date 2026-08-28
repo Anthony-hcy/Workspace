@@ -923,54 +923,7 @@ $('#libNext').addEventListener('click', () => { state.libPage += 1; renderLibrar
 
 $('#bookClose').addEventListener('click', () => $('#bookModal').close());
 
-/* 临时批量添加（每行：书名 + 对应封面上传 → 生成 JSON 下载，之后下架） */
-const importRowHtml = () => `
-  <div class="lib-import-row">
-    <input type="text" class="lib-import-title" placeholder="书名" />
-    <input type="file" class="lib-import-file" accept="image/*" />
-    <button type="button" class="btn-ghost lib-import-del" title="删除此行">✕</button>
-  </div>`;
 
-$('#libImportBtn').addEventListener('click', () => {
-  $('#libImportRows').innerHTML = importRowHtml();
-  $('#libImportModal').showModal();
-});
-$('#libImportAddRow').addEventListener('click', () => {
-  $('#libImportRows').insertAdjacentHTML('beforeend', importRowHtml());
-});
-$('#libImportRows').addEventListener('click', (e) => {
-  const del = e.target.closest('.lib-import-del');
-  if (del) del.closest('.lib-import-row').remove();
-});
-$('#libImportCancel').addEventListener('click', () => $('#libImportModal').close());
-$('#libImportGo').addEventListener('click', async () => {
-  const rows = [...document.querySelectorAll('#libImportRows .lib-import-row')];
-  const items = [];
-  for (const row of rows) {
-    const title = row.querySelector('.lib-import-title').value.trim();
-    if (!title) continue;
-    const file = row.querySelector('.lib-import-file').files[0];
-    items.push({ title, coverBase64: file ? await readAsDataUrl(file) : '' });
-  }
-  if (!items.length) return showToast('请至少填写一行书名', true);
-  if (items.length > 60) return showToast('一次最多 60 本', true);
-  const blob = new Blob([JSON.stringify(items, null, 2)], { type: 'application/json' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'library-import.json';
-  a.click();
-  URL.revokeObjectURL(a.href);
-  showToast('已生成 library-import.json，把下载的文件发我即可');
-  $('#libImportModal').close();
-});
-function readAsDataUrl(file) {
-  return new Promise((resolve, reject) => {
-    const r = new FileReader();
-    r.onload = () => resolve(String(r.result));
-    r.onerror = reject;
-    r.readAsDataURL(file);
-  });
-}
 // 点击弹窗空白处（backdrop）自动关闭
 $('#bookModal').addEventListener('click', (e) => {
   if (e.target === $('#bookModal')) $('#bookModal').close();
