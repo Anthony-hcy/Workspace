@@ -1,7 +1,8 @@
 [
   {
     "query": "我的前半生",
-    "coverOverride": "assets/img/books/我的前半生.jpg"
+    "coverOverride": "assets/img/books/我的前半生.jpg",
+    "doubanId": "34873403"
   },
   {
     "query": "庆余年",
@@ -34,31 +35,32 @@
   {
     "query": "牧羊少年奇幻之旅",
     "coverOverride": "assets/img/books/牧羊少年奇幻之旅.jpg"
-  }, 
+  },
   {
     "query": "小偷家族",
     "coverOverride": "assets/img/books/小偷家族.jpg"
-  },  
+  },
   {
     "query": "百年孤独",
     "coverOverride": "assets/img/books/百年孤独.jpg"
-  },  
+  },
   {
     "query": "夏日终曲",
     "coverOverride": "assets/img/books/夏日终曲.jpg"
   },
   {
     "query": "没有人给他写信的上校",
-    "coverOverride": "assets/img/books/没有人给他写信的上校.jpg"
-  },  
+    "coverOverride": "assets/img/books/没有人给他写信的上校.jpg",
+    "doubanId": "30177172"
+  },
   {
     "query": "悉达多",
     "coverOverride": "assets/img/books/悉达多.jpg"
-  },  
+  },
   {
     "query": "呼啸山庄",
     "coverOverride": "assets/img/books/呼啸山庄.jpg"
-  },  
+  },
   {
     "query": "追风筝的人",
     "coverOverride": "assets/img/books/追风筝的人.jpg"
@@ -66,23 +68,25 @@
   {
     "query": "杀死一只知更鸟",
     "coverOverride": "assets/img/books/杀死一只知更鸟.jpg"
-  },  
+  },
   {
     "query": "将夜",
     "coverOverride": "assets/img/books/将夜.jpg"
-  },  
+  },
   {
     "query": "银河帝国",
-    "coverOverride": "assets/img/books/银河帝国.jpg"
+    "coverOverride": "assets/img/books/银河帝国.jpg",
+    "doubanId": "32568108"
   },
   {
     "query": "球状闪电",
     "coverOverride": "assets/img/books/球状闪电.jpg"
-  },  
+  },
   {
     "query": "三体",
-    "coverOverride": "assets/img/books/三体.jpg"
-  },  
+    "coverOverride": "assets/img/books/三体.jpg",
+    "doubanId": "6518605"
+  },
   {
     "query": "山",
     "coverOverride": "assets/img/books/山.jpg"
@@ -97,7 +101,8 @@
   },
   {
     "query": "诡秘之主",
-    "coverOverride": "assets/img/books/诡秘之主.jpg"
+    "coverOverride": "assets/img/books/诡秘之主.jpg",
+    "doubanId": "36996604"
   },
   {
     "query": "雪中悍刀行",
@@ -121,7 +126,8 @@
   },
   {
     "query": "明朝那些事儿",
-    "coverOverride": "assets/img/books/明朝那些事儿.jpg"
+    "coverOverride": "assets/img/books/明朝那些事儿.jpg",
+    "doubanId": "3674537"
   },
   {
     "query": "长安的荔枝",
@@ -177,14 +183,17 @@
   },
   {
     "query": "知音漫客7期",
-    "coverOverride": "assets/img/books/知音漫客7期.jpg"
+    "coverOverride": "assets/img/books/知音漫客7期.jpg",
+    "doubanId": "3737382"
   },
   {
     "query": "知音漫客6期",
-    "coverOverride": "assets/img/books/知音漫客6期.jpg"
+    "coverOverride": "assets/img/books/知音漫客6期.jpg",
+    "doubanId": "3737382"
   },
   {
     "query": "知音漫客5期",
-    "coverOverride": "assets/img/books/知音漫客5期.jpg"
+    "coverOverride": "assets/img/books/知音漫客5期.jpg",
+    "doubanId": "3737382"
   }
 ]

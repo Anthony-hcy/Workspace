@@ -1,23 +1,23 @@
 [
   {
-    "id": "2230208",
+    "id": "我的前半生",
     "query": "我的前半生",
     "title": "我的前半生",
-    "author": "亦舒",
-    "publisher": "新世界出版社",
-    "intro": "一个三十几岁的美丽女人子君，在家做全职家庭主妇。却被一个平凡女人夺走丈夫，一段婚姻的失败，让女主角不得不坚强，变得更美丽，有了事业，最终遇见一个更值得爱的男人……",
-    "rating": 7.9,
+    "author": "爱新觉罗·溥仪",
+    "publisher": "人民文学出版社",
+    "intro": "《我的前半生》是我国末代皇帝爱新觉罗·溥仪的回忆录。周恩来总理接见溥仪时曾说：“你的东西基本上是要与旧社会宣战，彻底暴露……历史上还找不出这样的例子，你创造了一个新纪元。”\n本书按时间顺序叙述，先从家世开始介绍，然后对童年、在位、逃难、改造等这几个人生大片段按顺序介绍。全书语言通俗，故事情节强。自1964年出版后，受到读者欢迎，译成英语、日语、德语等文字出版。\n溥仪的《我的前半生》自1964年出版后在国内外产生了很大的影响，对普通读者了解中国近代以来的曲折历史有很好的普及作用。而他的童年自述，以及从患得患失到坚定决心的改造过程，对于当下的学校教育、家庭教育也有启示作用，值得推荐给每一位家长、老师阅读。",
+    "rating": 7.8,
     "bigTag": "其他",
     "tags": [],
     "cover": "assets/img/books/我的前半生.jpg",
     "coverOverride": "assets/img/books/我的前半生.jpg",
-    "doubanUrl": "https://book.douban.com/subject/2230208/",
-    "createdAt": 1787923469138
+    "doubanUrl": "https://book.douban.com/subject/34873403/",
+    "createdAt": 1787925098720
   },
   {
-    "id": "3155622",
+    "id": "庆余年",
     "query": "庆余年",
-    "title": "庆余年·壹",
+    "title": "庆余年",
     "author": "猫腻",
     "publisher": "中国友谊出版公司",
     "intro": "一个年轻的病人，因为一次毫不意外的经历，重生到一个完全不同的世界，成为古代庆国伯爵府一个并不光彩的私生子。修行无名功诀，踏足京都官场，继承庞大商团……范闲，包裹在他最外面的是一层金光闪闪的纸衣，纸衣下面是非常刺眼使人流泪的芥末，芥末下面是甜得发腻的奶油，奶油下面是苦涩无比的毒药壳，壳的中间却有那么一抹亮光……人都是复杂的，对于庆国的百姓来说，看到的是他金光闪闪的外衣，对于范闲的敌人来说，看到的却是这层外衣下面辛辣的芥末……且看一个混淆了身份的私生子，将如何玩转商场、官场、战场以及婚场！\n一部《庆余年》，缓缓道来的仿佛是一个异时空的灵魂的再生，却讲尽了这片大陆上几十年的风风雨雨。在这个叫范闲的年轻人的成长路程里，庆国几十年起伏的画卷慢慢地呈现出来。\n几十年的历程里，我们看到的是三代风云人物的起起落落、轮转更替。两条线索，范闲的成长、叶轻眉的一生贯穿着整...\n(展开全部)",
@@ -27,10 +27,10 @@
     "cover": "assets/img/books/庆余年.jpg",
     "coverOverride": "assets/img/books/庆余年.jpg",
     "doubanUrl": "https://book.douban.com/subject/3155622/",
-    "createdAt": 1787923472002
+    "createdAt": 1787925102104
   },
   {
-    "id": "38370177",
+    "id": "秦二世必须死",
     "query": "秦二世必须死",
     "title": "秦二世必须死",
     "author": "马伯庸",
@@ -42,10 +42,10 @@
     "cover": "assets/img/books/秦二世必须死.jpg",
     "coverOverride": "assets/img/books/秦二世必须死.jpg",
     "doubanUrl": "https://book.douban.com/subject/38370177/",
-    "createdAt": 1787923475887
+    "createdAt": 1787925105381
   },
   {
-    "id": "26118072",
+    "id": "祈祷落幕时",
     "query": "祈祷落幕时",
     "title": "祈祷落幕时",
     "author": "(日)东野圭吾",
@@ -57,10 +57,10 @@
     "cover": "assets/img/books/祈祷落幕时.jpg",
     "coverOverride": "assets/img/books/祈祷落幕时.jpg",
     "doubanUrl": "https://book.douban.com/subject/26118072/",
-    "createdAt": 1787923478920
+    "createdAt": 1787925109109
   },
   {
-    "id": "36473837",
+    "id": "油炸绿番茄",
     "query": "油炸绿番茄",
     "title": "油炸绿番茄",
     "author": "[美] 范妮·弗拉格",
@@ -72,10 +72,10 @@
     "cover": "assets/img/books/油炸绿番茄.jpg",
     "coverOverride": "assets/img/books/油炸绿番茄.jpg",
     "doubanUrl": "https://book.douban.com/subject/36473837/",
-    "createdAt": 1787923481934
+    "createdAt": 1787925111411
   },
   {
-    "id": "30331835",
+    "id": "窄门",
     "query": "窄门",
     "title": "窄门",
     "author": "[法] 安德烈·纪德",
@@ -87,10 +87,10 @@
     "cover": "assets/img/books/窄门.jpg",
     "coverOverride": "assets/img/books/窄门.jpg",
     "doubanUrl": "https://book.douban.com/subject/30331835/",
-    "createdAt": 1787923486311
+    "createdAt": 1787925115861
   },
   {
-    "id": "35818897",
+    "id": "雪国",
     "query": "雪国",
     "title": "雪国",
     "author": "[日] 川端康成",
@@ -102,12 +102,12 @@
     "cover": "assets/img/books/雪国.jpg",
     "coverOverride": "assets/img/books/雪国.jpg",
     "doubanUrl": "https://book.douban.com/subject/35818897/",
-    "createdAt": 1787923489434
+    "createdAt": 1787925120532
   },
   {
-    "id": "26916709",
+    "id": "你的名字。",
     "query": "你的名字。",
-    "title": "你的名字",
+    "title": "你的名字。",
     "author": "新海诚",
     "publisher": "百花洲文艺出版社",
     "intro": "在朴素小镇里土生土长的少女三叶，因周围的环境和家传神社加诸的职责等因素心生不满，憧憬着有一天能离开小镇到大都市里生活。某天，她在睡梦中与生活在东京的少年泷交换了灵魂，原本素不相识的少年与少女，在时空奇迹的作用下产生了命运的交集，而唯一维系着两人的，便是彼此的“名字”。",
@@ -117,10 +117,10 @@
     "cover": "assets/img/books/你的名字。.jpg",
     "coverOverride": "assets/img/books/你的名字。.jpg",
     "doubanUrl": "https://book.douban.com/subject/26916709/",
-    "createdAt": 1787923494355
+    "createdAt": 1787925124583
   },
   {
-    "id": "3608208",
+    "id": "牧羊少年奇幻之旅",
     "query": "牧羊少年奇幻之旅",
     "title": "牧羊少年奇幻之旅",
     "author": "[巴西] 保罗·柯艾略",
@@ -132,10 +132,10 @@
     "cover": "assets/img/books/牧羊少年奇幻之旅.jpg",
     "coverOverride": "assets/img/books/牧羊少年奇幻之旅.jpg",
     "doubanUrl": "https://book.douban.com/subject/3608208/",
-    "createdAt": 1787923497798
+    "createdAt": 1787925127526
   },
   {
-    "id": "30374817",
+    "id": "小偷家族",
     "query": "小偷家族",
     "title": "小偷家族",
     "author": "[日] 是枝裕和",
@@ -147,10 +147,10 @@
     "cover": "assets/img/books/小偷家族.jpg",
     "coverOverride": "assets/img/books/小偷家族.jpg",
     "doubanUrl": "https://book.douban.com/subject/30374817/",
-    "createdAt": 1787923501244
+    "createdAt": 1787925131440
   },
   {
-    "id": "6082808",
+    "id": "百年孤独",
     "query": "百年孤独",
     "title": "百年孤独",
     "author": "[哥伦比亚] 加西亚·马尔克斯",
@@ -162,10 +162,10 @@
     "cover": "assets/img/books/百年孤独.jpg",
     "coverOverride": "assets/img/books/百年孤独.jpg",
     "doubanUrl": "https://book.douban.com/subject/6082808/",
-    "createdAt": 1787923506838
+    "createdAt": 1787925133940
   },
   {
-    "id": "28659562",
+    "id": "夏日终曲",
     "query": "夏日终曲",
     "title": "夏日终曲",
     "author": "[美] 安德烈·艾席蒙",
@@ -177,25 +177,25 @@
     "cover": "assets/img/books/夏日终曲.jpg",
     "coverOverride": "assets/img/books/夏日终曲.jpg",
     "doubanUrl": "https://book.douban.com/subject/28659562/",
-    "createdAt": 1787923510528
+    "createdAt": 1787925137024
   },
   {
-    "id": "20392523",
+    "id": "没有人给他写信的上校",
     "query": "没有人给他写信的上校",
     "title": "没有人给他写信的上校",
-    "author": "[哥伦比亚] 加西亚·马尔克斯",
+    "author": "[哥伦比亚]加西亚·马尔克斯",
     "publisher": "南海出版公司",
-    "intro": "★ 五十六年了，上校唯一做过的事情就是等待。\n★《没有人给他写信的上校》我写了九遍，它是我所有作品中最无懈可击的，可以面对任何敌人。 ——加西亚•马尔克斯\n★《百年孤独》在问世之前就已经被我自己超越了。事实上，我认为我最好的作品是《没有人给他写信的上校》。  ——加西亚•马尔克斯\n★《没有人给 他写信的上校》是一部完美杰作。——《2666》作者罗贝托•波拉尼奥\n《没有人给他写信的上校》是加西亚•马尔克斯最负盛名的中篇小说，在世界文学史上与海明威的《老人与海》齐名。马尔克斯自认《没有人给他写信的上校》的艺术成就要超越《百年孤独》。\n《没有人给他写信的上校》讲述了一位七十多岁的老上校，五十六年来一直等待退伍金的绝望生活。这位著名的“没有人给他写信的上校”，被誉为“20世纪小说中最难忘的人物”，小说结尾也被誉为“所有文学作品中最完美的一段”。",
+    "intro": "★ 【全新雅致开本、典藏封面】\n★ 五十六年了，上校唯一做过的事情就是等待。\n《没有人给他写信的上校》是加西亚•马尔克斯最负盛名的中篇小说，在世界文学史上与海明威的《老人与海》齐名。马尔克斯自认《没有人给他写信的上校》的艺术成就超越 《百年孤独》。\n★《没有人给他写信的上校》我写了九遍，它是我所有作品中最无懈可击的，可以面对任何敌人。 ——加西亚•马尔克斯\n★ 就像海明威的《老人与海》，《没有人给他写信的上校》是举世公认的中篇巨作，其饱满的张力、谨慎的节奏和杰出的结局几近完美。——（文学评论家）杰拉德·马丁\n《没有人给他写信的上校》讲述了一位七十多岁的老上校，五十六年来一直等待退伍金的绝望而固守尊严的生活。这位著名的“没有人给他写信的上校”，被誉为“20世纪小说中最难忘的人物”，小说结尾也被誉为“所有文学作品中最完美的一段”。\n记者：有人说《百年孤独...\n(展开全部)",
     "rating": 8.6,
     "bigTag": "其他",
     "tags": [],
     "cover": "assets/img/books/没有人给他写信的上校.jpg",
     "coverOverride": "assets/img/books/没有人给他写信的上校.jpg",
-    "doubanUrl": "https://book.douban.com/subject/20392523/",
-    "createdAt": 1787923514702
+    "doubanUrl": "https://book.douban.com/subject/30177172/",
+    "createdAt": 1787925139242
   },
   {
-    "id": "26980487",
+    "id": "悉达多",
     "query": "悉达多",
     "title": "悉达多",
     "author": "[德] 赫尔曼·黑塞",
@@ -207,10 +207,10 @@
     "cover": "assets/img/books/悉达多.jpg",
     "coverOverride": "assets/img/books/悉达多.jpg",
     "doubanUrl": "https://book.douban.com/subject/26980487/",
-    "createdAt": 1787923517987
+    "createdAt": 1787925142531
   },
   {
-    "id": "4898521",
+    "id": "呼啸山庄",
     "query": "呼啸山庄",
     "title": "呼啸山庄",
     "author": "(英) 艾米莉·勃朗特",
@@ -222,10 +222,10 @@
     "cover": "assets/img/books/呼啸山庄.jpg",
     "coverOverride": "assets/img/books/呼啸山庄.jpg",
     "doubanUrl": "https://book.douban.com/subject/4898521/",
-    "createdAt": 1787923522922
+    "createdAt": 1787925145700
   },
   {
-    "id": "1770782",
+    "id": "追风筝的人",
     "query": "追风筝的人",
     "title": "追风筝的人",
     "author": "[美] 卡勒德·胡赛尼",
@@ -237,10 +237,10 @@
     "cover": "assets/img/books/追风筝的人.jpg",
     "coverOverride": "assets/img/books/追风筝的人.jpg",
     "doubanUrl": "https://book.douban.com/subject/1770782/",
-    "createdAt": 1787923527310
+    "createdAt": 1787925149563
   },
   {
-    "id": "26879778",
+    "id": "杀死一只知更鸟",
     "query": "杀死一只知更鸟",
     "title": "杀死一只知更鸟",
     "author": "[美] 哈珀·李",
@@ -252,12 +252,12 @@
     "cover": "assets/img/books/杀死一只知更鸟.jpg",
     "coverOverride": "assets/img/books/杀死一只知更鸟.jpg",
     "doubanUrl": "https://book.douban.com/subject/26879778/",
-    "createdAt": 1787923531585
+    "createdAt": 1787925152511
   },
   {
-    "id": "35837197",
+    "id": "将夜",
     "query": "将夜",
-    "title": "将夜（全十册）",
+    "title": "将夜",
     "author": "猫腻",
     "publisher": "作家出版社",
     "intro": "在昊天世界，每隔千年冥王降临，举世坠入黑暗，是为永夜。宁缺为报家仇，与相依为命的侍女桑桑来到都城。他历经种种奇缘，最终成为修道者最高学府——书院的十三先生，同时继承了世间第一神符师的衣钵。在书院领袖夫子的指引下，宁缺肩负起匡扶国家、护卫人民的重任，并成功为家人昭雪。而此时一切罪恶的幕后黑手——昊天终于现身，发动了永夜浩劫。在宁缺的率领下，书院众弟子与昊天展开了殊死一搏……",
@@ -267,25 +267,25 @@
     "cover": "assets/img/books/将夜.jpg",
     "coverOverride": "assets/img/books/将夜.jpg",
     "doubanUrl": "https://book.douban.com/subject/35837197/",
-    "createdAt": 1787923535424
+    "createdAt": 1787925155114
   },
   {
-    "id": "26389895",
+    "id": "银河帝国",
     "query": "银河帝国",
-    "title": "银河帝国：基地七部曲",
+    "title": "银河帝国",
     "author": "[美] 艾萨克·阿西莫夫",
     "publisher": "江苏凤凰文艺出版社",
-    "intro": "人类蜗居在银河系的一个小角落——太阳系，在围绕太阳旋转的第三颗 行星上，生 活了十多万年之久。\n人类在这个小小的行星（他们称之为“地球”）上，建立了两百多个不同的行政区域（他们称之为“国家”），直到地球上诞生了第一个会思考的机器人。\n在机器人的帮助下，人类迅速掌握了改造外星球的技术，开启了恢弘的星际殖民运动；人类在银河系如蝗虫般繁衍扩张，带着他们永不磨灭的愚昧与智慧、贪婪与良知，登上了一个个荒凉的星球，并将银河系卷入漫长的星际战国时代，直至整个银河被统一，一个统治超过2500万个住人行星、疆域横跨十万光年、总计数兆亿人口的庞大帝国崛起——银河帝国。\n一个微妙的转折发生在银河帝国建国后的12020年。哈里·谢顿，这个刚满32岁的年轻数学家，开创了“心理史学”，这门学科能用数学公式准确推演全人类的未来——“预言”从此成为一门可以信任的科学，人类由此可以看...\n(展开全部)",
-    "rating": 9.5,
+    "intro": "《银河帝国》 “银河帝国”百万册全新纪念版。人类历史上最好看的系列小说（Best All-Time Novel Series）。十年来，数万次修订，成就中文世界最佳译本！地球人公认的“科幻圣经”，文艺青年和技术宅的共同挚爱！《银河帝国》系列小说，一直被认为是人类想象力的极限，人类历史上最有趣迷人的故事，讲述人类未来两万年的历史。",
+    "rating": 9.4,
     "bigTag": "其他",
     "tags": [],
     "cover": "assets/img/books/银河帝国.jpg",
     "coverOverride": "assets/img/books/银河帝国.jpg",
-    "doubanUrl": "https://book.douban.com/subject/26389895/",
-    "createdAt": 1787923538890
+    "doubanUrl": "https://book.douban.com/subject/32568108/",
+    "createdAt": 1787925157825
   },
   {
-    "id": "1192090",
+    "id": "球状闪电",
     "query": "球状闪电",
     "title": "球状闪电",
     "author": "刘慈欣",
@@ -297,25 +297,25 @@
     "cover": "assets/img/books/球状闪电.jpg",
     "coverOverride": "assets/img/books/球状闪电.jpg",
     "doubanUrl": "https://book.douban.com/subject/1192090/",
-    "createdAt": 1787923542829
+    "createdAt": 1787925161110
   },
   {
-    "id": "2567698",
+    "id": "三体",
     "query": "三体",
     "title": "三体",
     "author": "刘慈欣",
     "publisher": "重庆出版社",
-    "intro": "文化大革命如火如荼进行的同时。军方探寻外星文明的绝秘计划“红岸工程”取得了突破性进展。但在按下发射键的那一刻，历经劫难的叶文洁没有意识到，她彻底改变了人类的命运。地球文明向宇宙发出的第一声啼鸣，以太阳为中心，以光速向宇宙深处飞驰……\n四光年外，“三体文明”正苦苦挣扎——三颗无规则运行的太阳主导下的百余次毁灭与重生逼迫他们逃离母星。而恰在此时。他们接收到了地球发来的信息。在运用超技术锁死地球人的基础科学之后。三体人庞大的宇宙舰队开始向地球进发……\n人类的末日悄然来临。",
-    "rating": 8.9,
+    "intro": "《地球往事·三体》\n文化大革命如火如荼进行的同时，军方探寻外星文明的绝秘计划“红岸工程”取得了突破性进展。但在按下发射键的那一刻，历经劫难的叶文洁没有意识到，她彻底改变了人类的命运。\n地球文明向宇宙发出的第一声啼鸣，以太阳为中心，以光速向宇宙深处飞驰……\n四光年外，“三体文明”正苦苦挣扎——三颗无规则运行的太阳主导下的百余次毁灭与重生逼迫他们逃离母星。而恰在此时，他们接收到了地球发来的信息。\n在运用超技术锁死地球人的基础科学之后，三体人庞大的宇宙舰队开始向地球进发……人类的末日悄然来临。\n《地球往事·黑暗森林》\n三体人在利用魔法般的科技锁死了地球人的科学之后，庞大的宇宙舰队杀气腾腾地直扑太阳系，意欲清除地球文明。\n面对前所未有的危局，经历过无数磨难的地球人组建起同样庞大的太空舰队，同时，利用三体人思维透明的致命缺陷，制订了神秘莫测的“面壁计划”，精选...\n(展开全部)",
+    "rating": 9.5,
     "bigTag": "其他",
     "tags": [],
     "cover": "assets/img/books/三体.jpg",
     "coverOverride": "assets/img/books/三体.jpg",
-    "doubanUrl": "https://book.douban.com/subject/2567698/",
-    "createdAt": 1787923546675
+    "doubanUrl": "https://book.douban.com/subject/6518605/",
+    "createdAt": 1787925163875
   },
   {
-    "id": "35596032",
+    "id": "山",
     "query": "山",
     "title": "山",
     "author": "刘慈欣",
@@ -327,10 +327,10 @@
     "cover": "assets/img/books/山.jpg",
     "coverOverride": "assets/img/books/山.jpg",
     "doubanUrl": "https://book.douban.com/subject/35596032/",
-    "createdAt": 1787923550204
+    "createdAt": 1787925167170
   },
   {
-    "id": "26807573",
+    "id": "流浪地球",
     "query": "流浪地球",
     "title": "流浪地球",
     "author": "刘慈欣",
@@ -342,10 +342,10 @@
     "cover": "assets/img/books/流浪地球.jpg",
     "coverOverride": "assets/img/books/流浪地球.jpg",
     "doubanUrl": "https://book.douban.com/subject/26807573/",
-    "createdAt": 1787923555186
+    "createdAt": 1787925171067
   },
   {
-    "id": "26658900",
+    "id": "镜子",
     "query": "镜子",
     "title": "镜子",
     "author": "刘慈欣",
@@ -357,27 +357,27 @@
     "cover": "assets/img/books/镜子.jpg",
     "coverOverride": "assets/img/books/镜子.jpg",
     "doubanUrl": "https://book.douban.com/subject/26658900/",
-    "createdAt": 1787923558770
+    "createdAt": 1787925174711
   },
   {
-    "id": "35051813",
+    "id": "诡秘之主",
     "query": "诡秘之主",
-    "title": "诡秘之主 1",
+    "title": "诡秘之主",
     "author": "爱潜水的乌贼",
-    "publisher": "广东旅游出版社",
-    "intro": "◆阅文白金大神爱潜水的乌贼实力代表作，引爆蒸汽朋克+克苏鲁奇幻新风潮！\n◆起点中文网超1亿阅读量、3000万总推荐、352万读者收藏！\n◆新颖独特的世界观架构、22条非凡者序列途径设定、蒸汽时代与魔法世界的特色交融！\n◆作为近年以来最火爆的IP，衍生出了大量同人文化，在 贴吧、微博、知乎、豆瓣、LOFTER等平台的热推指数不断升高！\n◆随书附赠愚者塔罗牌+正义塔罗牌+大帝日记本！\n◆文笔的优劣跟辞藻没关系，得跟题材相配……《诡秘之主》走的是十九世纪工业英伦范儿，文笔自然要偏冷峻质朴，不干扰读者阅读为要。——马伯庸\n--------------------------------\n▶ 故事简介◀\n周明瑞一夜醒来，发现自己成了鲁恩王国霍伊大学历史系的毕业生克莱恩·莫雷蒂。他有一兄一妹，生活清贫，还遭遇了一场关乎生死存亡的危机。\n为求自保，亦为回归，他启用...\n(展开全部)",
-    "rating": 8.5,
+    "publisher": "新星出版社",
+    "intro": "蒸汽与机械的浪潮中，谁能触及非凡？历史和黑暗的迷雾里，又是谁在耳语？我从诡秘中醒来，睁眼看见这个世界：枪械，大炮，巨舰，飞空艇，差分机；魔药，占卜，诅咒，倒吊人，封印物……光明依旧照耀，神秘从未远离，这是一段“愚者”的传说。",
+    "rating": 8.2,
     "bigTag": "其他",
     "tags": [],
     "cover": "assets/img/books/诡秘之主.jpg",
     "coverOverride": "assets/img/books/诡秘之主.jpg",
-    "doubanUrl": "https://book.douban.com/subject/35051813/",
-    "createdAt": 1787923561512
+    "doubanUrl": "https://book.douban.com/subject/36996604/",
+    "createdAt": 1787925178193
   },
   {
-    "id": "25714176",
+    "id": "雪中悍刀行",
     "query": "雪中悍刀行",
-    "title": "雪中悍刀行 1",
+    "title": "雪中悍刀行",
     "author": "烽火戏诸侯",
     "publisher": "悦读纪",
     "intro": "道门真人飞天入地，千里取人首级；佛家菩萨低眉怒目，抬手可撼昆仑；谁又言书生无意气，一怒敢叫天子露戚容。踏江踏湖踏歌，我有一剑仙人跪；提刀提剑提酒，三十万铁骑征天。\n老仆剑九背匣，吕祖修道骑牛，天道悠悠难觅，情之一字可杀人。\n漠北黄沙如刀舞， 世子白马出北凉，身后跟着一百佩刀甲士。\n鲜衣怒马，美婢娇娘，还有一个抠脚的断臂老人。\n犹记得跟缺门牙老黄的那段对话。\n“老黄，你是高手吗？”\n“是哩。”\n“有多高？”\n“啧啧，只比公子差一点点。”\n回想当初自己不屑地吐出黄瓜花儿，还骂了句去你娘的。却不承想，那老黄乃是传说中高手中的高手。这世道果然难测。\n世子如今带双刀，剑神武夫，江湖庙堂，可否一并斩之？",
@@ -387,10 +387,10 @@
     "cover": "assets/img/books/雪中悍刀行.jpg",
     "coverOverride": "assets/img/books/雪中悍刀行.jpg",
     "doubanUrl": "https://book.douban.com/subject/25714176/",
-    "createdAt": 1787923565932
+    "createdAt": 1787925182012
   },
   {
-    "id": "20421947",
+    "id": "在细雨中呼喊",
     "query": "在细雨中呼喊",
     "title": "在细雨中呼喊",
     "author": "余华",
@@ -402,10 +402,10 @@
     "cover": "assets/img/books/在细雨中呼喊.jpg",
     "coverOverride": "assets/img/books/在细雨中呼喊.jpg",
     "doubanUrl": "https://book.douban.com/subject/20421947/",
-    "createdAt": 1787923570397
+    "createdAt": 1787925185782
   },
   {
-    "id": "20441957",
+    "id": "兄弟",
     "query": "兄弟",
     "title": "兄弟",
     "author": "余华",
@@ -417,10 +417,10 @@
     "cover": "assets/img/books/兄弟.jpg",
     "coverOverride": "assets/img/books/兄弟.jpg",
     "doubanUrl": "https://book.douban.com/subject/20441957/",
-    "createdAt": 1787923573789
+    "createdAt": 1787925188490
   },
   {
-    "id": "4913064",
+    "id": "活着",
     "query": "活着",
     "title": "活着",
     "author": "余华",
@@ -432,10 +432,10 @@
     "cover": "assets/img/books/活着.jpg",
     "coverOverride": "assets/img/books/活着.jpg",
     "doubanUrl": "https://book.douban.com/subject/4913064/",
-    "createdAt": 1787923577383
+    "createdAt": 1787925191585
   },
   {
-    "id": "4231381",
+    "id": "那些回不去的年少时光",
     "query": "那些回不去的年少时光",
     "title": "那些回不去的年少时光",
     "author": "桐华",
@@ -447,25 +447,25 @@
     "cover": "assets/img/books/那些回不去的年少时光.jpg",
     "coverOverride": "assets/img/books/那些回不去的年少时光.jpg",
     "doubanUrl": "https://book.douban.com/subject/4231381/",
-    "createdAt": 1787923581814
+    "createdAt": 1787925194537
   },
   {
-    "id": "7163250",
+    "id": "明朝那些事儿",
     "query": "明朝那些事儿",
     "title": "明朝那些事儿",
     "author": "当年明月",
-    "publisher": "浙江人民出版社",
-    "intro": "《明朝那些事儿》这篇文主要讲述的是从1344年到1644年这三百年间关于明朝的一些事情，以史料为基础，以年代和具体人物为主线，并加入了小说的笔法，对明朝十七帝和其他王公权贵和小人物的命运进行全景展示，尤其对官场政治、战争、帝王心术着墨最多，并加入对当时政治经济制度、人伦道德的演义。",
+    "publisher": "中国海关出版社",
+    "intro": "《明朝那些事儿》讲述从1344年到1644年，明朝三百年间的历史。作品以史料为基础，以年代和具体人物为主线，运用小说的笔法，对明朝十七帝和其他王公权贵和小人物的命运进行全景展示，尤其对官场政治、战争、帝王心术着墨最多。作品也是一部明朝政治经济制度、人伦道德的演义。",
     "rating": 9.2,
     "bigTag": "其他",
     "tags": [],
     "cover": "assets/img/books/明朝那些事儿.jpg",
     "coverOverride": "assets/img/books/明朝那些事儿.jpg",
-    "doubanUrl": "https://book.douban.com/subject/7163250/",
-    "createdAt": 1787923585707
+    "doubanUrl": "https://book.douban.com/subject/3674537/",
+    "createdAt": 1787925197750
   },
   {
-    "id": "36104107",
+    "id": "长安的荔枝",
     "query": "长安的荔枝",
     "title": "长安的荔枝",
     "author": "马伯庸",
@@ -477,10 +477,10 @@
     "cover": "assets/img/books/长安的荔枝.jpg",
     "coverOverride": "assets/img/books/长安的荔枝.jpg",
     "doubanUrl": "https://book.douban.com/subject/36104107/",
-    "createdAt": 1787923588568
+    "createdAt": 1787925201918
   },
   {
-    "id": "5910656",
+    "id": "我与地坛",
     "query": "我与地坛",
     "title": "我与地坛",
     "author": "史铁生",
@@ -492,10 +492,10 @@
     "cover": "assets/img/books/我与地坛.jpg",
     "coverOverride": "assets/img/books/我与地坛.jpg",
     "doubanUrl": "https://book.douban.com/subject/5910656/",
-    "createdAt": 1787923593548
+    "createdAt": 1787925204377
   },
   {
-    "id": "1485224",
+    "id": "悟空传",
     "query": "悟空传",
     "title": "悟空传",
     "author": "今何在",
@@ -507,10 +507,10 @@
     "cover": "assets/img/books/悟空传.jpg",
     "coverOverride": "assets/img/books/悟空传.jpg",
     "doubanUrl": "https://book.douban.com/subject/1485224/",
-    "createdAt": 1787923597717
+    "createdAt": 1787925208275
   },
   {
-    "id": "3268399",
+    "id": "上海堡垒",
     "query": "上海堡垒",
     "title": "上海堡垒",
     "author": "江南",
@@ -522,12 +522,12 @@
     "cover": "assets/img/books/上海堡垒.jpg",
     "coverOverride": "assets/img/books/上海堡垒.jpg",
     "doubanUrl": "https://book.douban.com/subject/3268399/",
-    "createdAt": 1787923601758
+    "createdAt": 1787925211178
   },
   {
-    "id": "26647621",
+    "id": "龙族Ⅳ：奥丁之渊",
     "query": "龙族Ⅳ：奥丁之渊",
-    "title": "龙族Ⅳ",
+    "title": "龙族Ⅳ：奥丁之渊",
     "author": "江南",
     "publisher": "长江出版社",
     "intro": "路明非成为了卡塞尔学院的新任学生会主席，偶然中路明非发现，楚子航消失了，除了他，其他人都不记得有这个人曾经存在，并怀疑他在任务中脑震荡。路明非在痛苦中挣扎，找到远在小岛上上新娘课程的诺诺。他并不知道在他离开学院的当天，学院遭受袭击，蒙受重大损失，而他是嫌疑人。这一切充满 了诡异，而芬格尔从古巴千里迢迢赶来助阵，由此路明非和芬格尔、诺诺决定回到了楚子航的故乡，寻找楚子航曾经留下的痕迹。却在无意中与诺诺闯入楚子航当年遇过的尼伯龙根。奥丁再次出现，长枪直指诺诺。路明非为了救诺诺，求助路明泽……",
@@ -537,12 +537,12 @@
     "cover": "assets/img/books/龙族Ⅳ：奥丁之渊.jpg",
     "coverOverride": "assets/img/books/龙族Ⅳ：奥丁之渊.jpg",
     "doubanUrl": "https://book.douban.com/subject/26647621/",
-    "createdAt": 1787923604736
+    "createdAt": 1787925214248
   },
   {
-    "id": "6434543",
+    "id": "龙族Ⅱ：悼亡者之瞳",
     "query": "龙族Ⅱ：悼亡者之瞳",
-    "title": "龙族Ⅱ",
+    "title": "龙族Ⅱ：悼亡者之瞳",
     "author": "江南",
     "publisher": "长江出版社",
     "intro": "这是一个关于屠龙者的故事，这也是一个关于少年们成长的传奇。\n衰仔路明非在生日那天收到了同学聚会的邀请，也同时接收到了来自卡塞尔学院的任务。而特立独行的楚子航却独自承担了全部的任务，并且圆满完成。二人立即飞往芝加哥，开始了新的学期。\n在芝加哥，他们邂逅了漂亮的师妹夏弥。同时，昂热校长来到此地，带领路明非以亿元天价拍下了“七宗罪”。而当他们在六旗游乐园上开始庆祝吐槽时，一个意外发生了——过山车面临离奇崩塌，楚子航不得不冒险使用“爆血”技能将事故化解。而因为血统的不稳定。他也面临着校董会的审判，就在审判结束后，猎人网站却传来了令人震惊的消息——大地与山之龙王在北京苏醒。\n全世界的混血精英纷纷飞往北京，而酒德麻衣团队也在北京不下了“杀龙之局”：魔兽世界副本、英雄级路明非账号、全方位监控。路明非和他的伙伴们纷纷潜入北京地铁，开始了新一轮的屠龙历程。",
@@ -552,12 +552,42 @@
     "cover": "assets/img/books/龙族Ⅱ：悼亡者之瞳.jpg",
     "coverOverride": "assets/img/books/龙族Ⅱ：悼亡者之瞳.jpg",
     "doubanUrl": "https://book.douban.com/subject/6434543/",
-    "createdAt": 1787923609495
+    "createdAt": 1787925218491
   },
   {
-    "id": "25825717",
+    "id": "龙族Ⅲ：黑月之潮（下）",
+    "query": "龙族Ⅲ：黑月之潮（下）",
+    "title": "龙族Ⅲ：黑月之潮（下）",
+    "author": "江南",
+    "publisher": "长江出版社",
+    "intro": "逆命者，将被灼热的矛，贯穿在地狱的最深处！\n卡塞尔三人组从源氏重工撤出后，再次陷入东京暗流。路明非与绘梨衣为躲避蛇岐八家的追捕，躲进了情人旅馆。绘梨衣是开启白王宝藏的钥匙之一，恺撒与楚子航希望路明非能将绘梨衣带离日本。与此同时，酒德麻衣和薯片妞执行老板的“东京爱情故事”计划，要促成路明非与绘梨衣之间的世纪婚礼，然而路明非却背叛了计划，将绘梨衣送回了蛇岐八家。\n在源稚生的带领下，蛇岐八家挖掘出了藏骸之井。猛鬼众首领王将和政宗在东京塔展开谈判，源稚生却突然到来，战斗陡生，政宗葬生火海，王将却死而复生。\n源稚女与卡塞尔合作，欲与源稚生和解。白王却在此时苏醒，东京面临毁灭危机，副校长带卡塞尔装备部空降东京，全面介入危机。源稚生与源稚女在红井对决，两人却败给宿命，双双重伤。王将再次死而复活，以绘梨衣身体为容器抽出白王之血，贯通黄泉之路进化为白王。路明非目睹绘梨...\n(展开全部)",
+    "rating": 8.5,
+    "bigTag": "其他",
+    "tags": [],
+    "cover": "assets/img/books/龙族Ⅲ：黑月之潮（下）.jpg",
+    "coverOverride": "assets/img/books/龙族Ⅲ：黑月之潮（下）.jpg",
+    "doubanUrl": "https://book.douban.com/subject/25825717/",
+    "createdAt": 1787925222542
+  },
+  {
+    "id": "龙族Ⅲ：黑月之潮（中）",
+    "query": "龙族Ⅲ：黑月之潮（中）",
+    "title": "龙族Ⅲ：黑月之潮（中）",
+    "author": "江南",
+    "publisher": "长江出版社",
+    "intro": "逆命者，将被灼热的矛，贯穿在地狱的最深处！\n卡塞尔三人组从源氏重工撤出后，再次陷入东京暗流。路明非与绘梨衣为躲避蛇岐八家的追捕，躲进了情人旅馆。绘梨衣是开启白王宝藏的钥匙之一，恺撒与楚子航希望路明非能将绘梨衣带离日本。与此同时，酒德麻衣和薯片妞执行老板的“东京爱情故事”计划，要促成路明非与绘梨衣之间的世纪婚礼，然而路明非却背叛了计划，将绘梨衣送回了蛇岐八家。\n在源稚生的带领下，蛇岐八家挖掘出了藏骸之井。猛鬼众首领王将和政宗在东京塔展开谈判，源稚生却突然到来，战斗陡生，政宗葬生火海，王将却死而复生。\n源稚女与卡塞尔合作，欲与源稚生和解。白王却在此时苏醒，东京面临毁灭危机，副校长带卡塞尔装备部空降东京，全面介入危机。源稚生与源稚女在红井对决，两人却败给宿命，双双重伤。王将再次死而复活，以绘梨衣身体为容器抽出白王之血，贯通黄泉之路进化为白王。路明非目睹绘梨...\n(展开全部)",
+    "rating": 8.5,
+    "bigTag": "其他",
+    "tags": [],
+    "cover": "assets/img/books/龙族Ⅲ：黑月之潮（中）.jpg",
+    "coverOverride": "assets/img/books/龙族Ⅲ：黑月之潮（中）.jpg",
+    "doubanUrl": "https://book.douban.com/subject/25825717/",
+    "createdAt": 1787925225785
+  },
+  {
+    "id": "龙族Ⅲ：黑月之潮（上）",
     "query": "龙族Ⅲ：黑月之潮（上）",
-    "title": "龙族Ⅲ",
+    "title": "龙族Ⅲ：黑月之潮（上）",
     "author": "江南",
     "publisher": "长江出版社",
     "intro": "逆命者，将被灼热的矛，贯穿在地狱的最深处！\n卡塞尔三人组从源氏重工撤出后，再次陷入东京暗流。路明非与绘梨衣为躲避蛇岐八家的追捕，躲进了情人旅馆。绘梨衣是开启白王宝藏的钥匙之一，恺撒与楚子航希望路明非能将绘梨衣带离日本。与此同时，酒德麻衣和薯片妞执行老板的“东京爱情故事”计划，要促成路明非与绘梨衣之间的世纪婚礼，然而路明非却背叛了计划，将绘梨衣送回了蛇岐八家。\n在源稚生的带领下，蛇岐八家挖掘出了藏骸之井。猛鬼众首领王将和政宗在东京塔展开谈判，源稚生却突然到来，战斗陡生，政宗葬生火海，王将却死而复生。\n源稚女与卡塞尔合作，欲与源稚生和解。白王却在此时苏醒，东京面临毁灭危机，副校长带卡塞尔装备部空降东京，全面介入危机。源稚生与源稚女在红井对决，两人却败给宿命，双双重伤。王将再次死而复活，以绘梨衣身体为容器抽出白王之血，贯通黄泉之路进化为白王。路明非目睹绘梨...\n(展开全部)",
@@ -567,10 +597,10 @@
     "cover": "assets/img/books/龙族Ⅲ：黑月之潮（上）.jpg",
     "coverOverride": "assets/img/books/龙族Ⅲ：黑月之潮（上）.jpg",
     "doubanUrl": "https://book.douban.com/subject/25825717/",
-    "createdAt": 1787923622512
+    "createdAt": 1787925229647
   },
   {
-    "id": "25867881",
+    "id": "龙与少年游",
     "query": "龙与少年游",
     "title": "龙与少年游",
     "author": "江南",
@@ -582,12 +612,12 @@
     "cover": "assets/img/books/龙与少年游.jpg",
     "coverOverride": "assets/img/books/龙与少年游.jpg",
     "doubanUrl": "https://book.douban.com/subject/25867881/",
-    "createdAt": 1787923624965
+    "createdAt": 1787925231492
   },
   {
-    "id": "25997575",
+    "id": "天之炽",
     "query": "天之炽",
-    "title": "天之炽1",
+    "title": "天之炽",
     "author": "江南",
     "publisher": "湖南人民出版社",
     "intro": "酷爱蒸汽机械的高冷男西泽尔，总是孤独寂寞的与世界相处，心里的小小梦想是希望自己和妹妹平静而幸福的生活。这样的一个人，有人觉得他是希望，有人觉得他是魔鬼，他所到之处，就有腥风血雨跟随，从锡兰到马斯顿，他把灾难从一座城市带往另一座城市……为了保护自己所爱的人，让妹妹可以无忧无虑成长，面对敌人的冰寒之剑，西泽尔将作何选择？命运又将何去何从？！",
@@ -597,10 +627,10 @@
     "cover": "assets/img/books/天之炽.jpg",
     "coverOverride": "assets/img/books/天之炽.jpg",
     "doubanUrl": "https://book.douban.com/subject/25997575/",
-    "createdAt": 1787923627324
+    "createdAt": 1787925234593
   },
   {
-    "id": "1321017",
+    "id": "九州·缥缈录",
     "query": "九州·缥缈录",
     "title": "九州·缥缈录",
     "author": "江南",
@@ -612,12 +642,12 @@
     "cover": "assets/img/books/九州·缥缈录.jpg",
     "coverOverride": "assets/img/books/九州·缥缈录.jpg",
     "doubanUrl": "https://book.douban.com/subject/1321017/",
-    "createdAt": 1787923630843
+    "createdAt": 1787925238680
   },
   {
-    "id": "4737329",
+    "id": "龙族Ⅰ：火之晨曦",
     "query": "龙族Ⅰ：火之晨曦",
-    "title": "龙族Ⅰ",
+    "title": "龙族Ⅰ：火之晨曦",
     "author": "江南",
     "publisher": "长江出版社",
     "intro": "他以为他将这样度过一生，他以为他始终只是个衰小孩。但是，一封来自卡塞尔学院的录取通知书改变了他的一生。云层里透出神秘的吟唱：你也有神奇的父母，你也有热血的同伴，你的血管里流动着龙族的血液。而你的目标将是 —— 屠龙。\n由中国最有影响力的青春读物品牌《知音漫客》、《漫客•小说绘》策划，著名青春小说家，九州创始人江南启动全新青春热血大作《龙族》，该作品以一个少年的冒险之旅为故事核心，展现了龙的世界中的神秘与宏大。主角路明非只是一个普通的懵懂高中生，一封来自卡塞尔学院的来信改变了他平淡的人生。在热血与神秘的呼唤下，在爱与梦想的抉择下，他毅然选择了未知。黑色的直升机划过天际，陌生国度的大门向他缓缓开启，平凡的中国小孩走上不平凡的屠龙之路。而遥远的卡塞尔学院却处处透着神秘——奇怪的课程、搞笑的学长、疯狂的教师、骄傲的同学……路明非刚刚进入学校就遭遇了无数的怪事...\n(展开全部)",
@@ -627,12 +657,42 @@
     "cover": "assets/img/books/龙族Ⅰ：火之晨曦.jpg",
     "coverOverride": "assets/img/books/龙族Ⅰ：火之晨曦.jpg",
     "doubanUrl": "https://book.douban.com/subject/4737329/",
-    "createdAt": 1787923633827
+    "createdAt": 1787925242217
   },
   {
-    "id": "3737382",
+    "id": "知音漫客7期",
+    "query": "知音漫客7期",
+    "title": "知音漫客7期",
+    "author": "简介",
+    "publisher": "作者",
+    "intro": "",
+    "rating": 7.5,
+    "bigTag": "其他",
+    "tags": [],
+    "cover": "assets/img/books/知音漫客7期.jpg",
+    "coverOverride": "assets/img/books/知音漫客7期.jpg",
+    "doubanUrl": "https://book.douban.com/subject/3737382/",
+    "createdAt": 1787925245205
+  },
+  {
+    "id": "知音漫客6期",
+    "query": "知音漫客6期",
+    "title": "知音漫客6期",
+    "author": "简介",
+    "publisher": "作者",
+    "intro": "",
+    "rating": 7.5,
+    "bigTag": "其他",
+    "tags": [],
+    "cover": "assets/img/books/知音漫客6期.jpg",
+    "coverOverride": "assets/img/books/知音漫客6期.jpg",
+    "doubanUrl": "https://book.douban.com/subject/3737382/",
+    "createdAt": 1787925248251
+  },
+  {
+    "id": "知音漫客5期",
     "query": "知音漫客5期",
-    "title": "知音漫客",
+    "title": "知音漫客5期",
     "author": "简介",
     "publisher": "作者",
     "intro": "",
@@ -642,6 +702,6 @@
     "cover": "assets/img/books/知音漫客5期.jpg",
     "coverOverride": "assets/img/books/知音漫客5期.jpg",
     "doubanUrl": "https://book.douban.com/subject/3737382/",
-    "createdAt": 1787923645457
+    "createdAt": 1787925250637
   }
 ]
