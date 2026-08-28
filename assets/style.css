@@ -747,7 +747,7 @@ body.is-library .main { max-width: none; padding: 14px 24px 40px; }
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
-/* 书脊模式：仿真书架（竖条 + 竖排书名，按大分类分区） */
+/* 书脊模式：仿真书架——封面图作书脊背景（真实书脊=封面延续），竖排书名/作者 + 书壳质感 */
 .lib-spine-shelf { display: flex; flex-direction: column; gap: 26px; }
 .lib-spine-section { display: flex; flex-direction: column; gap: 8px; }
 .lib-spine-head {
@@ -757,62 +757,76 @@ body.is-library .main { max-width: none; padding: 14px 24px 40px; }
   font-weight: 600;
   padding-left: 2px;
 }
+/* 书架底板：深色木纹质感 */
 .lib-spine-row {
   display: flex;
   align-items: flex-end;
   gap: 10px;
   flex-wrap: wrap;
   padding: 14px 12px 8px;
-  background: linear-gradient(180deg, #8a5a33, #6f4526 60%, #5d3a1e);
+  background:
+    repeating-linear-gradient(90deg, rgba(0, 0, 0, .12) 0 2px, transparent 2px 8px),
+    linear-gradient(180deg, #7a4e2b, #5d3a1e 55%, #4a2d15);
   border-radius: 10px;
   min-height: 252px;
-  box-shadow: inset 0 6px 18px rgba(0, 0, 0, .28);
+  box-shadow: inset 0 6px 18px rgba(0, 0, 0, .3);
 }
 .lib-spine {
   position: relative;
   width: 48px;
   height: 210px;
-  border-radius: 3px 4px 4px 3px;
-  background:
-    linear-gradient(90deg, rgba(0,0,0,.18), transparent 14%, transparent 86%, rgba(0,0,0,.24)),
-    var(--spine-c, #6b7280);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, .25);
+  border-radius: 4px 5px 5px 4px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform .18s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, .32);
+  background: var(--spine-c, #6b7280);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  cursor: pointer;
-  transition: transform .18s ease;
-  overflow: hidden;
 }
 .lib-spine:hover { transform: translateY(-6px); }
-.lib-spine::before,
+/* 封面图铺满书脊（竖条裁切封面中部，即真实书脊的封面延续） */
+.lib-spine-cover {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  pointer-events: none;
+}
+/* 压暗渐变保证文字可读 + 左右高光/阴影模拟圆柱感 + 上下书壳 */
 .lib-spine::after {
   content: '';
   position: absolute;
-  left: 0; right: 0;
-  height: 6px;
-  background: rgba(0, 0, 0, .28);
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, .36), rgba(0, 0, 0, .10) 16%, rgba(0, 0, 0, .16) 84%, rgba(0, 0, 0, .44)),
+    linear-gradient(90deg, rgba(255, 255, 255, .2), transparent 22%, transparent 78%, rgba(0, 0, 0, .24));
+  pointer-events: none;
 }
-.lib-spine::before { top: 0; }
-.lib-spine::after { bottom: 0; }
+.lib-spine-title,
+.lib-spine-author { position: relative; z-index: 1; }
 .lib-spine-title {
   writing-mode: vertical-rl;
   text-orientation: mixed;
-  margin-top: 18px;
-  font-size: 12.5px;
-  font-weight: 700;
+  margin-top: 22px;
+  font-size: 13px;
+  font-weight: 800;
   color: #fff;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, .5);
-  letter-spacing: 1px;
-  max-height: 150px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, .75), 0 0 6px rgba(0, 0, 0, .4);
+  letter-spacing: 1.5px;
+  max-height: 140px;
   overflow: hidden;
 }
 .lib-spine-author {
   writing-mode: vertical-rl;
-  margin-top: 6px;
-  font-size: 9.5px;
-  color: rgba(255, 255, 255, .85);
+  margin-top: 8px;
+  font-size: 9px;
+  color: rgba(255, 255, 255, .92);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, .7);
   max-height: 40px;
   overflow: hidden;
 }
@@ -836,6 +850,14 @@ body.is-library .main { max-width: none; padding: 14px 24px 40px; }
   white-space: pre-line;
   max-height: 220px;
   overflow-y: auto;
+}
+/* 弹窗跳转链接区（豆瓣 / 微信读书） */
+.book-links { display: flex; gap: 10px; flex-wrap: wrap; }
+.btn-primary, .btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
 }
 
 /* 移动端 */

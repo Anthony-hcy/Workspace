@@ -47,6 +47,7 @@ const state = {
   syncing: false,     // 是否正在云端同步
   library: [],        // Library 书架书籍（独立于收藏）
   libMode: 'cover',   // 书架模式：cover（封面）| spine（书脊）
+  libSort: 'asc',     // 书名排序：asc（A-Z）| desc（Z-A）
   libBig: 'all',      // 大分类筛选
   libSub: 'all',      // 小分类筛选
 };
@@ -729,13 +730,18 @@ const LIB_BIG_COLORS = {
 };
 const libBigColor = (tag) => LIB_BIG_COLORS[tag] || '#6b7280';
 
-/** 当前筛选下的书 */
+/** 当前筛选下的书（按书名 A-Z/Z-A 排序，中文按拼音） */
+const libTitleCollator = new Intl.Collator('zh-CN');
 function libFiltered() {
-  return state.library.filter((b) => {
+  const list = state.library.filter((b) => {
     if (state.libBig !== 'all' && b.bigTag !== state.libBig) return false;
     if (state.libSub !== 'all' && !(b.tags || []).includes(state.libSub)) return false;
     return true;
   });
+  list.sort((a, b) => state.libSort === 'asc'
+    ? libTitleCollator.compare(a.title || '', b.title || '')
+    : libTitleCollator.compare(b.title || '', a.title || ''));
+  return list;
 }
 
 function renderLibrary() {
@@ -796,20 +802,12 @@ function renderSpine(books) {
       <div class="lib-spine-row">
         ${list.map((b) => `
           <div class="lib-spine" data-book="${b.id}" style="--spine-c:${libBigColor(b.bigTag)};width:${Math.round(44 + Math.random() * 14)}px" title="${escapeHtml(b.title)}">
+            ${b.cover ? `<img class="lib-spine-cover" src="${b.cover}" alt="" loading="lazy" onerror="this.remove()">` : ''}
             <span class="lib-spine-title">${escapeHtml(b.title)}</span>
             <span class="lib-spine-author">${escapeHtml(b.author || '')}</span>
           </div>`).join('')}
       </div>
     </section>`).join('');
-  // 异步用封面主色刷新书脊底色（本地图片无跨域问题；失败保留分类配色）
-  for (const b of books) {
-    if (!b.cover) continue;
-    extractCoverColor(b.cover).then((c) => {
-      if (!c) return;
-      const el = shelf.querySelector(`[data-book="${b.id}"]`);
-      if (el) el.style.setProperty('--spine-c', c);
-    });
-  }
 }
 
 /** 从封面图提取主色（缩小采样平均色） */
@@ -848,7 +846,10 @@ function openBook(id) {
         ${b.rating ? `<p class="book-rating">豆瓣评分 <b>${b.rating}</b></p>` : ''}
         <p class="book-tags">${tagHtml}</p>
         <p class="book-intro">${escapeHtml(b.intro || '暂无简介')}</p>
-        ${b.doubanUrl ? `<a class="btn-primary" href="${b.doubanUrl}" target="_blank" rel="noopener noreferrer">去豆瓣查看</a>` : ''}
+        <div class="book-links">
+          ${b.doubanUrl ? `<a class="btn-primary" href="${b.doubanUrl}" target="_blank" rel="noopener noreferrer">去豆瓣查看</a>` : ''}
+          <a class="btn-ghost" href="https://weread.qq.com/web/search/books?keyword=${encodeURIComponent(b.title)}" target="_blank" rel="noopener noreferrer">微信读书</a>
+        </div>
       </div>
     </div>`;
   $('#bookModal').showModal();
@@ -875,12 +876,23 @@ $('#libSubTags').addEventListener('click', (e) => {
   state.libSub = btn.dataset.libSub;
   renderLibrary();
 });
+$('#libSort').addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-lib-sort]');
+  if (!btn) return;
+  document.querySelectorAll('#libSort .chip').forEach((c) => c.classList.toggle('is-active', c === btn));
+  state.libSort = btn.dataset.libSort;
+  renderLibrary();
+});
 // 书架点击（封面或书脊）→ 详情弹窗
 $('#libShelf').addEventListener('click', (e) => {
   const el = e.target.closest('[data-book]');
   if (el) openBook(el.dataset.book);
 });
 $('#bookClose').addEventListener('click', () => $('#bookModal').close());
+// 点击弹窗空白处（backdrop）自动关闭
+$('#bookModal').addEventListener('click', (e) => {
+  if (e.target === $('#bookModal')) $('#bookModal').close();
+});
 
 // 侧边栏切换（事件委托）：箭头展开/收起 Favorites 二级平台；Blog 为站内视图
 $('#sideNav').addEventListener('click', (e) => {
