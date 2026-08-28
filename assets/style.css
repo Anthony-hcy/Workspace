@@ -816,52 +816,36 @@ body.is-library .main { max-width: none; padding: 14px 24px 40px; }
   align-items: center;
   justify-content: flex-start;
 }
-.lib-spine:hover { transform: translateY(-6px); z-index: 4; }
-/* 悬停展开封面：从书脊右侧滑出（仅 transform/opacity 过渡，GPU 合成，横扫不卡顿） */
-.lib-spine-pop {
+/* 书脊悬停：横向展开成封面（宽封面为书脊的兄弟元素，从书脊位置向右 scaleX 展开，
+   不受书脊自身变换影响，正常比例显示；仅 transform/opacity，GPU 平滑） */
+.lib-spine { transition: transform .18s ease; }
+.lib-spine:hover { z-index: 2; }
+.lib-spine-wide {
   position: absolute;
-  left: calc(100% + 8px);
+  left: 0;
   top: 0;
-  width: 132px;
-  padding: 7px 7px 9px;
-  border-radius: 10px;
-  background: #fff;
-  box-shadow: 0 16px 36px rgba(0, 0, 0, .32);
-  pointer-events: none;
+  width: 150px;
   z-index: 6;
-  transform: translateX(-10px) scale(.55);
-  transform-origin: 0 50%;
+  border-radius: 5px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, .3);
   opacity: 0;
-  transition: transform .22s cubic-bezier(.2, .7, .3, 1.1), opacity .16s ease;
+  transform: scaleX(.16);
+  transform-origin: left center;
+  transition: transform .26s cubic-bezier(.25, .8, .3, 1), opacity .18s ease;
+  cursor: pointer;
+  pointer-events: auto;
 }
-.lib-spine:hover .lib-spine-pop {
-  transform: translateX(0) scale(1);
-  opacity: 1;
-}
-.lib-spine-pop-cover {
-  display: block;
+.lib-spine:hover + .lib-spine-wide,
+.lib-spine-wide:hover { opacity: 1; transform: scaleX(1); }
+.lib-spine-cover-wide-img {
+  position: absolute;
+  inset: 0;
   width: 100%;
-  aspect-ratio: 3 / 4;
+  height: 100%;
   object-fit: cover;
-  border-radius: 6px;
-  background: #eee;
-}
-.lib-spine-pop-title {
-  margin: 7px 2px 1px;
-  font-size: 12.5px;
-  font-weight: 700;
-  color: var(--ink);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.lib-spine-pop-author {
-  margin: 1px 2px 0;
-  font-size: 11px;
-  color: var(--ink-2);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  border-radius: 5px;
 }
 /* 封面图铺满书脊（竖条裁切封面中部，即真实书脊的封面延续） */
 .lib-spine-cover {

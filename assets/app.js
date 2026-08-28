@@ -798,15 +798,24 @@ function renderSpine(books) {
             <span class="lib-spine-title">${escapeHtml(b.title)}</span>
             <span class="lib-spine-author">${escapeHtml(b.author || '')}</span>
             ${b.publisher ? `<span class="lib-spine-pub">${escapeHtml(b.publisher)}</span>` : ''}
-            <div class="lib-spine-pop">
-              ${b.cover ? `<img class="lib-spine-pop-cover" src="${b.cover}" alt="" draggable="false">` : ''}
-              <p class="lib-spine-pop-title">${escapeHtml(b.title)}</p>
-              <p class="lib-spine-pop-author">${escapeHtml(b.author || '')}</p>
-            </div>
+          </div>
+          <div class="lib-spine-wide" data-book="${b.id}">
+            ${b.cover ? `<img class="lib-spine-cover-wide-img" src="${b.cover}" alt="" draggable="false">` : ''}
           </div>`;
         }).join('')}
       </div>
     </section>`;
+  // 把展开封面定位到对应书脊的位置（相对书架行）
+  const spines = shelf.querySelectorAll('.lib-spine');
+  const wides = shelf.querySelectorAll('.lib-spine-wide');
+  spines.forEach((s, i) => {
+    const wd = wides[i];
+    if (wd) {
+      wd.style.left = `${s.offsetLeft}px`;
+      wd.style.top = `${s.offsetTop}px`;
+      wd.style.height = `${s.offsetHeight}px`;
+    }
+  });
 }
 
 /** 从封面图提取主色（缩小采样平均色） */
