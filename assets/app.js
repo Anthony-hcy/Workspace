@@ -789,13 +789,17 @@ function renderSpine(books) {
   shelf.innerHTML = `
     <section class="lib-spine-section">
       <div class="lib-spine-row">
-        ${books.map((b) => `
-          <div class="lib-spine" data-book="${b.id}" style="width:${Math.round(28 + Math.random() * 8)}px" title="${escapeHtml(b.title)}">
+        ${books.map((b) => {
+          // 宽度按书名哈希确定性生成：同一本书永远同宽，重渲染不抖动
+          const w = 28 + (hashId(b.id + b.title) % 8);
+          return `
+          <div class="lib-spine" data-book="${b.id}" style="width:${w}px" title="${escapeHtml(b.title)}">
             ${b.cover ? `<img class="lib-spine-cover" src="${b.cover}" alt="" loading="lazy" onerror="this.remove()">` : ''}
             <span class="lib-spine-title">${escapeHtml(b.title)}</span>
             <span class="lib-spine-author">${escapeHtml(b.author || '')}</span>
             ${b.publisher ? `<span class="lib-spine-pub">${escapeHtml(b.publisher)}</span>` : ''}
-          </div>`).join('')}
+          </div>`;
+        }).join('')}
       </div>
     </section>`;
 }
