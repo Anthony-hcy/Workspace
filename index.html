@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Workspace · 我的收藏夹</title>
   <meta name="description" content="跨平台收藏夹工作台：自动同步抖音、B站与小 红书的收藏内容" />
-  <link rel="stylesheet" href="assets/style.css?v=20260828m" />
+  <link rel="stylesheet" href="assets/style.css?v=20260828n" />
   <!-- 内联 favicon：一个渐变书签图标，免额外请求 -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%237c5cff'/><stop offset='1' stop-color='%2300c2ff'/></linearGradient></defs><path fill='url(%23g)' d='M6 2h12a2 2 0 0 1 2 2v18l-8-4.8L4 22V4a2 2 0 0 1 2-2z'/></svg>" />
 </head>
@@ -150,6 +150,12 @@
         </div>
         <p class="lib-count" id="libCount"></p>
         <div class="lib-shelf" id="libShelf"></div>
+        <!-- 封面模式分页（一页四行） -->
+        <div class="pagination" id="libPagination" hidden>
+          <button class="page-btn" id="libPrev">‹ 上一页</button>
+          <span class="page-info">第 <span id="libPageCur">1</span> / <span id="libPageTotal">1</span> 页</span>
+          <button class="page-btn" id="libNext">下一页 ›</button>
+        </div>
       </div>
 
       <!-- Library 书籍详情弹窗 -->

@@ -50,6 +50,7 @@ const state = {
   libSort: 'title-asc', // 排序：title-asc | title-desc | rating-desc
   libKw: '',          // 书架搜索关键词
   libSub: 'all',      // 分类（小分类 tags）筛选
+  libPage: 1,         // 封面模式页码（一页四行）
 };
 
 /* 封面占位渐变色板（仿 Collecta 的多彩柔和风） */
@@ -767,11 +768,23 @@ function renderLibrary() {
   else renderCoverGrid(filtered);
 }
 
-/** 封面模式：网格排列，本地封面 + 书名 + 评分角标 */
+/** 封面列数（按容器宽度估算） */
+function coverCols() {
+  const w = $('#libShelf').clientWidth || Math.max(300, window.innerWidth - 176 - 48);
+  return Math.max(2, Math.floor((w + 18) / 158));   // 140px 卡 + 18px gap
+}
+
+/** 封面模式：网格排列（一页四行分页），本地封面 + 书名 + 评分角标 */
 function renderCoverGrid(books) {
   const shelf = $('#libShelf');
   shelf.className = 'lib-shelf lib-cover-grid';
-  shelf.innerHTML = books.map((b) => `
+  const cols = coverCols();
+  const perPage = cols * 4;   // 一页四行
+  const totalPages = Math.max(1, Math.ceil(books.length / perPage));
+  state.libPage = Math.min(state.libPage, totalPages);
+  const slice = books.slice((state.libPage - 1) * perPage, state.libPage * perPage);
+
+  shelf.innerHTML = slice.map((b) => `
     <a class="lib-book" data-book="${b.id}">
       <div class="lib-cover">
         <img src="${b.cover || ''}" alt="${escapeHtml(b.title)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none'">
@@ -780,28 +793,47 @@ function renderCoverGrid(books) {
       <p class="lib-title">${escapeHtml(b.title)}</p>
       <p class="lib-author">${escapeHtml(b.author || '')}</p>
     </a>`).join('');
+
+  // 分页控件（封面模式一页四行）
+  const pg = $('#libPagination');
+  pg.hidden = books.length === 0;
+  $('#libPageCur').textContent = state.libPage;
+  $('#libPageTotal').textContent = totalPages;
+  $('#libPrev').disabled = state.libPage <= 1;
+  $('#libNext').disabled = state.libPage >= totalPages;
 }
 
-/** 书脊模式：仿真书脊（封面图背景 + 竖排书名/作者/出版社），全部一排 */
+/** 书脊模式：仿真书脊（封面图背景 + 竖排书名/作者/出版社），书多自动分到下一层书架 */
 function renderSpine(books) {
   const shelf = $('#libShelf');
   shelf.className = 'lib-shelf lib-spine-shelf';
-  shelf.innerHTML = `
-    <section class="lib-spine-section">
-      <div class="lib-spine-row">
-        ${books.map((b) => {
-          // 宽度按书名哈希确定性生成（存 CSS 变量，便于 hover 时展开覆盖）
-          const w = 28 + (hashId(b.id + b.title) % 8);
-          return `
-          <div class="lib-spine" data-book="${b.id}" style="--w:${w}px">
-            ${b.cover ? `<img class="lib-spine-cover" src="${b.cover}" alt="" loading="lazy" onerror="this.remove()">` : ''}
-            <span class="lib-spine-title">${escapeHtml(b.title)}</span>
-            <span class="lib-spine-author">${escapeHtml(b.author || '')}</span>
-            ${b.publisher ? `<span class="lib-spine-pub">${escapeHtml(b.publisher)}</span>` : ''}
-          </div>`;
-        }).join('')}
-      </div>
-    </section>`;
+  $('#libPagination').hidden = true;   // 书脊不分页
+
+  // 每层书架可放的本数（按容器宽度估算；44 ≈ 平均书脊宽 + 间距）
+  const avail = shelf.clientWidth || Math.max(300, window.innerWidth - 176 - 48);
+  const perRow = Math.max(3, Math.floor((avail - 28) / 44));
+  const rows = [];
+  for (let i = 0; i < books.length; i += perRow) rows.push(books.slice(i, i + perRow));
+
+  shelf.innerHTML = rows.map((rowBooks) => `
+    <div class="lib-spine-row">
+      ${rowBooks.map((b) => {
+        // 宽度按书名哈希确定性生成
+        const w = 28 + (hashId(b.id + b.title) % 8);
+        // 书名/作者按长度降字号（长则小，避免挤出书脊）
+        const tlen = (b.title || '').length;
+        const titleCls = tlen > 9 ? 'lib-spine-title long' : tlen > 5 ? 'lib-spine-title mid' : 'lib-spine-title';
+        const alen = (b.author || '').length;
+        const authorCls = alen > 10 ? 'lib-spine-author long' : alen > 5 ? 'lib-spine-author mid' : 'lib-spine-author';
+        return `
+        <div class="lib-spine" data-book="${b.id}" style="--w:${w}px">
+          ${b.cover ? `<img class="lib-spine-cover" src="${b.cover}" alt="" loading="lazy" onerror="this.remove()">` : ''}
+          <span class="${titleCls}">${escapeHtml(b.title)}</span>
+          <span class="${authorCls}">${escapeHtml(b.author || '')}</span>
+          ${b.publisher ? `<span class="lib-spine-pub">${escapeHtml(b.publisher)}</span>` : ''}
+        </div>`;
+      }).join('')}
+    </div>`).join('');
 }
 
 /** 从封面图提取主色（缩小采样平均色） */
@@ -885,6 +917,9 @@ $('#libShelf').addEventListener('click', (e) => {
   const el = e.target.closest('[data-book]');
   if (el) openBook(el.dataset.book);
 });
+// 封面分页
+$('#libPrev').addEventListener('click', () => { state.libPage = Math.max(1, state.libPage - 1); renderLibrary(); });
+$('#libNext').addEventListener('click', () => { state.libPage += 1; renderLibrary(); });
 $('#bookClose').addEventListener('click', () => $('#bookModal').close());
 // 点击弹窗空白处（backdrop）自动关闭
 $('#bookModal').addEventListener('click', (e) => {
