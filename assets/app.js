@@ -827,18 +827,22 @@ function renderSpine(books) {
         const tlen = (b.title || '').length;
         const titleCls = tlen > 9 ? 'lib-spine-title long' : tlen > 5 ? 'lib-spine-title mid' : 'lib-spine-title';
         const title = tlen > 15 ? clipText(b.title, 15) : b.title;   // 兜底：极长书名截断
+        // 知音漫客系列书脊只印书名（用户指定）：固定白字、无作者/出版社
+        const titleOnly = /^知音漫客/.test(b.title || '');
         const alen = (b.author || '').length;
         const authorCls = alen > 10 ? 'lib-spine-author long' : alen > 5 ? 'lib-spine-author mid' : 'lib-spine-author';
         // 作者/出版社按字号档的竖向容量截断（一列放得下的字符数），超长加省略号
         const author = clipText(b.author || '', alen > 10 ? 5 : alen > 5 ? 5 : 4);
         const pub = clipText(b.publisher || '', 7);
-        if (b.cover) toneTargets.push({ id: b.id, cover: b.cover });
+        // 只印书名的书不参与取色（保持白字兜底）
+        if (b.cover && !titleOnly) toneTargets.push({ id: b.id, cover: b.cover });
         return `
         <div class="lib-spine" data-book="${b.id}" style="--w:${w}px">
           ${b.cover ? `<img class="lib-spine-cover" src="${b.cover}" alt="" loading="lazy" onerror="this.remove()">` : ''}
-          <span class="${titleCls}">${escapeHtml(title)}</span>
+          <span class="${titleCls}${titleOnly ? ' lib-spine-title-only' : ''}">${escapeHtml(title)}</span>
+          ${titleOnly ? '' : `
           <span class="${authorCls}">${escapeHtml(author)}</span>
-          ${b.publisher ? `<span class="lib-spine-pub">${escapeHtml(pub)}</span>` : ''}
+          ${b.publisher ? `<span class="lib-spine-pub">${escapeHtml(pub)}</span>` : ''}`}
         </div>`;
       }).join('')}
     </div>`).join('');

@@ -896,6 +896,8 @@ body.is-library .main { max-width: none; padding: 14px 24px 40px; }
 }
 .lib-spine-title.mid { font-size: 11px; }
 .lib-spine-title.long { font-size: 9.5px; }
+/* 只印书名的书（如知音漫客系列）：书名垂直居中于书脊 */
+.lib-spine-title-only { margin-top: auto; margin-bottom: auto; }
 /* 作者：衬线小字，比书名小一档 */
 .lib-spine-author {
   writing-mode: vertical-rl;
