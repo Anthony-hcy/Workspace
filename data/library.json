@@ -184,16 +184,19 @@
   {
     "query": "知音漫客7期",
     "coverOverride": "assets/img/books/知音漫客7期.jpg",
-    "doubanId": "3737382"
+    "doubanId": "3737382",
+    "author": "知音漫客"
   },
   {
     "query": "知音漫客6期",
     "coverOverride": "assets/img/books/知音漫客6期.jpg",
-    "doubanId": "3737382"
+    "doubanId": "3737382",
+    "author": "知音漫客"
   },
   {
     "query": "知音漫客5期",
     "coverOverride": "assets/img/books/知音漫客5期.jpg",
-    "doubanId": "3737382"
+    "doubanId": "3737382",
+    "author": "知音漫客"
   }
 ]
