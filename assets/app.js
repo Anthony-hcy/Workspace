@@ -804,7 +804,7 @@ function renderCoverGrid(books) {
   $('#libNext').disabled = state.libPage >= totalPages;
 }
 
-/** 书脊模式：仿真书脊（封面图背景 + 竖排书名/作者/出版社），书多自动分到下一层书架 */
+/** 书脊模式：仿真书脊（封面左竖条背景 + 竖排书名/作者/出版社），书多自动分到下一层书架 */
 function renderSpine(books) {
   const shelf = $('#libShelf');
   shelf.className = 'lib-shelf lib-spine-shelf';
@@ -816,6 +816,8 @@ function renderSpine(books) {
   const rows = [];
   for (let i = 0; i < books.length; i += perRow) rows.push(books.slice(i, i + perRow));
 
+  const toneTargets = [];   // 渲染完成后统一异步取封面亮度，决定文字黑白
+
   shelf.innerHTML = rows.map((rowBooks) => `
     <div class="lib-spine-row">
       ${rowBooks.map((b) => {
@@ -824,21 +826,46 @@ function renderSpine(books) {
         // 书名/作者按长度降字号（长则小，避免挤出书脊）
         const tlen = (b.title || '').length;
         const titleCls = tlen > 9 ? 'lib-spine-title long' : tlen > 5 ? 'lib-spine-title mid' : 'lib-spine-title';
+        const title = tlen > 15 ? clipText(b.title, 15) : b.title;   // 兜底：极长书名截断
         const alen = (b.author || '').length;
         const authorCls = alen > 10 ? 'lib-spine-author long' : alen > 5 ? 'lib-spine-author mid' : 'lib-spine-author';
+        // 作者/出版社按字号档的竖向容量截断（一列放得下的字符数），超长加省略号
+        const author = clipText(b.author || '', alen > 10 ? 5 : alen > 5 ? 5 : 4);
+        const pub = clipText(b.publisher || '', 7);
+        if (b.cover) toneTargets.push({ id: b.id, cover: b.cover });
         return `
         <div class="lib-spine" data-book="${b.id}" style="--w:${w}px">
           ${b.cover ? `<img class="lib-spine-cover" src="${b.cover}" alt="" loading="lazy" onerror="this.remove()">` : ''}
-          <span class="${titleCls}">${escapeHtml(b.title)}</span>
-          <span class="${authorCls}">${escapeHtml(b.author || '')}</span>
-          ${b.publisher ? `<span class="lib-spine-pub">${escapeHtml(b.publisher)}</span>` : ''}
+          <span class="${titleCls}">${escapeHtml(title)}</span>
+          <span class="${authorCls}">${escapeHtml(author)}</span>
+          ${b.publisher ? `<span class="lib-spine-pub">${escapeHtml(pub)}</span>` : ''}
         </div>`;
       }).join('')}
     </div>`).join('');
+
+  // 逐本异步取封面左竖条亮度 → 浅色封面深字、深色封面白字（取色失败保持白字兜底）
+  for (const t of toneTargets) {
+    extractSpineTone(t.cover).then((l) => {
+      if (l == null) return;
+      const el = shelf.querySelector(`[data-book="${t.id}"]`);
+      if (!el) return;
+      const dark = l > 145;
+      el.style.setProperty('--spine-fg', dark ? '#26282d' : '#ffffff');
+      el.style.setProperty('--spine-fg-shadow', dark
+        ? '0 1px 0 rgba(255,255,255,.28)'
+        : '0 1px 2px rgba(0,0,0,.65), 0 0 5px rgba(0,0,0,.25)');
+    });
+  }
 }
 
-/** 从封面图提取主色（缩小采样平均色） */
-function extractCoverColor(src) {
+/** 超长文本截断：保留前 n-1 个字 + 省略号（书脊竖排单列放不下时用） */
+function clipText(s, n) {
+  if (!s || s.length <= n) return s;
+  return s.slice(0, Math.max(0, n - 1)) + '…';
+}
+
+/** 从封面图提取左侧竖条的平均感知亮度（0~255），用于书脊文字黑白自适应 */
+function extractSpineTone(src) {
   return new Promise((resolve) => {
     const img = new Image();
     img.onload = () => {
@@ -848,9 +875,16 @@ function extractCoverColor(src) {
         const ctx = cv.getContext('2d');
         ctx.drawImage(img, 0, 0, 40, 60);
         const d = ctx.getImageData(0, 0, 40, 60).data;
-        let r = 0, g = 0, b = 0, n = 0;
-        for (let i = 0; i < d.length; i += 4) { r += d[i]; g += d[i + 1]; b += d[i + 2]; n++; }
-        resolve(`rgb(${Math.round(r / n)},${Math.round(g / n)},${Math.round(b / n)})`);
+        const leftW = Math.max(1, Math.round(40 * 0.18));   // 只采样左侧 18% 竖条
+        let lum = 0, n = 0;
+        for (let y = 0; y < 60; y++) {
+          for (let x = 0; x < leftW; x++) {
+            const i = (y * 40 + x) * 4;
+            lum += 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+            n++;
+          }
+        }
+        resolve(n ? lum / n : null);
       } catch { resolve(null); }
     };
     img.onerror = () => resolve(null);
