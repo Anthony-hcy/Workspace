@@ -839,7 +839,7 @@ function renderSpine(books) {
         return `
         <div class="lib-spine" data-book="${b.id}" style="--w:${w}px">
           ${b.cover ? `<img class="lib-spine-cover" src="${b.cover}" alt="" loading="lazy" onerror="this.remove()">` : ''}
-          <span class="${titleCls}${titleOnly ? ' lib-spine-title-only' : ''}">${escapeHtml(title)}</span>
+          <span class="${titleCls}">${escapeHtml(title)}</span>
           ${titleOnly ? '' : `
           <span class="${authorCls}">${escapeHtml(author)}</span>
           ${b.publisher ? `<span class="lib-spine-pub">${escapeHtml(pub)}</span>` : ''}`}
