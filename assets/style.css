@@ -889,7 +889,7 @@ body.is-library .main { max-width: none; padding: 14px 24px 40px; }
   writing-mode: vertical-rl;
   text-orientation: mixed;
   font-family: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", serif;
-  font-size: 9.5px;
+  font-size: 11px;
   font-weight: 700;
   color: var(--spine-fg, #fff);
   text-shadow: var(--spine-fg-shadow, 0 1px 3px rgba(0, 0, 0, .75), 0 0 6px rgba(0, 0, 0, .4));
@@ -899,7 +899,7 @@ body.is-library .main { max-width: none; padding: 14px 24px 40px; }
 /* 作者：绝对定位固定于书脊中间偏下（各书 top 一致即上对齐），水平居中，字号统一且比书名小 */
 .lib-spine-author {
   position: absolute;
-  top: 63%;
+  top: 66%;
   left: 50%;
   transform: translateX(-50%);
   writing-mode: vertical-rl;
@@ -909,10 +909,10 @@ body.is-library .main { max-width: none; padding: 14px 24px 40px; }
   text-shadow: var(--spine-fg-shadow, 0 1px 2px rgba(0, 0, 0, .7));
   max-height: 40px;
 }
-/* 书脊底部出版社：绝对定位固定于底部（各书底部一致即上对齐），水平居中，字号统一且比作者小，弱化存在感 */
+/* 书脊底部出版社：绝对定位固定顶部（各书 top 一致即上对齐，底部随字数参差），水平居中，字号统一且比作者小，弱化存在感 */
 .lib-spine-pub {
   position: absolute;
-  bottom: 6px;
+  top: 84%;
   left: 50%;
   transform: translateX(-50%);
   writing-mode: vertical-rl;
@@ -966,9 +966,9 @@ body.is-library .main { max-width: none; padding: 14px 24px 40px; }
   .lib-spine:hover { width: 150px; }   /* 200×3/4，封面完整比例 */
   .lib-spine-row { min-height: 230px; }
   /* 移动端书脊矮 40px：字号整体降一档，底部留白收紧，保证三行文字不重叠 */
-  .lib-spine-title { top: 14px; font-size: 9px; }
-  .lib-spine-author { top: 62%; font-size: 7px; }
-  .lib-spine-pub { bottom: 6px; font-size: 6px; }
+  .lib-spine-title { top: 14px; font-size: 10px; }
+  .lib-spine-author { top: 64%; font-size: 7px; }
+  .lib-spine-pub { top: 85%; font-size: 6px; }
 }
 
 /* 临时批量添加弹窗 */

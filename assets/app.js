@@ -824,12 +824,12 @@ function renderSpine(books) {
       ${rowBooks.map((b) => {
         // 宽度按书名哈希确定性生成
         const w = 28 + (hashId(b.id + b.title) % 8);
-        // 字号统一、位置固定（CSS absolute 版式），超长按单列容量截断：桌面书名 10 字/移动 8 字，作者 5 字，出版社桌面 5 字/移动 4 字
-        const title = clipText(b.title || '', isMobile ? 8 : 10);
+        // 字号统一、位置固定（CSS absolute 版式），超长按单列容量截断：桌面书名 9 字/移动 8 字，作者 5 字，出版社 4 字
+        const title = clipText(b.title || '', isMobile ? 8 : 9);
         // 知音漫客系列书脊只印书名（用户指定）：固定白字、无作者/出版社
         const titleOnly = /^知音漫客/.test(b.title || '');
         const author = clipText(b.author || '', 5);
-        const pub = clipText(b.publisher || '', isMobile ? 4 : 5);
+        const pub = clipText(b.publisher || '', 4);
         // 只印书名的书不参与取色（保持白字兜底）
         if (b.cover && !titleOnly) toneTargets.push({ id: b.id, cover: b.cover });
         return `
