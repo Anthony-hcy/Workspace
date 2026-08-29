@@ -816,6 +816,7 @@ function renderSpine(books) {
   const rows = [];
   for (let i = 0; i < books.length; i += perRow) rows.push(books.slice(i, i + perRow));
 
+  const isMobile = window.innerWidth <= 640;   // 移动端书脊矮一截，书名截断更短
   const toneTargets = [];   // 渲染完成后统一异步取封面亮度，决定文字黑白
 
   shelf.innerHTML = rows.map((rowBooks) => `
@@ -823,25 +824,20 @@ function renderSpine(books) {
       ${rowBooks.map((b) => {
         // 宽度按书名哈希确定性生成
         const w = 28 + (hashId(b.id + b.title) % 8);
-        // 书名/作者按长度降字号（长则小，避免挤出书脊）
-        const tlen = (b.title || '').length;
-        const titleCls = tlen > 9 ? 'lib-spine-title long' : tlen > 5 ? 'lib-spine-title mid' : 'lib-spine-title';
-        const title = tlen > 15 ? clipText(b.title, 15) : b.title;   // 兜底：极长书名截断
+        // 字号统一、位置固定（CSS absolute 版式），超长按单列容量截断：桌面书名 10 字/移动 8 字，作者 5 字，出版社桌面 5 字/移动 4 字
+        const title = clipText(b.title || '', isMobile ? 8 : 10);
         // 知音漫客系列书脊只印书名（用户指定）：固定白字、无作者/出版社
         const titleOnly = /^知音漫客/.test(b.title || '');
-        const alen = (b.author || '').length;
-        const authorCls = alen > 10 ? 'lib-spine-author long' : alen > 5 ? 'lib-spine-author mid' : 'lib-spine-author';
-        // 作者/出版社按字号档的竖向容量截断（一列放得下的字符数），超长加省略号
-        const author = clipText(b.author || '', alen > 10 ? 5 : alen > 5 ? 5 : 4);
-        const pub = clipText(b.publisher || '', 7);
+        const author = clipText(b.author || '', 5);
+        const pub = clipText(b.publisher || '', isMobile ? 4 : 5);
         // 只印书名的书不参与取色（保持白字兜底）
         if (b.cover && !titleOnly) toneTargets.push({ id: b.id, cover: b.cover });
         return `
         <div class="lib-spine" data-book="${b.id}" style="--w:${w}px">
           ${b.cover ? `<img class="lib-spine-cover" src="${b.cover}" alt="" loading="lazy" onerror="this.remove()">` : ''}
-          <span class="${titleCls}">${escapeHtml(title)}</span>
+          <span class="lib-spine-title">${escapeHtml(title)}</span>
           ${titleOnly ? '' : `
-          <span class="${authorCls}">${escapeHtml(author)}</span>
+          <span class="lib-spine-author">${escapeHtml(author)}</span>
           ${b.publisher ? `<span class="lib-spine-pub">${escapeHtml(pub)}</span>` : ''}`}
         </div>`;
       }).join('')}

@@ -873,54 +873,55 @@ body.is-library .main { max-width: none; padding: 14px 24px 40px; }
 .lib-spine-title,
 .lib-spine-author,
 .lib-spine-pub {
-  position: relative;
   z-index: 1;
+  line-height: 1;                          /* 固定行高=字号，竖排占位可预测，避免三行文字重叠 */
   max-width: calc(var(--w, 32px) - 12px);  /* 竖排文字最多一列，超宽裁切防止换列挤出书脊 */
   overflow: hidden;
   text-overflow: ellipsis;
 }
-/* 书名：衬线宋体更端庄，开头贴近书脊顶部；按长度降字号自适应。
+/* 书名：绝对定位固定于书脊上方（各书 top 一致即上对齐），水平居中，字号统一。
    颜色/阴影由 JS 按封面左竖条亮度注入 --spine-fg / --spine-fg-shadow（浅封面深字、深封面白字） */
 .lib-spine-title {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
   writing-mode: vertical-rl;
   text-orientation: mixed;
-  margin-top: 14px;
   font-family: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", serif;
-  font-size: 13px;
+  font-size: 9.5px;
   font-weight: 700;
   color: var(--spine-fg, #fff);
   text-shadow: var(--spine-fg-shadow, 0 1px 3px rgba(0, 0, 0, .75), 0 0 6px rgba(0, 0, 0, .4));
   letter-spacing: 1px;
   max-height: 150px;
-  overflow: hidden;
 }
-.lib-spine-title.mid { font-size: 11px; }
-.lib-spine-title.long { font-size: 9.5px; }
-/* 作者：衬线小字，比书名小一档 */
+/* 作者：绝对定位固定于书脊中间偏下（各书 top 一致即上对齐），水平居中，字号统一且比书名小 */
 .lib-spine-author {
+  position: absolute;
+  top: 63%;
+  left: 50%;
+  transform: translateX(-50%);
   writing-mode: vertical-rl;
-  margin-top: 8px;
   font-family: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", serif;
-  font-size: 8.5px;
+  font-size: 8px;
   color: var(--spine-fg, rgba(255, 255, 255, .92));
   text-shadow: var(--spine-fg-shadow, 0 1px 2px rgba(0, 0, 0, .7));
   max-height: 40px;
-  overflow: hidden;
 }
-.lib-spine-author.mid { font-size: 8px; }
-.lib-spine-author.long { font-size: 7px; }
-/* 书脊底部出版社：更小的衬线小字，弱化存在感（像真实书脊的印字） */
+/* 书脊底部出版社：绝对定位固定于底部（各书底部一致即上对齐），水平居中，字号统一且比作者小，弱化存在感 */
 .lib-spine-pub {
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%);
   writing-mode: vertical-rl;
-  margin-top: auto;
-  margin-bottom: 14px;
   font-family: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", serif;
   font-size: 6.5px;
   color: var(--spine-fg, rgba(255, 255, 255, .9));
   opacity: .72;
   text-shadow: var(--spine-fg-shadow, 0 1px 2px rgba(0, 0, 0, .7));
   max-height: 56px;
-  overflow: hidden;
 }
 
 /* 书籍详情弹窗 */
@@ -964,6 +965,10 @@ body.is-library .main { max-width: none; padding: 14px 24px 40px; }
   .lib-spine { height: 200px; }
   .lib-spine:hover { width: 150px; }   /* 200×3/4，封面完整比例 */
   .lib-spine-row { min-height: 230px; }
+  /* 移动端书脊矮 40px：字号整体降一档，底部留白收紧，保证三行文字不重叠 */
+  .lib-spine-title { top: 14px; font-size: 9px; }
+  .lib-spine-author { top: 62%; font-size: 7px; }
+  .lib-spine-pub { bottom: 6px; font-size: 6px; }
 }
 
 /* 临时批量添加弹窗 */
