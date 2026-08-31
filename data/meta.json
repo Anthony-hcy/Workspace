@@ -1,20 +1,20 @@
 {
-  "lastSync": "2026-08-30T01:00:08.797Z",
+  "lastSync": "2026-08-31T00:21:38.077Z",
   "mode": "incremental",
   "sources": {
     "douyin-like": {
-      "count": 671,
+      "count": 608,
       "ok": true,
-      "added": 4,
-      "removed": null,
-      "incremental": true
+      "added": 608,
+      "removed": 0,
+      "incremental": false
     },
     "douyin-collect": {
-      "count": 428,
+      "count": 430,
       "ok": true,
-      "added": 12,
-      "removed": null,
-      "incremental": true
+      "added": 430,
+      "removed": 0,
+      "incremental": false
     },
     "bilibili-collect": {
       "count": 483,
