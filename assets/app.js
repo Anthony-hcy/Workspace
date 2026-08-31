@@ -1425,6 +1425,9 @@ $('#sideNav').addEventListener('click', (e) => {
   const btn = e.target.closest('.side-item');
   if (!btn || !btn.dataset.view) return;
 
+  // 切换到任一栏目都回到顶部（SPA 共享同一滚动容器，不重置会残留上一栏的滚动位置）
+  window.scrollTo(0, 0);
+
   // Blog 视图
   if (btn.dataset.view === 'blog') {
     enterBlog();
