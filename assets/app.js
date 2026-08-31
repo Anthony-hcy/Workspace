@@ -49,8 +49,17 @@ const state = {
   libMode: 'cover',   // 书架模式：cover（封面）| spine（书脊）
   libSort: 'title-asc', // 排序：title-asc | title-desc | rating-desc
   libKw: '',          // 书架搜索关键词
-  libSub: 'all',      // 分类（小分类 tags）筛选
   libPage: 1,         // 封面模式页码（一页四行）
+  theatre: [],        // Theatre 影视数据（独立于收藏与书架）
+  theatreView: 'all', // 影视分类：all | movie | series | anime
+  theatreKw: '',      // 影视搜索关键词
+  theatreTag: 'all',  // 标签筛选：all | 某个内容标签
+  theatreSort: 'latest', // 排序：latest(最近观看) | rating-desc | title-asc | title-desc
+  theatrePage: 1,     // 影视封面页码（一页四行）
+  music: [],          // Music 网易云歌曲（独立于其他栏目）
+  musicKw: '',        // 音乐搜索关键词
+  musicSort: 'collectedAt-desc', // 排序：collectedAt-desc(默认) | title-asc | title-desc | artist-asc
+  musicPage: 1,       // 音乐封面页码（一页四行）
 };
 
 /* 封面占位渐变色板（仿 Collecta 的多彩柔和风） */
@@ -77,7 +86,7 @@ async function loadData() {
   // ⚠️ 加时间戳参数绕过浏览器/CDN 缓存（Pages 对静态资源缓存 10 分钟，
   //    否则同步完成后打开页面可能仍看到旧数据）
   const bust = `t=${Date.now()}`;
-  const [metaRes, likeRes, collectRes, biliRes, foldersRes, xhhRes, libRes] = await Promise.allSettled([
+  const [metaRes, likeRes, collectRes, biliRes, foldersRes, xhhRes, libRes, theatreRes, musicRes] = await Promise.allSettled([
     fetch(`data/meta.json?${bust}`, { cache: 'no-store' }).then((r) => r.json()),
     fetch(`data/douyin-like.json?${bust}`, { cache: 'no-store' }).then((r) => r.json()),
     fetch(`data/douyin-collect.json?${bust}`, { cache: 'no-store' }).then((r) => r.json()),
@@ -85,6 +94,8 @@ async function loadData() {
     fetch(`data/bilibili-folders.json?${bust}`, { cache: 'no-store' }).then((r) => r.json()),
     fetch(`data/xiaoheihe-collect.json?${bust}`, { cache: 'no-store' }).then((r) => r.json()),
     fetch(`data/library-books.json?${bust}`, { cache: 'no-store' }).then((r) => r.json()),
+    fetch(`data/theatre.json?${bust}`, { cache: 'no-store' }).then((r) => r.json()),
+    fetch(`data/music.json?${bust}`, { cache: 'no-store' }).then((r) => r.json()),
   ]);
 
   // meta：顶栏显示"最近同步时间 + 本次模式"
@@ -103,6 +114,8 @@ async function loadData() {
   const xhh = xhhRes.status === 'fulfilled' && Array.isArray(xhhRes.value) ? xhhRes.value : [];
   state.folders = foldersRes.status === 'fulfilled' && Array.isArray(foldersRes.value) ? foldersRes.value : [];
   state.library = libRes.status === 'fulfilled' && Array.isArray(libRes.value) ? libRes.value : [];
+  state.theatre = theatreRes.status === 'fulfilled' && Array.isArray(theatreRes.value) ? theatreRes.value : [];
+  state.music = musicRes.status === 'fulfilled' && Array.isArray(musicRes.value) ? musicRes.value : [];
 
   /** 按 id 合并：同一条作品既点赞又收藏时，合并来源而不是重复展示 */
   const map = new Map();
@@ -663,28 +676,33 @@ const VIEW_TITLES = {
   xhs: '小红书 · 点赞与收藏',
   xiaoheihe: '黑盒 · 我的收藏',
   library: 'Library · 我的书架',
+  theatre: 'Theatre · 影视收藏',
+  'theatre-movie': 'Theatre · 电影',
+  'theatre-series': 'Theatre · 剧集',
+  'theatre-anime': 'Theatre · 动漫',
+  music: 'Music · 我的音乐',
 };
 
-/** 根据当前视图动态生成二级筛选 chips（抖音/小红书：点赞、收藏；B站：各收藏夹） */
+/** 根据当前视图动态生成二级筛选下拉（抖音/小红书：点赞、收藏；B站：各收藏夹） */
 function renderSubFilters() {
-  const box = $('#subFilters');
-  let chips = [];
+  const sel = $('#subSelect');
+  let opts = [];
   if (state.view === 'douyin' || state.view === 'xhs') {
-    chips = [
+    opts = [
       { sub: 'all', label: '全部' },
       { sub: 'like', label: '点赞' },
       { sub: 'collect', label: '收藏' },
     ];
   } else if (state.view === 'bilibili' && state.folders.length > 0) {
-    chips = [
+    opts = [
       { sub: 'all', label: '全部' },
       ...state.folders.map((f) => ({ sub: f.id, label: `${f.title} ${f.count}` })),
     ];
   }
-  box.hidden = chips.length === 0;
-  box.innerHTML = chips.map((c, i) =>
-    `<button class="chip ${i === 0 ? 'is-active' : ''}" data-sub="${c.sub}">${escapeHtml(c.label)}</button>`,
-  ).join('');
+  sel.hidden = opts.length === 0;
+  sel.innerHTML = opts.map((o) =>
+    `<option value="${o.sub}">${escapeHtml(o.label)}</option>`).join('');
+  sel.value = state.sub;
 }
 
 /** 进入 Blog 视图：站内 iframe 展示 Study 站首页（也作为站点默认首页） */
@@ -700,8 +718,10 @@ function enterBlog() {
   $('#countLine').textContent = '';
   $('#blogFrame').hidden = false;
   $('#libraryView').hidden = true;
+  $('#theatreView').hidden = true;
+  $('#musicView').hidden = true;
   document.body.classList.add('is-blog');
-  document.body.classList.remove('is-library');
+  document.body.classList.remove('is-library', 'is-theatre', 'is-music');
 }
 
 /** 进入 Library 视图：仿真书架（封面/书脊双模式 + 标签分类） */
@@ -717,9 +737,338 @@ function enterLibrary() {
   $('#countLine').textContent = '';
   $('#blogFrame').hidden = true;
   $('#libraryView').hidden = false;
+  $('#theatreView').hidden = true;
+  $('#musicView').hidden = true;
   document.body.classList.add('is-library');
-  document.body.classList.remove('is-blog');
+  document.body.classList.remove('is-blog', 'is-theatre', 'is-music');
   renderLibrary();
+}
+
+/** 进入 Theatre 视图：影视收藏（电影 / 剧集 / 动漫，封面网格） */
+function enterTheatre(view) {
+  document.querySelectorAll('#sideNav .side-item[data-view]').forEach((b) =>
+    b.classList.toggle('is-active', b.dataset.view === view));
+  state.view = 'theatre';
+  // 侧边栏 data-view 带 theatre- 前缀，映射回数据里的 category（theatre = 全部）
+  state.theatreView = ({ theatre: 'all', 'theatre-movie': 'movie', 'theatre-series': 'series', 'theatre-anime': 'anime' })[view] || 'all';
+  $('#viewTitle').textContent = VIEW_TITLES[view] ?? 'Theatre · 影视收藏';
+  $('#toolbar').hidden = true;
+  $('#grid').hidden = true;
+  $('#pagination').hidden = true;
+  $('#emptyBox').hidden = true;
+  $('#countLine').textContent = '';
+  $('#blogFrame').hidden = true;
+  $('#libraryView').hidden = true;
+  $('#theatreView').hidden = false;
+  $('#musicView').hidden = true;
+  document.body.classList.add('is-theatre');
+  document.body.classList.remove('is-blog', 'is-library', 'is-music');
+  renderTheatre();
+}
+
+/** 进入 Music 视图：网易云我喜欢的音乐（封面网格 + 唱片机弹窗） */
+function enterMusic() {
+  document.querySelectorAll('#sideNav .side-item[data-view]').forEach((b) =>
+    b.classList.toggle('is-active', b.dataset.view === 'music'));
+  state.view = 'music';
+  $('#viewTitle').textContent = 'Music · 我的音乐';
+  $('#toolbar').hidden = true;
+  $('#grid').hidden = true;
+  $('#pagination').hidden = true;
+  $('#emptyBox').hidden = true;
+  $('#countLine').textContent = '';
+  $('#blogFrame').hidden = true;
+  $('#libraryView').hidden = true;
+  $('#theatreView').hidden = true;
+  $('#musicView').hidden = false;
+  document.body.classList.add('is-music');
+  document.body.classList.remove('is-blog', 'is-library', 'is-theatre');
+  renderMusic();
+}
+
+/* ---------------------------------------------------------------------------
+ * Music 渲染（封面网格 + 排序/搜索 + 分页）
+ * ------------------------------------------------------------------------- */
+const musicCollator = new Intl.Collator('zh-CN');
+
+function musicFiltered() {
+  const kw = state.musicKw.trim().toLowerCase();
+  const list = state.music.filter((m) => {
+    if (kw && !(m.title || '').toLowerCase().includes(kw) && !(m.artist || '').toLowerCase().includes(kw)) return false;
+    return true;
+  });
+  if (state.musicSort === 'artist-asc') {
+    list.sort((a, b) => musicCollator.compare(a.artist || '', b.artist || ''));
+  } else if (state.musicSort === 'collectedAt-desc') {
+    list.sort((a, b) => (b.collectedAt || 0) - (a.collectedAt || 0));   // 按收藏时间，最新在前
+  } else {
+    const dir = state.musicSort === 'title-desc' ? -1 : 1;
+    list.sort((a, b) => dir * musicCollator.compare(a.title || '', b.title || ''));
+  }
+  return list;
+}
+
+function renderMusic() {
+  const filtered = musicFiltered();
+  $('#musicCount').textContent = state.music.length ? `共 ${filtered.length} 首` : '';
+
+  const shelf = $('#musicShelf');
+  shelf.className = 'lib-shelf lib-cover-grid music-grid';
+  const w = shelf.clientWidth || Math.max(300, window.innerWidth - 176 - 48);
+  const cols = Math.max(2, Math.floor((w + 18) / 158));
+  const perPage = cols * 4;
+  const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
+  state.musicPage = Math.min(state.musicPage, totalPages);
+  const slice = filtered.slice((state.musicPage - 1) * perPage, state.musicPage * perPage);
+
+  shelf.innerHTML = slice.map((m) => `
+    <a class="lib-book" data-music="${m.id}">
+      <div class="lib-cover music-cover">
+        <img src="${m.cover || ''}" alt="${escapeHtml(m.title)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none'">
+      </div>
+      <p class="lib-title">${escapeHtml(m.title)}</p>
+      <p class="lib-author">${escapeHtml(m.artist || '')}</p>
+    </a>`).join('');
+
+  const pg = $('#musicPagination');
+  pg.hidden = filtered.length === 0;
+  $('#musicPageInput').value = state.musicPage;
+  $('#musicPageInput').max = totalPages;
+  $('#musicPageTotal').textContent = totalPages;
+  $('#musicPrev').disabled = state.musicPage <= 1;
+  $('#musicNext').disabled = state.musicPage >= totalPages;
+}
+
+/** 时长格式化（秒 → mm:ss） */
+function fmtDuration(s) {
+  if (!Number.isFinite(s) || s <= 0) return '';
+  const m = Math.floor(s / 60), ss = Math.floor(s % 60);
+  return `${m}:${String(ss).padStart(2, '0')}`;
+}
+/** 时间戳格式化（ms → YYYY-MM-DD） */
+function fmtDate(ts) {
+  if (!ts) return '';
+  const d = new Date(ts);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+/** 打开歌曲百科弹窗（数据渲染：封面 + 歌曲信息 + 歌词） */
+function openMusic(id) {
+  const m = state.music.find((x) => x.id === id);
+  if (!m) return;
+  // 歌词：去掉 [mm:ss] 时间戳，纯文本展示
+  const lyricText = (m.lrc || '').replace(/\[\d{1,2}:\d{1,2}(?:[.:]\d{1,3})?\]/g, '').trim();
+  const lyricHtml = lyricText
+    ? lyricText.split('\n').filter(Boolean).map((l) => `<p>${escapeHtml(l)}</p>`).join('')
+    : '<p class="lyric-empty">纯音乐，暂无歌词</p>';
+  // 点击歌曲即联动右下角播放器，弹窗内给出即时反馈（播放器加载有延迟）
+  const playingRow = window.playSongOnDock
+    ? `<div class="music-play-status"><span class="bars"><i></i><i></i><i></i></span>正在播放：${escapeHtml(m.title)}</div>`
+    : '';
+
+  $('#musicDetail').innerHTML = `
+    <div class="music-detail">
+      <div class="music-detail-cover">
+        <img src="${m.cover || ''}" alt="${escapeHtml(m.title)}" onerror="this.style.display='none'">
+      </div>
+      <div class="music-detail-info">
+        ${playingRow}
+        <h3>${escapeHtml(m.title)}</h3>
+        <p class="book-meta">${escapeHtml(m.artist || '')}${m.album ? ' · ' + escapeHtml(m.album) : ''}</p>
+        <p class="music-meta-line">${fmtDuration(m.duration) ? '时长 ' + fmtDuration(m.duration) : ''}${m.publishTime ? '　·　发行于 ' + fmtDate(m.publishTime) : ''}${m.collectedAt ? '　·　收藏于 ' + fmtDate(m.collectedAt) : ''}</p>
+        <div class="music-lyrics">${lyricHtml}</div>
+      </div>
+    </div>`;
+  $('#musicOpenUrl').href = `https://music.163.com/#/song?id=${m.id}`;
+  $('#musicModal').showModal();
+  // 联动右下角播放器：点击歌曲 → 自动播放该歌（播放器未就绪时静默忽略）
+  if (window.playSongOnDock) window.playSongOnDock(m.id);
+}
+
+/* ---------------------------------------------------------------------------
+ * Theatre 影视渲染（分类 + 搜索 + 排序 + 封面分页 + 详情弹窗）
+ * ------------------------------------------------------------------------- */
+
+/** 当前筛选下的影视（分类 + 关键词；按评分/名称/最近观看排序） */
+function theatreFiltered() {
+  const kw = state.theatreKw.trim().toLowerCase();
+  const list = state.theatre.filter((t) => {
+    if (state.theatreView !== 'all' && t.category !== state.theatreView) return false;
+    if (state.theatreTag !== 'all' && !(t.tags || []).includes(state.theatreTag)) return false;
+    if (kw) {
+      const hay = `${t.title || ''} ${(t.director || []).join(' ')} ${(t.country || []).join(' ')}`.toLowerCase();
+      if (!hay.includes(kw)) return false;
+    }
+    return true;
+  });
+  if (state.theatreSort === 'rating-desc') {
+    list.sort((a, b) => (b.score || 0) - (a.score || 0));
+  } else if (state.theatreSort === 'latest') {
+    list.sort((a, b) => (b.currentDate || '').localeCompare(a.currentDate || ''));
+  } else {
+    const dir = state.theatreSort === 'title-desc' ? -1 : 1;
+    list.sort((a, b) => dir * libTitleCollator.compare(a.title || '', b.title || ''));
+  }
+  return list;
+}
+
+/** Theatre 封面列数（按容器宽度估算，与 Library 封面同规格） */
+function theatreCols() {
+  const w = $('#theatreShelf').clientWidth || Math.max(300, window.innerWidth - 176 - 48);
+  return Math.max(2, Math.floor((w + 18) / 158));
+}
+
+/** 影视封面网格：一页四行分页，海报 + 标题 + 年份/国家 + 评分角标 */
+function renderTheatre() {
+  const filtered = theatreFiltered();
+  $('#theatreCount').textContent = state.theatre.length ? `共 ${filtered.length} 部` : '';
+
+  // 标签筛选下拉（全部 + 各内容标签，按中文排序）
+  const tagPool = [...new Set(state.theatre.flatMap((t) => t.tags || []))].sort((a, b) => a.localeCompare(b, 'zh-CN'));
+  const tagSel = $('#theatreTagSelect');
+  tagSel.innerHTML = ['<option value="all">标签：全部</option>',
+    ...tagPool.map((t) => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`),
+  ].join('');
+  tagSel.value = state.theatreTag;
+
+  const shelf = $('#theatreShelf');
+  shelf.className = 'lib-shelf lib-cover-grid';
+  const perPage = theatreCols() * 4;
+  const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
+  state.theatrePage = Math.min(state.theatrePage, totalPages);
+  const slice = filtered.slice((state.theatrePage - 1) * perPage, state.theatrePage * perPage);
+
+  shelf.innerHTML = slice.map((t) => `
+    <a class="lib-book" data-theatre="${t.id}">
+      <div class="lib-cover">
+        <img src="${t.image || ''}" alt="${escapeHtml(t.title)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none'">
+        ${t.score ? `<span class="lib-rating">${t.score}</span>` : ''}
+      </div>
+      <p class="lib-title">${escapeHtml(t.title)}</p>
+      <p class="lib-author">${t.year ? escapeHtml(String(t.year)) : ''}${t.country?.length ? ' · ' + escapeHtml(t.country.join(' / ')) : ''}</p>
+    </a>`).join('');
+
+  const pg = $('#theatrePagination');
+  pg.hidden = filtered.length === 0;
+  $('#theatrePageInput').value = state.theatrePage;
+  $('#theatrePageInput').max = totalPages;
+  $('#theatrePageTotal').textContent = totalPages;
+  $('#theatrePrev').disabled = state.theatrePage <= 1;
+  $('#theatreNext').disabled = state.theatrePage >= totalPages;
+}
+
+/* ---------------------------------------------------------------------------
+ * Theatre 观影统计图表（Obsidian Charts 方案：Chart.js 渲染）
+ * 三图：影视类型分布 Top8 环状 + 偏爱导演 Top6 雷达 + 每月观影折线（全宽）
+ * ------------------------------------------------------------------------- */
+const CHART_PALETTE = ['#ff6384', '#36a2eb', '#ffce56', '#4bc0c0', '#9966ff', '#ff9f40', '#c242f2', '#f24256'];
+const CHART_TEXT = '#6B5B4D';   // 标题/刻度色（Obsidian 暖棕）
+
+/** 渲染三个统计图表（数据 = 当前筛选结果；重建前销毁旧实例） */
+function renderCharts(filtered) {
+  (window.__charts || []).forEach((c) => { try { c.destroy(); } catch {} });
+  window.__charts = [];
+  const typeCanvas = document.getElementById('typeChart');
+  const radarCanvas = document.getElementById('radarChart');
+  const monthCanvas = document.getElementById('monthChart');
+  if (!typeCanvas || !radarCanvas || !monthCanvas) return;
+  if (!filtered.length) return;   // 空筛选：不画图（弹窗内留空）
+
+  // ① 类型分布：全部标签都计，取 Top 8
+  const tagCount = {};
+  filtered.forEach((t) => (t.tags || []).forEach((g) => { tagCount[g] = (tagCount[g] || 0) + 1; }));
+  const top8 = Object.entries(tagCount).sort((a, b) => b[1] - a[1]).slice(0, 8);
+
+  // ② 偏爱导演 Top 6
+  const dirCount = {};
+  filtered.forEach((t) => (t.director || []).forEach((d) => { if (d) dirCount[d] = (dirCount[d] || 0) + 1; }));
+  const top6 = Object.entries(dirCount).sort((a, b) => b[1] - a[1]).slice(0, 6);
+
+  // ③ 每月观影：只列实际有观看记录的月份（对齐 Obsidian 脚本，不补零）
+  const byMonth = {};
+  filtered.forEach((t) => {
+    if (t.currentDate) { const m = t.currentDate.slice(0, 7); byMonth[m] = (byMonth[m] || 0) + 1; }
+  });
+  const months = Object.keys(byMonth).sort();
+
+  const titleOpts = (text) => ({ display: true, text, color: CHART_TEXT, font: { weight: 'bold', size: 14 } });
+
+  // 📊 类型分布 Doughnut（参考脚本配置）
+  window.__charts.push(new Chart(typeCanvas, {
+    type: 'doughnut',
+    data: {
+      labels: top8.map((x) => x[0]),
+      datasets: [{ data: top8.map((x) => x[1]), backgroundColor: CHART_PALETTE, borderWidth: 0 }],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { title: titleOpts('影视类型分布 (Top 8)'), legend: { position: 'right', labels: { color: CHART_TEXT } } },
+    },
+  }));
+
+  // 🕸️ 偏爱导演 Radar（参考脚本配置）
+  window.__charts.push(new Chart(radarCanvas, {
+    type: 'radar',
+    data: {
+      labels: top6.map((x) => x[0]),
+      datasets: [{ label: '观看数量', data: top6.map((x) => x[1]), fill: true, backgroundColor: 'rgba(255, 99, 132, 0.2)', borderColor: 'rgb(255, 99, 132)' }],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { title: titleOpts('偏爱导演 Top 6'), legend: { display: false } },
+      scales: { r: { grid: { color: 'rgba(106,91,77,0.15)' }, pointLabels: { color: CHART_TEXT }, ticks: { showLabelBackdrop: false, color: CHART_TEXT, stepSize: 1 } } },
+    },
+  }));
+
+  // 📈 每月观影 Line（参考脚本配置：fill + tension 0.3 + 青绿）
+  window.__charts.push(new Chart(monthCanvas, {
+    type: 'line',
+    data: {
+      labels: months,
+      datasets: [{ label: '每月观看记录', data: months.map((m) => byMonth[m]), borderColor: '#4bc0c0', backgroundColor: 'rgba(75,192,192,0.1)', tension: 0.3, fill: true }],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { title: titleOpts('每月观影'), tooltip: { mode: 'index', intersect: false } },
+      scales: { x: { grid: { display: false }, ticks: { color: CHART_TEXT } }, y: { grid: { display: false }, ticks: { color: CHART_TEXT, precision: 0, stepSize: 1 } } },
+    },
+  }));
+}
+
+/** 打开影视详情弹窗（左列：封面+时间/评分/标签；右列：标题+导演演员简介） */
+function openTheatre(id) {
+  const t = state.theatre.find((x) => x.id === id);
+  if (!t) return;
+  const join = (arr, n) => (arr || []).slice(0, n).join('、') || '—';
+  const tagHtml = (t.tags || []).map((g) =>
+    `<span class="tag">${escapeHtml(g)}</span>`).join(' ');
+  $('#theatreDetail').innerHTML = `
+    <div class="theatre-detail">
+      <div class="theatre-detail-left">
+        <div class="book-detail-cover"><img src="${t.image || ''}" alt="${escapeHtml(t.title)}" onerror="this.style.display='none'"></div>
+        <div class="theatre-detail-base">
+          <p class="book-meta theatre-meta">${t.year ? escapeHtml(String(t.year)) : ''}${t.country?.length ? ' · ' + escapeHtml(t.country.join(' / ')) : ''}${t.runtime ? ' · ' + escapeHtml(t.runtime) : ''}${t.episodes ? ' · ' + escapeHtml(t.episodes) + ' 集' : ''}</p>
+          <p class="theatre-times">
+            ${t.datePublished ? `<span>上映</span><span>${escapeHtml(t.datePublished)}</span>` : ''}
+            ${t.currentDate ? `<span>观看</span><span>${escapeHtml(t.currentDate)}</span>` : ''}
+          </p>
+          ${t.score ? `<p class="book-rating">豆瓣评分 <b>${t.score}</b></p>` : ''}
+          <p class="theatre-tags">${tagHtml}</p>
+          <div class="book-links">
+            ${t.doubanUrl ? `<a class="btn-primary btn-douban" href="${t.doubanUrl}" target="_blank" rel="noopener noreferrer">
+              <svg viewBox="0 0 16 16" width="14" height="14"><rect width="16" height="16" rx="3.5" fill="#fff"/><text x="8" y="11.6" text-anchor="middle" font-size="10" font-weight="700" fill="#2e963d">豆</text></svg>
+              豆瓣电影</a>` : ''}
+          </div>
+        </div>
+      </div>
+      <div class="theatre-detail-info">
+        <h3>${escapeHtml(t.title)}</h3>
+        <p class="book-meta">导演：${escapeHtml(join(t.director, 5))}</p>
+        <p class="book-meta">演员：${escapeHtml(join(t.actor, 8))}</p>
+        <p class="book-intro">${escapeHtml(t.intro || '暂无简介')}</p>
+      </div>
+    </div>`;
+  $('#theatreModal').showModal();
 }
 
 /* ---------------------------------------------------------------------------
@@ -736,7 +1085,6 @@ const libTitleCollator = new Intl.Collator('zh-CN');
 function libFiltered() {
   const kw = state.libKw.trim().toLowerCase();
   const list = state.library.filter((b) => {
-    if (state.libSub !== 'all' && !(b.tags || []).includes(state.libSub)) return false;
     if (kw && !(b.title || '').toLowerCase().includes(kw) && !(b.author || '').toLowerCase().includes(kw)) return false;
     return true;
   });
@@ -751,17 +1099,6 @@ function libFiltered() {
 
 function renderLibrary() {
   const filtered = libFiltered();
-
-  // 分类 chips = 所有书的 tags 并集（一本书可有多个分类）
-  const pool = [...new Set(state.library.flatMap((b) => b.tags || []))];
-  if (pool.length) {
-    $('#libSubTags').hidden = false;
-    $('#libSubTags').innerHTML = ['all', ...pool].map((t) =>
-      `<button class="chip ${state.libSub === t ? 'is-active' : ''}" data-lib-sub="${t}">${t === 'all' ? '全部' : t}</button>`,
-    ).join('');
-  } else {
-    $('#libSubTags').hidden = true;
-  }
 
   $('#libCount').textContent = state.library.length ? `共 ${filtered.length} 本` : '';
   if (state.libMode === 'spine') renderSpine(filtered);
@@ -928,12 +1265,6 @@ $('#libMode').addEventListener('click', (e) => {
   state.libMode = btn.dataset.libMode;
   renderLibrary();
 });
-$('#libSubTags').addEventListener('click', (e) => {
-  const btn = e.target.closest('[data-lib-sub]');
-  if (!btn) return;
-  state.libSub = btn.dataset.libSub;
-  renderLibrary();
-});
 $('#libSortSelect').addEventListener('change', (e) => {
   state.libSort = e.target.value;
   renderLibrary();
@@ -954,10 +1285,8 @@ $('#libShelf').addEventListener('click', (e) => {
 });
 // 封面分页
 // 封面分页（翻页后滚回书架工具栏顶部，与抖音/B站一致）
-const scrollLibTop = () => {
-  const t = document.querySelector('.lib-toolbar');
-  if (t) t.scrollIntoView({ behavior: 'auto', block: 'start' });
-};
+// 封面分页（翻页后直接回到页面最上方，与 B站 行为一致）
+const scrollLibTop = () => window.scrollTo(0, 0);
 $('#libPrev').addEventListener('click', () => { state.libPage = Math.max(1, state.libPage - 1); renderLibrary(); scrollLibTop(); });
 $('#libNext').addEventListener('click', () => { state.libPage += 1; renderLibrary(); scrollLibTop(); });
 // 封面分页跳转（页码输入 + 跳转按钮 + 回车）
@@ -978,6 +1307,111 @@ $('#bookClose').addEventListener('click', () => $('#bookModal').close());
 // 点击弹窗空白处（backdrop）自动关闭
 $('#bookModal').addEventListener('click', (e) => {
   if (e.target === $('#bookModal')) $('#bookModal').close();
+});
+
+/* Theatre 事件绑定 */
+// 点击封面 → 详情弹窗
+$('#theatreShelf').addEventListener('click', (e) => {
+  const el = e.target.closest('[data-theatre]');
+  if (el) openTheatre(el.dataset.theatre);
+});
+// 搜索（防抖）
+let theatreSearchTimer;
+$('#theatreSearch').addEventListener('input', (e) => {
+  clearTimeout(theatreSearchTimer);
+  theatreSearchTimer = setTimeout(() => {
+    state.theatreKw = e.target.value;
+    state.theatrePage = 1;
+    renderTheatre();
+  }, 250);
+});
+// 排序
+$('#theatreSortSelect').addEventListener('change', (e) => {
+  state.theatreSort = e.target.value;
+  renderTheatre();
+});
+// 标签筛选（下拉选择）
+$('#theatreTagSelect').addEventListener('change', (e) => {
+  state.theatreTag = e.target.value;
+  state.theatrePage = 1;
+  renderTheatre();
+});
+// 封面分页（翻页后直接回到页面最上方，与 B站 行为一致）
+const scrollTheatreTop = () => window.scrollTo(0, 0);
+$('#theatrePrev').addEventListener('click', () => { state.theatrePage = Math.max(1, state.theatrePage - 1); renderTheatre(); scrollTheatreTop(); });
+$('#theatreNext').addEventListener('click', () => { state.theatrePage += 1; renderTheatre(); scrollTheatreTop(); });
+function theatreGoPage(p) {
+  const total = Number($('#theatrePageTotal').textContent) || 1;
+  state.theatrePage = Math.min(Math.max(1, Math.round(p) || 1), total);
+  renderTheatre();
+  scrollTheatreTop();
+}
+$('#theatreJump').addEventListener('click', () => theatreGoPage(Number($('#theatrePageInput').value)));
+$('#theatrePageInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') theatreGoPage(Number(e.target.value));
+});
+// 弹窗关闭（按钮 + 点击空白处）
+$('#theatreClose').addEventListener('click', () => $('#theatreModal').close());
+$('#theatreModal').addEventListener('click', (e) => {
+  if (e.target === $('#theatreModal')) $('#theatreModal').close();
+});
+
+/* 观影统计图表：点按钮弹出模态弹窗（上环状 / 下折线），按当前筛选渲染 */
+$('#chartsToggle').addEventListener('click', () => {
+  $('#chartsModal').showModal();      // 先显示弹窗，canvas 才有真实宽度（避免 600px 兜底拉伸）
+  renderCharts(theatreFiltered());
+});
+$('#chartsClose').addEventListener('click', () => $('#chartsModal').close());
+$('#chartsModal').addEventListener('click', (e) => {
+  if (e.target === $('#chartsModal')) $('#chartsModal').close();
+});
+let chartResizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(chartResizeTimer);
+  chartResizeTimer = setTimeout(() => {
+    if ($('#chartsModal').open) renderCharts(theatreFiltered());
+  }, 200);
+});
+
+/* Music 事件绑定 */
+// 点击封面 → 唱片机弹窗
+$('#musicShelf').addEventListener('click', (e) => {
+  const el = e.target.closest('[data-music]');
+  if (el) openMusic(el.dataset.music);
+});
+// 搜索（防抖）
+let musicSearchTimer;
+$('#musicSearch').addEventListener('input', (e) => {
+  clearTimeout(musicSearchTimer);
+  musicSearchTimer = setTimeout(() => {
+    state.musicKw = e.target.value;
+    state.musicPage = 1;
+    renderMusic();
+  }, 250);
+});
+// 排序
+$('#musicSortSelect').addEventListener('change', (e) => {
+  state.musicSort = e.target.value;
+  renderMusic();
+});
+// 分页（翻页回顶）
+const scrollMusicTop = () => window.scrollTo(0, 0);
+$('#musicPrev').addEventListener('click', () => { state.musicPage = Math.max(1, state.musicPage - 1); renderMusic(); scrollMusicTop(); });
+$('#musicNext').addEventListener('click', () => { state.musicPage += 1; renderMusic(); scrollMusicTop(); });
+function musicGoPage(p) {
+  const total = Number($('#musicPageTotal').textContent) || 1;
+  state.musicPage = Math.min(Math.max(1, Math.round(p) || 1), total);
+  renderMusic();
+  scrollMusicTop();
+}
+$('#musicJump').addEventListener('click', () => musicGoPage(Number($('#musicPageInput').value)));
+$('#musicPageInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') musicGoPage(Number(e.target.value));
+});
+// 网易云 iframe 弹窗关闭（按钮 + 点击空白）
+$('#musicClose').addEventListener('click', () => $('#musicModal').close());
+$('#musicModal').addEventListener('click', (e) => {
+  if (e.target === $('#musicModal')) $('#musicModal').close();
 });
 
 // 侧边栏切换（事件委托）：箭头展开/收起 Favorites 二级平台；Blog 为站内视图
@@ -1003,13 +1437,27 @@ $('#sideNav').addEventListener('click', (e) => {
     return;
   }
 
-  // 收藏视图：显示内容区（隐藏 Blog/Library 视图）
+  // Music 视图
+  if (btn.dataset.view === 'music') {
+    enterMusic();
+    return;
+  }
+
+  // Theatre 视图（一级入口 + Movies / Series / Anime 三个子分类）
+  if (btn.dataset.view === 'theatre' || btn.dataset.view === 'theatre-movie' ||
+      btn.dataset.view === 'theatre-series' || btn.dataset.view === 'theatre-anime') {
+    enterTheatre(btn.dataset.view);
+    return;
+  }
+
+  // 收藏视图：显示内容区（隐藏 Blog/Library/Theatre/Music 视图）
   $('#toolbar').hidden = false;
   $('#grid').hidden = false;
   $('#blogFrame').hidden = true;
   $('#libraryView').hidden = true;
-  document.body.classList.remove('is-blog');
-  document.body.classList.remove('is-library');
+  $('#theatreView').hidden = true;
+  $('#musicView').hidden = true;
+  document.body.classList.remove('is-blog', 'is-library', 'is-theatre', 'is-music');
 
   if (btn.classList.contains('is-disabled')) {
     return showToast('暂未开放');
@@ -1034,21 +1482,15 @@ $('#sideNav').addEventListener('click', (e) => {
   applyFilter();
 });
 
-// 二级筛选点击（事件委托）
-$('#subFilters').addEventListener('click', (e) => {
-  const btn = e.target.closest('.chip');
-  if (!btn) return;
-  document.querySelectorAll('#subFilters .chip').forEach((c) => c.classList.toggle('is-active', c === btn));
-  state.sub = btn.dataset.sub;
+// 二级筛选下拉（B站收藏夹 / 抖音·小红书 点赞收藏）
+$('#subSelect').addEventListener('change', (e) => {
+  state.sub = e.target.value;
   applyFilter();
 });
 
-// 类型 chip 切换
-$('#typeChips').addEventListener('click', (e) => {
-  const btn = e.target.closest('.chip');
-  if (!btn) return;
-  document.querySelectorAll('#typeChips .chip').forEach((c) => c.classList.toggle('is-active', c === btn));
-  state.type = btn.dataset.type;
+// 类型下拉
+$('#typeSelect').addEventListener('change', (e) => {
+  state.type = e.target.value;
   applyFilter();
 });
 

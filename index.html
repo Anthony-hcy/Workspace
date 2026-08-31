@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Workspace · 我的收藏夹</title>
   <meta name="description" content="跨平台收藏夹工作台：自动同步抖音、B站与小 红书的收藏内容" />
-  <link rel="stylesheet" href="assets/style.css?v=20260829g" />
+  <link rel="stylesheet" href="assets/style.css?v=20260831ar" />
   <!-- 内联 favicon：一个渐变书签图标，免额外请求 -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%237c5cff'/><stop offset='1' stop-color='%2300c2ff'/></linearGradient></defs><path fill='url(%23g)' d='M6 2h12a2 2 0 0 1 2 2v18l-8-4.8L4 22V4a2 2 0 0 1 2-2z'/></svg>" />
 </head>
@@ -30,6 +30,12 @@
       <button class="side-item" data-view="library" title="我的书架">
         <svg viewBox="0 0 24 24" fill="none" stroke="#8b5e3c" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h4.5v16H4z" opacity=".4"/><path d="M10 4h4.5v16H10z" opacity=".75"/><path d="M16 4h4.5v16H16z"/></svg>
         <span>Library</span>
+      </button>
+
+      <!-- Music：网易云我喜欢的音乐（唱片机弹窗） -->
+      <button class="side-item" data-view="music" title="我的音乐">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#e07b39" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg>
+        <span>Music</span>
       </button>
 
       <!-- Favorites：一级标题，带展开箭头；展开后出现各平台（二级） -->
@@ -61,6 +67,29 @@
           </button>
         </div>
       </div>
+
+      <!-- Theatre：影视收藏（电影 / 剧集 / 动漫），与 Favorites 同级的一级组 -->
+      <div class="side-group is-expanded" id="theatreGroup">
+        <button class="side-item side-parent" data-view="theatre" title="全部影视收藏">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#e04f5f" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M7 5v14M17 5v14" opacity=".5"/></svg>
+          <span>Theatre</span>
+          <svg class="side-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+        </button>
+        <div class="side-children" id="theatreChildren">
+          <button class="side-item side-child" data-view="theatre-movie" title="电影">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#e04f5f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M9.5 9.5v5l4.5-2.5z" fill="#e04f5f" stroke="none"/></svg>
+            <span>Movies</span>
+          </button>
+          <button class="side-item side-child" data-view="theatre-series" title="剧集">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#e0872f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M8.5 3.5 12 6l3.5-2.5M12 19v2"/></svg>
+            <span>Series</span>
+          </button>
+          <button class="side-item side-child" data-view="theatre-anime" title="动漫">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#7c5cff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.4 5.6L20 11l-5.6 2.4L12 19l-2.4-5.6L4 11l5.6-2.4z"/></svg>
+            <span>Anime</span>
+          </button>
+        </div>
+      </div>
     </nav>
     <p class="side-foot">Workspace</p>
   </aside>
@@ -85,23 +114,21 @@
     <!-- 筛选工具栏（Blog 首页默认隐藏，进入收藏视图时显示） -->
     <nav class="toolbar" id="toolbar" hidden>
       <div class="toolbar-inner">
-        <!-- 二级筛选：随侧边栏视图动态生成（抖音的点赞/收藏、B站的各收藏夹） -->
-        <div class="chips" id="subFilters" hidden></div>
-
-        <div class="filters">
-          <!-- 类型筛选 -->
-          <div class="chips" id="typeChips">
-            <button class="chip is-active" data-type="all">全部类型</button>
-            <button class="chip" data-type="video">视频</button>
-            <button class="chip" data-type="image">图文</button>
-          </div>
-          <!-- 排序 -->
+        <!-- 全部靠左排列：排序 + 类型下拉 + 二级筛选下拉（B站收藏夹 / 抖音点赞收藏）+ 搜索 -->
+        <div class="filters filters-left">
           <select id="sortSelect" class="sort-select" title="排序方式">
             <option value="default" selected>最近更新</option>
             <option value="oldest">最早更新</option>
             <option value="likes">点赞最多</option>
           </select>
-          <!-- 搜索 -->
+          <select id="typeSelect" class="sort-select" title="类型筛选">
+            <option value="all" selected>全部类型</option>
+            <option value="video">视频</option>
+            <option value="image">图文</option>
+          </select>
+          <select id="subSelect" class="sort-select" title="二级筛选" hidden>
+            <option value="all">全部</option>
+          </select>
           <input type="search" id="searchBox" class="search" placeholder="搜索标题或作者…" />
         </div>
       </div>
@@ -143,10 +170,6 @@
             </select>
             <input type="search" id="libSearch" class="search lib-search" placeholder="搜索书名或作者…" />
           </div>
-          <div class="lib-toolbar-row lib-tag-row">
-            <span class="lib-label">分类</span>
-            <div class="chips" id="libSubTags" hidden></div>
-          </div>
         </div>
         <p class="lib-count" id="libCount"></p>
         <div class="lib-shelf" id="libShelf"></div>
@@ -161,6 +184,102 @@
           <button class="page-btn" id="libNext">下一页 ›</button>
         </div>
       </div>
+
+      <!-- Theatre 视图：影视收藏（电影 / 剧集 / 动漫，封面网格 + 分页 + 详情弹窗） -->
+      <div class="theatre" id="theatreView" hidden>
+        <div class="lib-toolbar">
+          <div class="lib-toolbar-row">
+            <select id="theatreSortSelect" class="sort-select" title="排序方式">
+              <option value="latest" selected>最近观看</option>
+              <option value="rating-desc">评分最高</option>
+              <option value="title-asc">名称 A-Z</option>
+              <option value="title-desc">名称 Z-A</option>
+            </select>
+            <select id="theatreTagSelect" class="sort-select" title="按标签筛选">
+              <option value="all" selected>标签：全部</option>
+            </select>
+            <input type="search" id="theatreSearch" class="search lib-search" placeholder="搜索片名、导演或国家…" />
+            <button type="button" class="charts-toggle" id="chartsToggle" title="弹出观影统计图表">📊 观影统计</button>
+          </div>
+        </div>
+
+        <p class="lib-count" id="theatreCount"></p>
+        <div class="lib-shelf lib-cover-grid" id="theatreShelf"></div>
+        <!-- 封面分页（一页四行，支持跳转） -->
+        <div class="pagination" id="theatrePagination" hidden>
+          <button class="page-btn" id="theatrePrev">‹ 上一页</button>
+          <span class="page-info">
+            第 <input type="number" id="theatrePageInput" class="page-input" min="1" value="1" /> /
+            <span id="theatrePageTotal">1</span> 页
+          </span>
+          <button class="page-btn" id="theatreJump">跳转</button>
+          <button class="page-btn" id="theatreNext">下一页 ›</button>
+        </div>
+      </div>
+
+      <!-- Music 视图：网易云我喜欢的音乐（封面网格 + 唱片机弹窗，风格与 Library 一致） -->
+      <div class="music" id="musicView" hidden>
+        <div class="lib-toolbar">
+          <div class="lib-toolbar-row">
+            <select id="musicSortSelect" class="sort-select" title="排序方式">
+              <option value="collectedAt-desc" selected>收藏时间</option>
+              <option value="title-asc">名称 A-Z</option>
+              <option value="title-desc">名称 Z-A</option>
+              <option value="artist-asc">歌手 A-Z</option>
+            </select>
+            <input type="search" id="musicSearch" class="search lib-search" placeholder="搜索歌名或歌手…" />
+          </div>
+        </div>
+        <p class="lib-count" id="musicCount"></p>
+        <div class="lib-shelf lib-cover-grid music-grid" id="musicShelf"></div>
+        <!-- 封面分页（一页四行，支持跳转） -->
+        <div class="pagination" id="musicPagination" hidden>
+          <button class="page-btn" id="musicPrev">‹ 上一页</button>
+          <span class="page-info">
+            第 <input type="number" id="musicPageInput" class="page-input" min="1" value="1" /> /
+            <span id="musicPageTotal">1</span> 页
+          </span>
+          <button class="page-btn" id="musicJump">跳转</button>
+          <button class="page-btn" id="musicNext">下一页 ›</button>
+        </div>
+      </div>
+
+      <!-- Theatre 影视详情弹窗 -->
+      <dialog class="modal" id="theatreModal">
+        <div class="modal-box book-modal">
+          <div id="theatreDetail"></div>
+          <div class="modal-actions">
+            <button type="button" class="btn-ghost" id="theatreClose">关闭</button>
+          </div>
+        </div>
+      </dialog>
+
+      <!-- 观影统计图表弹窗（Obsidian Charts 方案：上排 环状+雷达，下排 折线全宽） -->
+      <dialog class="modal" id="chartsModal">
+        <div class="modal-box charts-modal">
+          <div class="charts-detail" id="chartsDetail">
+            <div class="charts-row1">
+              <div class="chart-box"><canvas id="typeChart"></canvas></div>
+              <div class="chart-box"><canvas id="radarChart"></canvas></div>
+            </div>
+            <div class="chart-box chart-box-line"><canvas id="monthChart"></canvas></div>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn-ghost" id="chartsClose">关闭</button>
+          </div>
+        </div>
+      </dialog>
+
+      <!-- Music 歌曲百科弹窗：数据渲染（封面/歌名/歌手/专辑/时长/歌词，类似 Library 简介） -->
+      <dialog class="modal" id="musicModal">
+        <div class="modal-box music-modal">
+          <div id="musicDetail"></div>
+          <div class="modal-actions">
+            <a class="btn-primary btn-netease" id="musicOpenUrl" href="#" target="_blank" rel="noopener noreferrer">在网易云查看</a>
+            <button type="button" class="btn-ghost" id="musicClose">关闭</button>
+          </div>
+        </div>
+      </dialog>
 
       <!-- Library 书籍详情弹窗 -->
       <dialog class="modal" id="bookModal">
@@ -204,6 +323,8 @@
 
   <div class="toast" id="toast" hidden></div>
 
-  <script src="assets/app.js?v=20260829f"></script>
+  <script src="assets/vendor/chart.umd.js?v=20260831"></script>
+  <script src="assets/app.js?v=20260831ao"></script>
+  <script src="assets/music-dock.js?v=20260831aq"></script>
 </body>
 </html>

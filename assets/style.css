@@ -5,6 +5,9 @@
    ============================================================================ */
 
 /* ---------- 全局 ---------- */
+/* 预留滚动条空间：内容变短滚动条消失时，页面宽度不再变化，避免居中标题偏移 */
+html { scrollbar-gutter: stable; }
+
 :root {
   --bg: #f5f6f8;              /* 页面底色 */
   --card: #ffffff;            /* 卡片底色 */
@@ -23,6 +26,9 @@
 [hidden] { display: none !important; }
 
 html { scroll-behavior: smooth; }
+
+/* 任意弹窗打开时锁定背景滚动（滚轮不会滚到背后的页面） */
+body:has(dialog[open]) { overflow: hidden; }
 
 /* 页面骨架：左侧固定导航 + 右侧内容区 */
 body {
@@ -153,7 +159,8 @@ button { font-family: inherit; cursor: pointer; }
 .topbar-inner {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 12px 24px;
+  height: 51px;   /* 51px 内容 + 1px 顶栏底边框 = 52px 总高，与 sticky 吸附位对齐 */
+  padding: 0 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -162,7 +169,7 @@ button { font-family: inherit; cursor: pointer; }
 
 /* 当前视图标题（品牌已移入侧边栏顶部） */
 .view-title {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--ink);
 }
@@ -218,8 +225,8 @@ button { font-family: inherit; cursor: pointer; }
 /* ---------- 筛选工具栏 ---------- */
 .toolbar {
   max-width: 1280px;
-  margin: 0 auto;
-  padding: 18px 24px 4px;
+  margin: 14px auto 0;   /* 顶部留白 14px：与 Library/Theatre 工具栏距顶栏一致 */
+  padding: 0 24px 4px;
   scroll-margin-top: 76px; /* 锚点滚动时预留 sticky 顶栏的高度，避免被遮挡 */
 }
 
@@ -227,6 +234,17 @@ button { font-family: inherit; cursor: pointer; }
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  gap: 14px;
+}
+
+/* 工具栏左组：排序 + 类型下拉 + 二级筛选下拉 + 搜索（全部靠左，与 Theatre 一致）
+   #toolbar 提权：覆盖 .filters 的右对齐（同优先级后者胜，故用 ID） */
+#toolbar .filters-left {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
   gap: 14px;
 }
 
@@ -311,7 +329,7 @@ button { font-family: inherit; cursor: pointer; }
 .main {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 14px 24px 60px;
+  padding: 14px 24px 40px;
 }
 
 .count-line {
@@ -336,6 +354,8 @@ button { font-family: inherit; cursor: pointer; }
 body.is-blog .main { padding: 6px 8px 10px; max-width: none; }   /* Blog 视图撑满内容区，去掉居中限宽与留白 */
 body.is-blog .topbar { display: none; }                          /* Blog 视图不需要顶栏，画面上边空白归零 */
 body.is-blog .footer { display: none; }
+/* 播放器宿主挂在 <html> 直接子级（不在 body 内），需用 :has 从 html 定位 */
+html:has(body.is-blog) > .nmp-dock-host { display: none !important; }  /* Blog 为阅读区，隐藏右下角音乐播放器 */
 body.is-blog .blog-frame {
   height: calc(100vh - 40px);
   border-radius: 8px;
@@ -688,8 +708,7 @@ body.is-blog .blog-frame {
 /* ============================================================================
    Library 书架（封面 / 书脊 双模式 + 标签分类 + 详情弹窗）
    ============================================================================ */
-body.is-library { background: #f7f7f5; }   /* 书架页浅灰，贴合站点主题 */
-body.is-library .main { max-width: none; padding: 14px 24px 40px; }
+body.is-library .main, body.is-theatre .main, body.is-music .main { max-width: 1280px; margin: 0 auto; padding: 14px 24px 40px; }
 
 .lib-toolbar {
   scroll-margin-top: 76px;   /* 翻页回顶时预留 sticky 顶栏高度 */
@@ -702,7 +721,7 @@ body.is-library .main { max-width: none; padding: 14px 24px 40px; }
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
+  gap: 14px;
 }
 .lib-label {
   font-size: 12px;
@@ -711,10 +730,17 @@ body.is-library .main { max-width: none; padding: 14px 24px 40px; }
   margin-right: 2px;
 }
 .lib-search { width: 200px; }
-/* 分类行：与上方操作行用分隔线区分 */
-.lib-tag-row {
-  padding-top: 12px;
-  border-top: 1px solid var(--line);
+/* Library/Theatre/Music 视图下空的计数行不再占位（消除幽灵间距，工具栏距顶栏统一 14px） */
+body.is-library #countLine,
+body.is-theatre #countLine,
+body.is-music #countLine { display: none; }
+/* Theatre 工具栏跟随顶栏常驻（sticky），避免滚动浏览后点搜索框被浏览器强行滚回顶部 */
+#theatreView .lib-toolbar {
+  position: sticky;
+  top: 52px;
+  z-index: 40;
+  background: rgba(245, 246, 248, .95);
+  backdrop-filter: blur(6px);
 }
 .lib-mode { background: #ecedf0; padding: 3px; border-radius: 999px; }
 .lib-count { margin: 4px 2px 14px; font-size: 12px; color: var(--ink-2); }
@@ -961,6 +987,9 @@ body.is-library .main { max-width: none; padding: 14px 24px 40px; }
 @media (max-width: 640px) {
   .book-detail { flex-direction: column; }
   .book-detail-cover img { width: 110px; }
+  .theatre-detail { flex-direction: column; }
+  .theatre-detail-left { min-width: 0; }
+  .theatre-meta { white-space: normal; }
   .lib-shelf.lib-cover-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; }
   .lib-spine { height: 200px; }
   .lib-spine:hover { width: 150px; }   /* 200×3/4，封面完整比例 */
@@ -969,6 +998,175 @@ body.is-library .main { max-width: none; padding: 14px 24px 40px; }
   .lib-spine-title { top: 14px; font-size: 10px; }
   .lib-spine-author { top: 64%; font-size: 7px; }
   .lib-spine-pub { top: 85%; font-size: 6px; }
+}
+
+/* ============================================================================
+   Theatre 影视（电影 / 剧集 / 动漫）：复用 Library 封面网格与详情弹窗样式
+   ============================================================================ */
+/* 同步操作区（最近同步 + 立即同步）只在 Favorites 及平台分支显示 */
+body.is-library .topbar-actions,
+body.is-theatre .topbar-actions,
+body.is-music .topbar-actions { display: none; }
+
+/* 详情弹窗：左右两列 —— 左列 封面+时间/评分/标签，右列 标题+导演演员简介 */
+#theatreModal .modal-box { max-width: 660px; }
+.theatre-detail { display: flex; gap: 20px; }
+/* 左列宽度自适应内容（封面 150px，元信息行 nowrap 可撑得更宽） */
+.theatre-detail-left { flex-shrink: 0; min-width: 150px; }
+.theatre-detail-info { min-width: 0; flex: 1; }
+.theatre-detail-info h3 { margin: 0 0 8px; font-size: 19px; }
+.theatre-detail-base { margin-top: 12px; }
+/* 年份/国家/时长/集数：单行显示不换行 */
+.theatre-meta { white-space: nowrap; }
+/* 上映/观看时间：label 定宽，两行垂直对齐 */
+.theatre-times {
+  display: grid;
+  grid-template-columns: 3.2em 1fr;
+  gap: 3px 14px;
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: var(--ink-2);
+}
+.theatre-times span:nth-child(odd) { font-weight: 600; color: var(--ink); }
+/* 标签：浅色柔和胶囊，一行最多 3 个，超过自动换行 */
+.theatre-tags {
+  display: grid;
+  grid-template-columns: repeat(3, max-content);
+  gap: 6px;
+  justify-content: start;
+  margin: 0 0 12px;
+}
+.theatre-tags .tag {
+  background: rgba(124, 92, 255, .09);
+  color: #5b46c4;
+  border: 1px solid rgba(124, 92, 255, .2);
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 11.5px;
+  font-weight: 500;
+}
+
+/* ============================================================================
+   Theatre 观影统计（工具栏按钮 + Chart.js 三图弹窗：上排 环状+雷达，下排 折线全宽）
+   ============================================================================ */
+.charts-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: 999px;
+  padding: 8px 15px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+  transition: border-color .15s ease;
+}
+.charts-toggle:hover { border-color: #c9ccd3; }
+#chartsModal .modal-box { width: min(94vw, 900px); max-width: 900px; }
+.charts-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-height: calc(100vh - 150px);   /* 内容超高时内部滚动，关闭按钮不被 canvas 遮挡 */
+  overflow-y: auto;
+}
+.charts-row1 { display: flex; gap: 14px; }
+.chart-box { flex: 1; min-width: 0; height: 330px; position: relative; }
+.chart-box-line { width: 100%; height: 340px; position: relative; }
+.chart-box canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+/* 移动端：上排两图变上下 */
+@media (max-width: 900px) {
+  .charts-row1 { flex-direction: column; }
+  .chart-box { height: 300px; }
+}
+
+/* ============================================================================
+   Music 网易云我喜欢的音乐（圆形唱片封面 + 歌曲百科弹窗）
+   ============================================================================ */
+/* 歌曲封面：纯圆形唱片（无中心孔，img 填满无白边） */
+.music-grid .lib-cover {
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 6px 18px -6px rgba(0, 0, 0, .4), inset 0 0 0 3px rgba(0, 0, 0, .14);
+}
+.music-grid .lib-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+/* 歌曲百科弹窗（数据渲染，类似 Library 简介） */
+#musicModal .modal-box { width: min(94vw, 680px); max-width: 680px; }
+.music-detail { display: flex; gap: 22px; }
+.music-detail-cover {
+  width: 200px;
+  height: 200px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 8px 24px -8px rgba(0, 0, 0, .45), inset 0 0 0 4px rgba(0, 0, 0, .14);
+  animation: vinyl-spin 18s linear infinite;   /* 打开后唱片自动旋转 */
+}
+.music-detail-cover img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+@keyframes vinyl-spin { to { transform: rotate(360deg); } }
+.music-detail-info { flex: 1; min-width: 0; }
+.music-detail-info h3 { margin: 0 0 6px; font-size: 20px; }
+.music-meta-line { margin: 0 0 5px; font-size: 13px; color: var(--ink-2); }
+.music-lyrics {
+  margin-top: 10px;
+  max-height: 220px;
+  overflow-y: auto;
+  font-size: 13px;
+  line-height: 1.9;
+  color: var(--ink-2);
+  scrollbar-width: thin;
+  padding-right: 4px;
+}
+.music-lyrics p { margin: 0; }
+.lyric-empty { color: var(--ink-2); }
+.btn-netease { background: #ec4141; }
+.btn-netease:hover { opacity: .9; transform: translateY(-1px); }
+
+/* 歌曲百科弹窗：正在播放状态行（点击歌曲后即时反馈，弥补播放器加载延迟） */
+.music-play-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  color: #fff;
+  background: linear-gradient(135deg, #ec4141, #ff7a59);
+}
+.music-play-status .bars { display: inline-flex; align-items: flex-end; gap: 2px; height: 12px; }
+.music-play-status .bars i {
+  width: 3px;
+  border-radius: 1px;
+  background: #fff;
+  animation: music-bars 1s ease-in-out infinite;
+}
+.music-play-status .bars i:nth-child(2) { animation-delay: .18s; }
+.music-play-status .bars i:nth-child(3) { animation-delay: .36s; }
+@keyframes music-bars { 0%, 100% { height: 4px; } 50% { height: 12px; } }
+
+/* 右下角 NMP 播放器：系统开启「减少动态效果」时 v3 会把唱片旋转禁用
+   （@media (prefers-reduced-motion: reduce) 里 animation:none !important）。
+   用户要求播放时唱片旋转，这里强制恢复——仅在播放中（.nmpv3-is-playing）生效，
+   其他动画仍尊重系统设置。选择器加 .nmpv3-player 前缀提高优先级以压过 v3 规则 */
+@media (prefers-reduced-motion: reduce) {
+  .nmpv3-player.nmpv3-is-playing .nmpv3-cover,
+  .nmpv3-player.nmpv3-is-playing .nmpv3-vinyl-ring {
+    animation: nmpv3-spin 6s linear infinite !important;
+  }
+}
+@media (max-width: 640px) {
+  .music-detail { flex-direction: column; align-items: center; }
+  .music-detail-cover { width: 160px; height: 160px; }
 }
 
 /* 临时批量添加弹窗 */
