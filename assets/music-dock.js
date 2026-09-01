@@ -74,6 +74,7 @@
    * 轮询等待播放器实例就绪（最长约 10 秒，覆盖慢网络下播放器加载），超时静默放弃。
    */
   window.playSongOnDock = function (id) {
+    hasUserPlayed = true;   // 用户主动点歌后，失败自动跳才生效
     let tries = 0;
     const attempt = () => {
       const p = dockPlayer();
@@ -115,6 +116,87 @@
     p.loadPlaylistData({ songs }, { startIndex: 0, autoplay: false }).catch(() => {});
   }
 
+  /* --------------------------------------------------------------------------
+   * 音量记忆：v3 的 remember=false 不存音量，这里自己持久化到 localStorage。
+   * 恢复：播放器就绪后 setVolume(存的音量)（音量 0 静音也能记住）。
+   * 保存：音量变化无事件，用 2s 轻量轮询 getState().volume 比对后落盘。
+   * ------------------------------------------------------------------------ */
+  const VOLUME_KEY = 'nmpVolume';
+  let volumeTries = 0, lastVolume = null;
+  function initVolumeMemory() {
+    const p = dockPlayer();
+    if (!p || typeof p.setVolume !== 'function' || !p.getState) {
+      if (volumeTries++ < 60) setTimeout(initVolumeMemory, 300);
+      return;
+    }
+    try {
+      const saved = parseFloat(localStorage.getItem(VOLUME_KEY));
+      if (Number.isFinite(saved) && saved >= 0 && saved <= 1 && saved !== p.getState().volume) {
+        p.setVolume(saved);
+      }
+    } catch { /* localStorage 不可用时静默 */ }
+    lastVolume = p.getState().volume;
+    setInterval(() => {
+      const p2 = dockPlayer();
+      if (!p2 || !p2.getState) return;
+      const v = p2.getState().volume;
+      if (v !== lastVolume) {
+        lastVolume = v;
+        try { localStorage.setItem(VOLUME_KEY, String(v)); } catch { /* 忽略 */ }
+      }
+    }, 2000);
+  }
+
+  /* --------------------------------------------------------------------------
+   * url 加载失败自动跳下一首。
+   * v3 三种失败形态：
+   *   ① 音频播放中出错（audio error）→ v3 已自动带播放态跳下一首，无需干预；
+   *   ② 加载阶段显式报错（网络异常等）→ 发 nmpv3:error（"Failed to load ..."）；
+   *   ③ getSongUrl 返回 null（版权下架/VIP 拿不到 url）→ 不发事件、不跳，
+   *      status 卡在 loading 不动 —— 用「超时检测」兜底。
+   * 连续失败计数防死循环（整列表都失效时跳 3 次即停），播放成功清零。
+   * ------------------------------------------------------------------------ */
+  const ERR_SKIP_MAX = 3;
+  let errSkipCount = 0;
+  let hasUserPlayed = false;   // 用户点过歌才自动跳（预热空载不干预）
+  let loadStuckSince = 0;      // status 卡在 loading 的起始时间
+
+  function skipToNext() {
+    const p = dockPlayer();
+    if (!hasUserPlayed || !p || typeof p.next !== 'function' || typeof p.play !== 'function') return;
+    if (++errSkipCount > ERR_SKIP_MAX) return;
+    p.next().then(() => p.play()).catch(() => {});
+  }
+
+  function initErrorSkip() {
+    // ② 加载阶段报错（"Failed to load ..." / "song url not available" 等）
+    //    「Playback failed」（播放中出错）v3 已自动跳，忽略
+    document.addEventListener('nmpv3:error', (e) => {
+      const msg = e.detail && e.detail.message ? String(e.detail.message) : '';
+      if (/playback failed/i.test(msg)) return;
+      skipToNext();
+    });
+    // ③ getSongUrl 返回 null 不报错 → 卡 loading 超时判定（正常加载 2~5s，阈值 10s）
+    setInterval(() => {
+      const p = dockPlayer();
+      if (!p || !p.getState) return;
+      const st = p.getState();
+      if (st.status === 'loading') {
+        if (!loadStuckSince) loadStuckSince = Date.now();
+        else if (Date.now() - loadStuckSince > 10000) {
+          loadStuckSince = 0;
+          skipToNext();
+        }
+      } else {
+        loadStuckSince = 0;
+      }
+    }, 3000);
+    // 播放成功清零计数
+    document.addEventListener('nmpv3:play', () => { errSkipCount = 0; });
+  }
+
   ensureMusicDock();
   warmupDock();
+  initVolumeMemory();
+  initErrorSkip();
 })();

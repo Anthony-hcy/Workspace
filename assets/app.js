@@ -178,6 +178,31 @@ function applyFilter() {
 /* ---------------------------------------------------------------------------
  * 三、分页渲染（总览=行填充动态分页；抖音/B站视图=固定每页 24 张）
  * ------------------------------------------------------------------------- */
+
+/** 已预取过的封面 URL（会话内去重，翻页回来不重复请求） */
+const _prefetchCache = new Set();
+
+/**
+ * 预取当前页卡片封面：在渲染前先发图片请求，让封面（尤其远程 CDN 图）
+ * 在卡片出现时已在路上/缓存，避免"卡片框先出来、封面慢慢补"。
+ * 并发 limit 个，完成一个补一个，不打满浏览器连接数。
+ */
+function prefetchCovers(urls, limit = 8) {
+  const queue = (urls || []).filter((u) => u && !_prefetchCache.has(u));
+  if (!queue.length) return;
+  let i = 0;
+  const worker = () => {
+    if (i >= queue.length) return;
+    const u = queue[i++];
+    _prefetchCache.add(u);
+    const img = new Image();
+    img.referrerPolicy = 'no-referrer';   // 与卡片 img 一致，绕过 CDN 防盗链
+    img.onload = img.onerror = worker;    // 完成一个再发下一个
+    img.src = u;
+  };
+  for (let n = 0; n < limit; n++) worker();
+}
+
 const totalPages = () => state.view === 'all'
   ? Math.max(1, rowLayout.pages.length)
   : Math.max(1, Math.ceil(state.filtered.length / CONFIG.PAGE_SIZE));
@@ -193,11 +218,13 @@ function renderPage() {
     // 行填充模式：页边界已预计算，任意跳页都是 O(1) 切片
     const pg = rowLayout.pages[state.page - 1];
     const slice = pg ? state.filtered.slice(pg.start, pg.end) : [];
+    prefetchCovers(slice.map((it) => it.cover));   // 预取当前页封面
     grid.innerHTML = '';
     renderRows(slice);
   } else {
     const start = (state.page - 1) * CONFIG.PAGE_SIZE;
     const slice = state.filtered.slice(start, start + CONFIG.PAGE_SIZE);
+    prefetchCovers(slice.map((it) => it.cover));   // 预取当前页封面
     grid.innerHTML = '';
     const frag = document.createDocumentFragment();
     for (const item of slice) frag.appendChild(buildCard(item));
@@ -821,6 +848,7 @@ function renderMusic() {
   state.musicPage = Math.min(state.musicPage, totalPages);
   const slice = filtered.slice((state.musicPage - 1) * perPage, state.musicPage * perPage);
 
+  prefetchCovers(slice.map((m) => m.cover));   // 预取当前页封面
   shelf.innerHTML = slice.map((m) => `
     <a class="lib-book" data-music="${m.id}">
       <div class="lib-cover music-cover">
@@ -938,6 +966,7 @@ function renderTheatre() {
   state.theatrePage = Math.min(state.theatrePage, totalPages);
   const slice = filtered.slice((state.theatrePage - 1) * perPage, state.theatrePage * perPage);
 
+  prefetchCovers(slice.map((t) => t.image));   // 预取当前页封面
   shelf.innerHTML = slice.map((t) => `
     <a class="lib-book" data-theatre="${t.id}">
       <div class="lib-cover">
@@ -1121,6 +1150,7 @@ function renderCoverGrid(books) {
   state.libPage = Math.min(state.libPage, totalPages);
   const slice = books.slice((state.libPage - 1) * perPage, state.libPage * perPage);
 
+  prefetchCovers(slice.map((b) => b.cover));   // 预取当前页封面
   shelf.innerHTML = slice.map((b) => `
     <a class="lib-book" data-book="${b.id}">
       <div class="lib-cover">
@@ -1146,6 +1176,7 @@ function renderSpine(books) {
   const shelf = $('#libShelf');
   shelf.className = 'lib-shelf lib-spine-shelf';
   $('#libPagination').hidden = true;   // 书脊不分页
+  prefetchCovers(books.map((b) => b.cover));   // 预取书脊封面（量小，一次全预取）
 
   // 每层书架可放的本数（按容器宽度估算；44 ≈ 平均书脊宽 + 间距）
   const avail = shelf.clientWidth || Math.max(300, window.innerWidth - 176 - 48);
