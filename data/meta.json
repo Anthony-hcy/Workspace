@@ -1,5 +1,5 @@
 {
-  "lastSync": "2026-09-10T00:48:10.401Z",
+  "lastSync": "2026-09-11T00:49:09.263Z",
   "mode": "incremental",
   "sources": {
     "douyin-like": {
@@ -17,9 +17,9 @@
       "incremental": true
     },
     "xiaoheihe-collect": {
-      "count": 32,
+      "count": 34,
       "ok": true,
-      "added": 8,
+      "added": 10,
       "removed": 0,
       "incremental": false
     }
