@@ -733,6 +733,9 @@ button:focus, select:focus, input:focus { outline: none; }
   /* 顶栏：汉堡 + 标题居中 + 操作区靠右 */
   .topbar-inner { justify-content: flex-start; }
   .view-title { flex: 1; text-align: center; padding-left: 0; }
+  /* 手机端 Blog 也显示顶栏（含汉堡入口），否则默认首页无法打开抽屉导航 */
+  body.is-blog .topbar { display: block; }
+  body.is-blog .blog-frame { height: calc(100vh - 92px); }  /* 52px 顶栏 + 40px 原留白 */
 }
 
 @media (max-width: 640px) {
