@@ -744,7 +744,7 @@ function enterBlog() {
   document.querySelectorAll('#sideNav .side-item[data-view]').forEach((b) =>
     b.classList.toggle('is-active', b.dataset.view === 'blog'));
   state.view = 'blog';
-  $('#viewTitle').textContent = 'Blog';
+  $('#viewTitle').textContent = 'Blog · 我的博客';
   $('#toolbar').hidden = true;
   $('#grid').hidden = true;
   $('#pagination').hidden = true;
