@@ -61,9 +61,9 @@ const state = {
   musicSort: 'collectedAt-desc', // 排序：collectedAt-desc(默认) | title-asc | title-desc | artist-asc
   musicPage: 1,       // 音乐封面页码（一页四行）
   schedule: null,     // Schedule 课表数据（data/timetable.json）
-  schedWeek: 'all',   // 周次筛选：all（全部）| 第 N 周数字
-  schedDay: 'today',  // 手机单日视图当前星期：today（自动取今天）| 1..7
-  schedMode: 'day',   // 手机端模式：day（单日）| week（整周横向滚动）
+  schedDate: '',       // 当前查看日期 'YYYY-MM-DD'（默认今天，WakeUp 式单一基准，周次/星期几都由它推导）
+  schedShowAll: false, // 全部周次视图（不过滤课程；false=按当前日期所在周过滤）
+  schedMode: 'day',   // 模式：day（单日）| week（整周）
 };
 
 /* 封面占位渐变色板（仿 Collecta 的多彩柔和风） */
@@ -860,21 +860,76 @@ function isWeekActive(weeks, n) {
   return parseWeeks(weeks).includes(n);
 }
 
-/** 今天是本学期第几周（由 termStart 推算）；未开学/已结束返回 null */
+/** 今天是本学期第几周（由 termStart 推算）；未开学返回 0 */
 function currentWeek() {
   const data = state.schedule;
-  if (!data?.termStart) return null;
-  const start = new Date(data.termStart + 'T00:00:00');
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const diff = Math.floor((today - start) / 86400000);
-  if (diff < 0) return null;
-  return Math.floor(diff / 7) + 1;
+  if (!data?.termStart) return 0;
+  return weekOf(todayStr());
 }
 
 /** 今天星期几：1=周一 … 7=周日 */
 function todayDay() {
   return ((new Date().getDay() + 6) % 7) + 1;
+}
+
+/* ---- 日期 ↔ 周次 工具（WakeUp 式：以学期开始日期为锚点） ---- */
+/** 'YYYY-MM-DD' → 本地 Date */
+function parseDateStr(s) {
+  const [y, m, d] = s.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+/** Date → 'YYYY-MM-DD' */
+function fmtDateStr(d) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+/** 今天 'YYYY-MM-DD' */
+function todayStr() {
+  return fmtDateStr(new Date());
+}
+/** 该日期星期几：1=周一 … 7=周日 */
+function dayOfDate(dateStr) {
+  return ((parseDateStr(dateStr).getDay() + 6) % 7) + 1;
+}
+/** 该日期是第几周（周次 = 距 termStart 偏移天数 ÷ 7 + 1）；未开学返回 0 */
+function weekOf(dateStr) {
+  const start = parseDateStr(state.schedule.termStart);
+  const d = parseDateStr(dateStr);
+  const diff = Math.floor((d - start) / 86400000);
+  if (diff < 0) return 0;
+  return Math.floor(diff / 7) + 1;
+}
+/** 第 weekNum 周周一的日期 'YYYY-MM-DD' */
+function weekStartDateStr(weekNum) {
+  const start = parseDateStr(state.schedule.termStart);
+  start.setDate(start.getDate() + (weekNum - 1) * 7);
+  return fmtDateStr(start);
+}
+/** 该日期所在周的周一 'YYYY-MM-DD' */
+function mondayOfDate(dateStr) {
+  const d = parseDateStr(dateStr);
+  d.setDate(d.getDate() - (dayOfDate(dateStr) - 1));
+  return fmtDateStr(d);
+}
+/** 日期 → "M/D" */
+function formatMD(d) {
+  return `${d.getMonth() + 1}/${d.getDate()}`;
+}
+/** 周次区间并集压缩："1-8" + "13" → "8-13"；"13","14","15" → "13-15" */
+function mergeWeeksList(weeksList) {
+  const set = new Set();
+  weeksList.forEach((w) => parseWeeks(w).forEach((n) => set.add(n)));
+  const arr = [...set].sort((a, b) => a - b);
+  const parts = [];
+  let s = arr[0], p = arr[0];
+  for (let i = 1; i <= arr.length; i++) {
+    const c = arr[i];
+    if (c !== p + 1) {
+      parts.push(s === p ? String(s) : `${s}-${p}`);
+      s = c;
+    }
+    p = c;
+  }
+  return parts.join(',');
 }
 
 /** 课程配色：按课程名 hash 稳定取色 */
@@ -902,27 +957,42 @@ function enterSchedule() {
   $('#scheduleView').hidden = false;
   document.body.classList.add('is-schedule');
   document.body.classList.remove('is-blog', 'is-library', 'is-theatre', 'is-music');
+  if (!state.schedDate) state.schedDate = todayStr();
   renderSchedule();
 }
-/** 周次下拉填充（1~16 周，本周带标注） */
+
+/** 周次下拉填充（全部周次 + 1~16 周，本周带标注），选中项跟随当前查看日期 */
 function fillSchedWeekSelect() {
   const sel = $('#schedWeekSelect');
   const cw = currentWeek();
   const opts = ['<option value="all">全部周次</option>'];
   for (let w = 1; w <= 16; w++) {
-    opts.push(`<option value="${w}">${w === cw ? `第 ${w} 周（本周）` : `第 ${w} 周`}</option>`);
+    opts.push(`<option value="${w}">第 ${w} 周${w === cw ? '（本周）' : ''}</option>`);
   }
   sel.innerHTML = opts.join('');
-  sel.value = state.schedWeek;
+  if (state.schedShowAll) {
+    sel.value = 'all';
+  } else {
+    const w = weekOf(state.schedDate);
+    sel.value = (w >= 1 && w <= 16) ? String(w) : 'all';
+  }
 }
 
-/** 组装 (day, period) → 课程列表 的索引 */
+/** 组装 (day, period) → 课程列表 的索引；同格同名课程合并周次/教师（如 无人驾驶 13周+8-12周 → 8-13周） */
 function schedIndex() {
   const map = new Map();
   for (const c of state.schedule.courses) {
     const key = `${c.day}-${c.period}`;
     if (!map.has(key)) map.set(key, []);
-    map.get(key).push(c);
+    const arr = map.get(key);
+    const same = arr.find((x) => x.name === c.name);
+    if (same) {
+      same.weeks = mergeWeeksList([same.weeks, c.weeks]);
+      const teachers = [same.teacher, c.teacher].filter(Boolean);
+      if (teachers.length) same.teacher = [...new Set(teachers.join(',').split(','))].join(',');
+    } else {
+      arr.push({ ...c });
+    }
   }
   return map;
 }
@@ -936,82 +1006,79 @@ function schedCardHTML(c) {
   </button>`;
 }
 
-/** 周次筛选：只保留该周有课的课程（'all' 时全部保留） */
+/** 周次过滤：week 为 null 时保留全部；否则只保留该周有课的课程 */
 function schedFilterByWeek(list, week) {
   return week == null ? list : list.filter((c) => isWeekActive(c.weeks, week));
 }
 
-/** termStart 所在周（第 weekNum 周）第 day 天的日期 */
-function schedDateOf(day, weekNum) {
-  const base = new Date(state.schedule.termStart + 'T00:00:00');
-  base.setDate(base.getDate() + (weekNum - 1) * 7 + (day - 1));
-  return base;
+/** 单日切换器中间文本：查看日期 + 日期（今天是"今天"） */
+function schedDateLabel() {
+  const d = parseDateStr(state.schedDate);
+  const isToday = state.schedDate === todayStr();
+  return `${isToday ? '今天' : WEEK_NAMES[dayOfDate(state.schedDate) - 1]} ${formatMD(d)}`;
 }
 
-/** 日期 → "M/D" */
-function formatMD(d) {
-  return `${d.getMonth() + 1}/${d.getDate()}`;
+/** 当前查看周次标签：未开学显示提示 */
+function schedWeekLabel() {
+  if (state.schedShowAll) return '全部周次';
+  const w = weekOf(state.schedDate);
+  if (w >= 1) return `第 ${w} 周`;
+  return '未开学';
 }
 
-/** 星期切换器中间文本：今天态显示真实日期，其他按 termStart 周映射 */
-function schedDayLabel() {
-  const isToday = state.schedDay === 'today';
-  const day = isToday ? todayDay() : Math.min(7, Math.max(1, +state.schedDay));
-  const wn = state.schedWeek === 'all' ? 1 : +state.schedWeek;
-  const d = isToday ? new Date() : schedDateOf(day, wn);
-  return `${isToday ? '今天' : WEEK_NAMES[day - 1]} ${formatMD(d)}`;
-}
-
-/** 星期左右切换（周一~周日循环） */
+/** 左右箭头切换：查看日期 ±1 天（周次、星期几自动联动） */
 function schedShiftDay(delta) {
-  let d = (state.schedDay === 'today' ? todayDay() : +state.schedDay) + delta;
-  if (d < 1) d = 7;
-  if (d > 7) d = 1;
-  state.schedDay = String(d);
+  const d = parseDateStr(state.schedDate);
+  d.setDate(d.getDate() + delta);
+  state.schedDate = fmtDateStr(d);
   renderSchedule();
 }
 
-/** 桌面整周网格（也用于手机「整周」模式） */
+/** 整周网格：显示当前查看日期所在周（周一~周日），表头真实日期，今天列高亮 */
 function renderSchedGrid() {
   const data = state.schedule;
   const idx = schedIndex();
-  const cw = currentWeek();
-  const td = todayDay();
-  const week = state.schedWeek !== 'all' ? +state.schedWeek : null;
-  const wn = state.schedWeek === 'all' ? 1 : +state.schedWeek;
+  const td = todayStr();
+  const monday = mondayOfDate(state.schedDate);
+  const week = state.schedShowAll ? null : weekOf(state.schedDate);
   const cells = [];
 
   cells.push('<div class="sched-cell sched-head">节次 / 时间</div>');
   for (let d = 1; d <= 7; d++) {
-    cells.push(`<div class="sched-cell sched-head${d === td ? ' is-today-col' : ''}">${WEEK_NAMES[d - 1]}<span class="sched-head-date">${formatMD(schedDateOf(d, wn))}</span>${d === td ? '<span class="sched-today-tag">今天</span>' : ''}</div>`);
+    const m = parseDateStr(monday);
+    m.setDate(m.getDate() + d - 1);
+    const ds = fmtDateStr(m);
+    const isToday = ds === td;
+    cells.push(`<div class="sched-cell sched-head${isToday ? ' is-today-col' : ''}">${WEEK_NAMES[d - 1]}<span class="sched-head-date">${formatMD(m)}</span>${isToday ? '<span class="sched-today-tag">今天</span>' : ''}</div>`);
   }
 
   for (const p of data.periods) {
     cells.push(`<div class="sched-cell sched-time"><b>${escapeHtml(p.label)}</b><span>${escapeHtml(p.time)}</span></div>`);
     for (let d = 1; d <= 7; d++) {
+      const m = parseDateStr(monday);
+      m.setDate(m.getDate() + d - 1);
+      const ds = fmtDateStr(m);
+      const isToday = ds === td;
       const list = schedFilterByWeek(idx.get(`${d}-${p.id}`) || [], week);
       if (!list.length) {
-        cells.push(`<div class="sched-cell${d === td ? ' is-today-col' : ''}"></div>`);
+        cells.push(`<div class="sched-cell${isToday ? ' is-today-col' : ''}"></div>`);
         continue;
       }
-      // 当前周有课 → 格子高亮描边，便于一眼看到本周课程
-      const thisWeek = cw != null && list.some((c) => isWeekActive(c.weeks, cw));
-      cells.push(`<div class="sched-cell sched-has${thisWeek ? ' is-today' : ''}${d === td ? ' is-today-col' : ''}">${list.map((c) => schedCardHTML(c)).join('')}</div>`);
+      cells.push(`<div class="sched-cell sched-has${isToday ? ' is-today-col' : ''}">${list.map((c) => schedCardHTML(c)).join('')}</div>`);
     }
   }
 
   $('#schedStage').innerHTML = `<div class="sched-grid${state.schedMode === 'week' ? ' sched-mode-week' : ''}">${cells.join('')}</div>`;
 }
 
-/** 单日视图：当天 13 行列表（星期切换用工具栏箭头） */
+/** 单日视图：当前查看日期当天的 13 行列表（星期切换用工具栏箭头） */
 function renderSchedDay() {
   const data = state.schedule;
   const idx = schedIndex();
-  const td = todayDay();
-  const day = state.schedDay === 'today' ? td : Math.min(7, Math.max(1, +state.schedDay));
-  const week = state.schedWeek !== 'all' ? +state.schedWeek : null;
+  const day = dayOfDate(state.schedDate);
+  const week = state.schedShowAll ? null : weekOf(state.schedDate);
 
-  $('#schedDayLabel').textContent = schedDayLabel();
+  $('#schedDayLabel').textContent = schedDateLabel();
 
   const rows = data.periods.map((p) => {
     const list = schedFilterByWeek(idx.get(`${day}-${p.id}`) || [], week);
@@ -1047,6 +1114,7 @@ function renderSchedule() {
 
   fillSchedWeekSelect();
   $('#schedSemester').textContent = data.semester || '';
+  $('#schedWeekLabel').textContent = schedWeekLabel();
 
   // 调课提示条（有调课信息时才显示）
   const adj = data.adjustments || [];
@@ -1715,17 +1783,24 @@ $('#musicModal').addEventListener('click', (e) => {
 });
 
 /* Schedule 事件绑定 */
-// 周次筛选
+// 周次下拉：选「全部周次」不过滤；选第 N 周跳转到该周周一
 $('#schedWeekSelect').addEventListener('change', (e) => {
-  state.schedWeek = e.target.value;
+  const v = e.target.value;
+  if (v === 'all') {
+    state.schedShowAll = true;
+  } else {
+    state.schedShowAll = false;
+    state.schedDate = weekStartDateStr(+v);
+  }
   renderSchedule();
 });
-// 星期左右箭头切换
+// 星期左右箭头切换：查看日期 ±1 天（周次/星期几自动联动）
 $('#schedPrevDay').addEventListener('click', () => schedShiftDay(-1));
 $('#schedNextDay').addEventListener('click', () => schedShiftDay(1));
 // 「今天」：回到今天并切回单日视图
 $('#schedTodayBtn').addEventListener('click', () => {
-  state.schedDay = 'today';
+  state.schedDate = todayStr();
+  state.schedShowAll = false;
   state.schedMode = 'day';
   renderSchedule();
 });
