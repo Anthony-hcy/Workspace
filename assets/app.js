@@ -60,6 +60,10 @@ const state = {
   musicKw: '',        // 音乐搜索关键词
   musicSort: 'collectedAt-desc', // 排序：collectedAt-desc(默认) | title-asc | title-desc | artist-asc
   musicPage: 1,       // 音乐封面页码（一页四行）
+  schedule: null,     // Schedule 课表数据（data/timetable.json）
+  schedWeek: 'all',   // 周次筛选：all（全部）| 第 N 周数字
+  schedDay: 'today',  // 手机单日视图当前星期：today（自动取今天）| 1..7
+  schedMode: 'day',   // 手机端模式：day（单日）| week（整周横向滚动）
 };
 
 /* 封面占位渐变色板（仿 Collecta 的多彩柔和风） */
@@ -86,7 +90,7 @@ async function loadData() {
   // ⚠️ 加时间戳参数绕过浏览器/CDN 缓存（Pages 对静态资源缓存 10 分钟，
   //    否则同步完成后打开页面可能仍看到旧数据）
   const bust = `t=${Date.now()}`;
-  const [metaRes, likeRes, collectRes, biliRes, foldersRes, xhhRes, libRes, theatreRes, musicRes] = await Promise.allSettled([
+  const [metaRes, likeRes, collectRes, biliRes, foldersRes, xhhRes, libRes, theatreRes, musicRes, schedRes] = await Promise.allSettled([
     fetch(`data/meta.json?${bust}`, { cache: 'no-store' }).then((r) => r.json()),
     fetch(`data/douyin-like.json?${bust}`, { cache: 'no-store' }).then((r) => r.json()),
     fetch(`data/douyin-collect.json?${bust}`, { cache: 'no-store' }).then((r) => r.json()),
@@ -96,6 +100,7 @@ async function loadData() {
     fetch(`data/library-books.json?${bust}`, { cache: 'no-store' }).then((r) => r.json()),
     fetch(`data/theatre.json?${bust}`, { cache: 'no-store' }).then((r) => r.json()),
     fetch(`data/music.json?${bust}`, { cache: 'no-store' }).then((r) => r.json()),
+    fetch(`data/timetable.json?${bust}`, { cache: 'no-store' }).then((r) => r.json()),
   ]);
 
   // meta：顶栏显示"最近同步时间 + 本次模式"
@@ -116,6 +121,7 @@ async function loadData() {
   state.library = libRes.status === 'fulfilled' && Array.isArray(libRes.value) ? libRes.value : [];
   state.theatre = theatreRes.status === 'fulfilled' && Array.isArray(theatreRes.value) ? theatreRes.value : [];
   state.music = musicRes.status === 'fulfilled' && Array.isArray(musicRes.value) ? musicRes.value : [];
+  state.schedule = schedRes.status === 'fulfilled' && schedRes.value?.courses ? schedRes.value : null;
 
   /** 按 id 合并：同一条作品既点赞又收藏时，合并来源而不是重复展示 */
   const map = new Map();
@@ -708,6 +714,7 @@ const VIEW_TITLES = {
   'theatre-series': 'Theatre · 剧集',
   'theatre-anime': 'Theatre · 动漫',
   music: 'Music · 我的音乐',
+  schedule: 'Schedule · 我的课表',
 };
 
 /** 根据当前视图动态生成二级筛选下拉（抖音/小红书：点赞、收藏；B站：各收藏夹） */
@@ -747,8 +754,9 @@ function enterBlog() {
   $('#libraryView').hidden = true;
   $('#theatreView').hidden = true;
   $('#musicView').hidden = true;
+  $('#scheduleView').hidden = true;
   document.body.classList.add('is-blog');
-  document.body.classList.remove('is-library', 'is-theatre', 'is-music');
+  document.body.classList.remove('is-library', 'is-theatre', 'is-music', 'is-schedule');
 }
 
 /** 进入 Library 视图：仿真书架（封面/书脊双模式 + 标签分类） */
@@ -766,8 +774,9 @@ function enterLibrary() {
   $('#libraryView').hidden = false;
   $('#theatreView').hidden = true;
   $('#musicView').hidden = true;
+  $('#scheduleView').hidden = true;
   document.body.classList.add('is-library');
-  document.body.classList.remove('is-blog', 'is-theatre', 'is-music');
+  document.body.classList.remove('is-blog', 'is-theatre', 'is-music', 'is-schedule');
   renderLibrary();
 }
 
@@ -788,8 +797,9 @@ function enterTheatre(view) {
   $('#libraryView').hidden = true;
   $('#theatreView').hidden = false;
   $('#musicView').hidden = true;
+  $('#scheduleView').hidden = true;
   document.body.classList.add('is-theatre');
-  document.body.classList.remove('is-blog', 'is-library', 'is-music');
+  document.body.classList.remove('is-blog', 'is-library', 'is-music', 'is-schedule');
   renderTheatre();
 }
 
@@ -808,9 +818,237 @@ function enterMusic() {
   $('#libraryView').hidden = true;
   $('#theatreView').hidden = true;
   $('#musicView').hidden = false;
+  $('#scheduleView').hidden = true;
   document.body.classList.add('is-music');
-  document.body.classList.remove('is-blog', 'is-library', 'is-theatre');
+  document.body.classList.remove('is-blog', 'is-library', 'is-theatre', 'is-schedule');
   renderMusic();
+}
+
+/* ---------------------------------------------------------------------------
+ * Schedule 课表（周网格 + 周次筛选 + 今天高亮；手机端单日/整周切换）
+ * ------------------------------------------------------------------------- */
+const WEEK_NAMES = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+
+/* 课程配色板（浅底 + 强调色），按课程名 hash 稳定取色 */
+const SCHED_COLORS = [
+  ['#e8eefb', '#5b7fd4'],
+  ['#fdeee3', '#e08b3c'],
+  ['#e9f6ef', '#3fae7a'],
+  ['#fbeef2', '#e06a8b'],
+  ['#f0ecfa', '#8a6fd1'],
+  ['#e7f4f6', '#3aa3b8'],
+  ['#faf3e0', '#c99a2e'],
+  ['#eef0f4', '#7d8ba1'],
+];
+
+/** 解析周次串 "1-2,4-8" / "1,3-12" / "13" → [1,2,4,5,6,7,8] */
+function parseWeeks(str) {
+  if (!str) return [];
+  const set = new Set();
+  for (const part of String(str).split(',')) {
+    const m = part.trim().match(/^(\d+)(?:-(\d+))?$/);
+    if (!m) continue;
+    const a = +m[1];
+    const b = m[2] ? +m[2] : a;
+    for (let w = a; w <= b; w++) set.add(w);
+  }
+  return [...set].sort((x, y) => x - y);
+}
+
+/** 第 n 周是否有课 */
+function isWeekActive(weeks, n) {
+  return parseWeeks(weeks).includes(n);
+}
+
+/** 今天是本学期第几周（由 termStart 推算）；未开学/已结束返回 null */
+function currentWeek() {
+  const data = state.schedule;
+  if (!data?.termStart) return null;
+  const start = new Date(data.termStart + 'T00:00:00');
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const diff = Math.floor((today - start) / 86400000);
+  if (diff < 0) return null;
+  return Math.floor(diff / 7) + 1;
+}
+
+/** 今天星期几：1=周一 … 7=周日 */
+function todayDay() {
+  return ((new Date().getDay() + 6) % 7) + 1;
+}
+
+/** 课程配色：按课程名 hash 稳定取色 */
+function schedColor(name) {
+  let h = 0;
+  for (const ch of name) h = (h * 31 + ch.codePointAt(0)) >>> 0;
+  return SCHED_COLORS[h % SCHED_COLORS.length];
+}
+
+/** 进入 Schedule 视图 */
+function enterSchedule() {
+  document.querySelectorAll('#sideNav .side-item[data-view]').forEach((b) =>
+    b.classList.toggle('is-active', b.dataset.view === 'schedule'));
+  state.view = 'schedule';
+  $('#viewTitle').textContent = VIEW_TITLES.schedule;
+  $('#toolbar').hidden = true;
+  $('#grid').hidden = true;
+  $('#pagination').hidden = true;
+  $('#emptyBox').hidden = true;
+  $('#countLine').textContent = '';
+  $('#blogFrame').hidden = true;
+  $('#libraryView').hidden = true;
+  $('#theatreView').hidden = true;
+  $('#musicView').hidden = true;
+  $('#scheduleView').hidden = false;
+  document.body.classList.add('is-schedule');
+  document.body.classList.remove('is-blog', 'is-library', 'is-theatre', 'is-music');
+  renderSchedule();
+}
+/** 周次下拉填充（1~16 周，本周带标注） */
+function fillSchedWeekSelect() {
+  const sel = $('#schedWeekSelect');
+  const cw = currentWeek();
+  const opts = ['<option value="all">全部周次</option>'];
+  for (let w = 1; w <= 16; w++) {
+    opts.push(`<option value="${w}">${w === cw ? `第 ${w} 周（本周）` : `第 ${w} 周`}</option>`);
+  }
+  sel.innerHTML = opts.join('');
+  sel.value = state.schedWeek;
+}
+
+/** 组装 (day, period) → 课程列表 的索引 */
+function schedIndex() {
+  const map = new Map();
+  for (const c of state.schedule.courses) {
+    const key = `${c.day}-${c.period}`;
+    if (!map.has(key)) map.set(key, []);
+    map.get(key).push(c);
+  }
+  return map;
+}
+
+/** 课程卡 HTML；week 为筛选周次（非 'all' 时，该周无课的卡片变淡） */
+function schedCardHTML(c, week) {
+  const [bg, accent] = schedColor(c.name);
+  const dim = week != null && !isWeekActive(c.weeks, week);
+  return `<button type="button" class="sched-card${dim ? ' is-dim' : ''}" data-code="${escapeHtml(c.code || '')}" data-name="${escapeHtml(c.name)}" data-teacher="${escapeHtml(c.teacher || '')}" data-room="${escapeHtml(c.room || '')}" data-weeks="${escapeHtml(c.weeks)}" data-classname="${escapeHtml(c.className || '')}" data-day="${c.day}" data-period="${c.period}" style="--sc-bg:${bg};--sc-accent:${accent}">
+    <span class="sched-card-name">${escapeHtml(c.name)}</span>
+    <span class="sched-card-meta">${escapeHtml(c.room || '')}</span>
+  </button>`;
+}
+
+/** 桌面整周网格（也用于手机「整周」模式） */
+function renderSchedGrid() {
+  const data = state.schedule;
+  const idx = schedIndex();
+  const cw = currentWeek();
+  const td = todayDay();
+  const week = state.schedWeek !== 'all' ? +state.schedWeek : null;
+  const cells = [];
+
+  cells.push('<div class="sched-cell sched-head">节次 / 时间</div>');
+  for (let d = 1; d <= 7; d++) {
+    cells.push(`<div class="sched-cell sched-head${d === td ? ' is-today-col' : ''}">${WEEK_NAMES[d - 1]}${d === td ? '<span class="sched-today-tag">今天</span>' : ''}</div>`);
+  }
+
+  for (const p of data.periods) {
+    cells.push(`<div class="sched-cell sched-time"><b>${escapeHtml(p.label)}</b><span>${escapeHtml(p.time)}</span></div>`);
+    for (let d = 1; d <= 7; d++) {
+      const list = idx.get(`${d}-${p.id}`) || [];
+      if (!list.length) {
+        cells.push(`<div class="sched-cell${d === td ? ' is-today-col' : ''}"></div>`);
+        continue;
+      }
+      // 当前周有课 → 格子高亮描边，便于一眼看到本周课程
+      const thisWeek = cw != null && list.some((c) => isWeekActive(c.weeks, cw));
+      cells.push(`<div class="sched-cell sched-has${thisWeek ? ' is-today' : ''}${d === td ? ' is-today-col' : ''}">${list.map((c) => schedCardHTML(c, week)).join('')}</div>`);
+    }
+  }
+
+  $('#schedStage').innerHTML = `<div class="sched-grid${state.schedMode === 'week' ? ' sched-mode-week' : ''}">${cells.join('')}</div>`;
+}
+
+/** 手机单日视图：星期 tab + 当天 13 行列表 */
+function renderSchedDay() {
+  const data = state.schedule;
+  const idx = schedIndex();
+  const td = todayDay();
+  const day = state.schedDay === 'today' ? td : Math.min(7, Math.max(1, +state.schedDay));
+  const week = state.schedWeek !== 'all' ? +state.schedWeek : null;
+
+  const chips = [`<button type="button" class="chip${state.schedDay === 'today' ? ' is-active' : ''}" data-sched-day="today">今天</button>`];
+  for (let d = 1; d <= 7; d++) {
+    chips.push(`<button type="button" class="chip${state.schedDay !== 'today' && d === day ? ' is-active' : ''}" data-sched-day="${d}">${WEEK_NAMES[d - 1]}</button>`);
+  }
+
+  const rows = data.periods.map((p) => {
+    const list = idx.get(`${day}-${p.id}`) || [];
+    return `<div class="sched-day-row">
+      <div class="sched-day-time"><b>${escapeHtml(p.label)}</b><span>${escapeHtml(p.time)}</span></div>
+      <div class="sched-day-cards">${list.length ? list.map((c) => schedCardHTML(c, week)).join('') : '<span class="sched-empty">—</span>'}</div>
+    </div>`;
+  }).join('');
+
+  $('#schedStage').innerHTML = `<div class="sched-day-head">${chips.join('')}</div><div class="sched-day-list">${rows}</div>`;
+}
+
+/** 未安排时间地点的课程卡片 */
+function renderSchedUnscheduled() {
+  const uns = state.schedule.unscheduled || [];
+  const el = $('#schedUnscheduled');
+  if (!uns.length) { el.hidden = true; el.innerHTML = ''; return; }
+  el.hidden = false;
+  el.innerHTML = `<p class="lib-count">已选但未安排时间地点的课程</p>` + uns.map((u) => `
+    <div class="sched-unsched-card" data-code="${escapeHtml(u.code || '')}" data-name="${escapeHtml(u.name)}" data-teacher="${escapeHtml(u.teacher || '')}" data-weeks="${escapeHtml(u.weeks)}" data-classname="${escapeHtml(u.className || '')}" data-day="" data-period="">
+      <b>${escapeHtml(u.name)}</b>
+      <span>${escapeHtml(u.code || '')} · ${escapeHtml(u.campus || '')}${u.dept ? ' · ' + escapeHtml(u.dept) : ''} · ${escapeHtml(u.weeks)}</span>
+    </div>`).join('');
+}
+
+/** 渲染整个 Schedule 视图（工具栏 + 调课提示 + 网格/单日） */
+function renderSchedule() {
+  const data = state.schedule;
+  if (!data) {
+    $('#schedStage').innerHTML = '<p class="lib-count">课表数据未加载</p>';
+    return;
+  }
+
+  fillSchedWeekSelect();
+  $('#schedSemester').textContent = data.semester || '';
+
+  // 调课提示条（有调课信息时才显示）
+  const adj = data.adjustments || [];
+  const adjEl = $('#schedAdjust');
+  adjEl.hidden = adj.length === 0;
+  adjEl.innerHTML = adj.map((a) => `<div class="sched-adjust-item">⚠️ ${escapeHtml(a)}</div>`).join('');
+
+  $('#schedCount').textContent = `${data.courses.length} 节次记录 · ${data.semester || ''}`;
+  renderSchedUnscheduled();
+
+  // 视口分派：手机默认单日，可切整周；桌面始终整周网格
+  const mobile = window.matchMedia('(max-width: 640px)').matches;
+  $('#schedModeToggle').hidden = !mobile;
+  $('#schedModeToggle').querySelectorAll('.chip').forEach((c) =>
+    c.classList.toggle('is-active', c.dataset.schedMode === state.schedMode));
+  if (mobile && state.schedMode === 'day') renderSchedDay();
+  else renderSchedGrid();
+}
+
+/** 打开课程详情弹窗（格子卡片 / 未安排卡片共用） */
+function openSchedDetail(btn) {
+  $('#schedDetail').innerHTML = `
+    <div class="book-detail">
+      <div class="book-detail-info">
+        <h3>${escapeHtml(btn.dataset.name || '')}</h3>
+        <p class="book-meta">课程代码：${escapeHtml(btn.dataset.code || '—')}</p>
+        <p class="book-meta">班级：${escapeHtml(btn.dataset.classname || '—')}</p>
+        <p class="book-meta">上课时间：${btn.dataset.day ? `周${['一', '二', '三', '四', '五', '六', '日'][+btn.dataset.day - 1]} 第 ${btn.dataset.period} 节` : '未安排时间'}</p>
+        <p class="book-meta">上课周次：${escapeHtml(btn.dataset.weeks || '—')} 周</p>
+        <p class="book-meta">任课教师：${escapeHtml(btn.dataset.teacher || '—')}</p>
+        <p class="book-meta">上课地点：${escapeHtml(btn.dataset.room || '—')}</p>
+      </div>
+    </div>`;
+  $('#schedModal').showModal();
 }
 
 /* ---------------------------------------------------------------------------
@@ -1445,6 +1683,57 @@ $('#musicModal').addEventListener('click', (e) => {
   if (e.target === $('#musicModal')) $('#musicModal').close();
 });
 
+/* Schedule 事件绑定 */
+// 周次筛选
+$('#schedWeekSelect').addEventListener('change', (e) => {
+  state.schedWeek = e.target.value;
+  renderSchedule();
+});
+// 「今天」：跳到本周并回到今天的单日视图（手机）
+$('#schedTodayBtn').addEventListener('click', () => {
+  const cw = currentWeek();
+  state.schedWeek = cw != null ? String(cw) : 'all';
+  state.schedDay = 'today';
+  renderSchedule();
+});
+// 手机端 单日/整周 切换
+$('#schedModeToggle').addEventListener('click', (e) => {
+  const chip = e.target.closest('.chip');
+  if (!chip?.dataset?.schedMode) return;
+  state.schedMode = chip.dataset.schedMode;
+  $('#schedModeToggle').querySelectorAll('.chip').forEach((c) =>
+    c.classList.toggle('is-active', c.dataset.schedMode === state.schedMode));
+  renderSchedule();
+});
+// 课表容器事件委托：星期 tab 切换 / 课程卡弹窗
+$('#schedStage').addEventListener('click', (e) => {
+  const tab = e.target.closest('[data-sched-day]');
+  if (tab) {
+    state.schedDay = tab.dataset.schedDay;
+    renderSchedDay();
+    return;
+  }
+  const card = e.target.closest('.sched-card, .sched-unsched-card');
+  if (card) openSchedDetail(card);
+});
+// 课程详情弹窗关闭（按钮 + 点击空白）
+$('#schedClose').addEventListener('click', () => $('#schedModal').close());
+$('#schedModal').addEventListener('click', (e) => {
+  if (e.target === $('#schedModal')) $('#schedModal').close();
+});
+// 视口变化（桌面 ↔ 手机）时重渲染课表：resize + 媒体查询跨边界 + 手机旋转
+// （resize 在部分 WebView/内嵌浏览器下不可靠，matchMedia change 是标准可靠路径）
+let schedResizeTimer;
+const schedViewportChange = () => {
+  clearTimeout(schedResizeTimer);
+  schedResizeTimer = setTimeout(() => {
+    if (state.view === 'schedule') renderSchedule();
+  }, 200);
+};
+window.addEventListener('resize', schedViewportChange);
+window.addEventListener('orientationchange', schedViewportChange);
+window.matchMedia('(max-width: 640px)').addEventListener('change', schedViewportChange);
+
 // 侧边栏切换（事件委托）：箭头展开/收起 Favorites 二级平台；Blog 为站内视图
 $('#sideNav').addEventListener('click', (e) => {
   const arrow = e.target.closest('.side-arrow');
@@ -1471,6 +1760,12 @@ $('#sideNav').addEventListener('click', (e) => {
     return;
   }
 
+  // Schedule 视图
+  if (btn.dataset.view === 'schedule') {
+    enterSchedule();
+    return;
+  }
+
   // Music 视图
   if (btn.dataset.view === 'music') {
     enterMusic();
@@ -1484,14 +1779,15 @@ $('#sideNav').addEventListener('click', (e) => {
     return;
   }
 
-  // 收藏视图：显示内容区（隐藏 Blog/Library/Theatre/Music 视图）
+  // 收藏视图：显示内容区（隐藏 Blog/Library/Theatre/Music/Schedule 视图）
   $('#toolbar').hidden = false;
   $('#grid').hidden = false;
   $('#blogFrame').hidden = true;
   $('#libraryView').hidden = true;
   $('#theatreView').hidden = true;
   $('#musicView').hidden = true;
-  document.body.classList.remove('is-blog', 'is-library', 'is-theatre', 'is-music');
+  $('#scheduleView').hidden = true;
+  document.body.classList.remove('is-blog', 'is-library', 'is-theatre', 'is-music', 'is-schedule');
 
   if (btn.classList.contains('is-disabled')) {
     return showToast('暂未开放');

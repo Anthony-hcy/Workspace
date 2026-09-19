@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Workspace · 我的收藏夹</title>
   <meta name="description" content="跨平台收藏夹工作台：自动同步抖音、B站与小 红书的收藏内容" />
-  <link rel="stylesheet" href="assets/style.css?v=20260831ar" />
+  <link rel="stylesheet" href="assets/style.css?v=20260919a" />
   <!-- 内联 favicon：一个渐变书签图标，免额外请求 -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%237c5cff'/><stop offset='1' stop-color='%2300c2ff'/></linearGradient></defs><path fill='url(%23g)' d='M6 2h12a2 2 0 0 1 2 2v18l-8-4.8L4 22V4a2 2 0 0 1 2-2z'/></svg>" />
 </head>
@@ -30,6 +30,12 @@
       <button class="side-item" data-view="library" title="我的书架">
         <svg viewBox="0 0 24 24" fill="none" stroke="#8b5e3c" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h4.5v16H4z" opacity=".4"/><path d="M10 4h4.5v16H10z" opacity=".75"/><path d="M16 4h4.5v16H16z"/></svg>
         <span>Library</span>
+      </button>
+
+      <!-- Schedule：课表（与 Library 并列） -->
+      <button class="side-item" data-view="schedule" title="我的课表">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#4a6fa5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M8 2.5v4M16 2.5v4" opacity=".6"/><path d="M3 9.5h18" opacity=".5"/><path d="M8 13.5h.01M12 13.5h.01M16 13.5h.01M8 17h.01M12 17h.01" stroke-width="2.4"/></svg>
+        <span>Schedule</span>
       </button>
 
       <!-- Music：网易云我喜欢的音乐（唱片机弹窗） -->
@@ -185,6 +191,29 @@
         </div>
       </div>
 
+      <!-- Schedule 视图：研究生课表（周网格 + 周次筛选 + 今天高亮；手机端单日/整周） -->
+      <div class="schedule" id="scheduleView" hidden>
+        <div class="lib-toolbar sched-toolbar">
+          <div class="lib-toolbar-row">
+            <select id="schedWeekSelect" class="sort-select" title="按周次筛选">
+              <option value="all" selected>全部周次</option>
+            </select>
+            <button type="button" class="page-btn" id="schedTodayBtn" title="跳转到今天所在周">今天</button>
+            <span class="lib-label" id="schedSemester"></span>
+            <div class="chips lib-mode sched-mode" id="schedModeToggle" hidden>
+              <button class="chip is-active" data-sched-mode="day">单日</button>
+              <button class="chip" data-sched-mode="week">整周</button>
+            </div>
+          </div>
+        </div>
+        <div class="sched-adjust" id="schedAdjust" hidden></div>
+        <p class="lib-count" id="schedCount"></p>
+        <!-- 桌面整周网格 / 手机单日列表共用容器，JS 按 viewport 决定渲染方式 -->
+        <div class="sched-stage" id="schedStage"></div>
+        <!-- 未安排时间地点的课程 -->
+        <div class="sched-unsched" id="schedUnscheduled" hidden></div>
+      </div>
+
       <!-- Theatre 视图：影视收藏（电影 / 剧集 / 动漫，封面网格 + 分页 + 详情弹窗） -->
       <div class="theatre" id="theatreView" hidden>
         <div class="lib-toolbar">
@@ -291,6 +320,16 @@
         </div>
       </dialog>
 
+      <!-- Schedule 课程详情弹窗 -->
+      <dialog class="modal" id="schedModal">
+        <div class="modal-box book-modal">
+          <div id="schedDetail"></div>
+          <div class="modal-actions">
+            <button type="button" class="btn-ghost" id="schedClose">关闭</button>
+          </div>
+        </div>
+      </dialog>
+
 
 
 
@@ -324,7 +363,7 @@
   <div class="toast" id="toast" hidden></div>
 
   <script src="assets/vendor/chart.umd.js?v=20260831"></script>
-  <script src="assets/app.js?v=20260831at"></script>
-  <script src="assets/music-dock.js?v=20260831at"></script>
+  <script src="assets/app.js?v=20260919a"></script>
+  <script src="assets/music-dock.js?v=20260919a"></script>
 </body>
 </html>

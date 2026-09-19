@@ -708,7 +708,7 @@ body.is-blog .blog-frame {
 /* ============================================================================
    Library 书架（封面 / 书脊 双模式 + 标签分类 + 详情弹窗）
    ============================================================================ */
-body.is-library .main, body.is-theatre .main, body.is-music .main { max-width: 1280px; margin: 0 auto; padding: 14px 24px 40px; }
+body.is-library .main, body.is-theatre .main, body.is-music .main, body.is-schedule .main { max-width: 1280px; margin: 0 auto; padding: 14px 24px 40px; }
 
 .lib-toolbar {
   scroll-margin-top: 76px;   /* 翻页回顶时预留 sticky 顶栏高度 */
@@ -733,7 +733,8 @@ body.is-library .main, body.is-theatre .main, body.is-music .main { max-width: 1
 /* Library/Theatre/Music 视图下空的计数行不再占位（消除幽灵间距，工具栏距顶栏统一 14px） */
 body.is-library #countLine,
 body.is-theatre #countLine,
-body.is-music #countLine { display: none; }
+body.is-music #countLine,
+body.is-schedule #countLine { display: none; }
 /* Theatre 工具栏跟随顶栏常驻（sticky），避免滚动浏览后点搜索框被浏览器强行滚回顶部 */
 #theatreView .lib-toolbar {
   position: sticky;
@@ -1170,4 +1171,173 @@ body.is-music .topbar-actions { display: none; }
 }
 
 /* 临时批量添加弹窗 */
+
+/* ============================================================================
+   Schedule 课表（周网格 + 周次筛选 + 今天高亮；手机端 单日/整周 切换）
+   ============================================================================ */
+#scheduleView .sched-toolbar {
+  position: sticky;
+  top: 52px;
+  z-index: 40;
+  background: rgba(245, 246, 248, .95);
+  backdrop-filter: blur(6px);
+}
+.sched-semester { margin-left: 2px; }
+.sched-mode { margin-left: auto; }  /* 单日/整周切换靠右，手机才可见 */
+
+/* 调课提示条 */
+.sched-adjust { margin-bottom: 12px; }
+.sched-adjust-item {
+  padding: 9px 14px;
+  margin-bottom: 6px;
+  border-radius: 10px;
+  background: #fff7e6;
+  border: 1px solid #ffd591;
+  color: #ad6800;
+  font-size: 13px;
+}
+
+/* 课表网格：节次列 + 周一~周日 7 列 */
+.sched-stage { min-width: 0; }
+.sched-grid {
+  display: grid;
+  grid-template-columns: 74px repeat(7, minmax(0, 1fr));
+  gap: 6px;
+}
+.sched-cell {
+  min-height: 66px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  padding: 5px 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: border-color .15s ease, background .15s ease;
+}
+.sched-head {
+  min-height: 34px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--ink-2);
+  background: #ecedf0;
+  cursor: default;
+}
+.sched-today-tag {
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: #7c5cff;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+}
+.sched-time {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: #f3f4f6;
+  color: var(--ink-2);
+  font-size: 11.5px;
+  line-height: 1.4;
+  cursor: default;
+}
+.sched-time b { font-size: 13px; color: var(--ink); }
+/* 今天所在列：表头与整列底色提亮 */
+.sched-cell.is-today-col { background: #faf8ff; }
+.sched-cell.sched-head.is-today-col { background: #efe9ff; }
+/* 当前周有课的格子：强调色描边 */
+.sched-cell.is-today {
+  border-color: #7c5cff;
+  box-shadow: 0 0 0 1px #7c5cff;
+  background: #fbfaff;
+}
+
+/* 课程卡 */
+.sched-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 0;
+  padding: 5px 7px;
+  border: none;
+  border-left: 3px solid var(--sc-accent);
+  border-radius: 7px;
+  background: var(--sc-bg);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.sched-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+.sched-card.is-dim { opacity: .32; }
+.sched-card-name {
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.35;
+  word-break: break-word;
+}
+.sched-card-meta { font-size: 11px; color: var(--ink-2); }
+
+/* 手机单日视图 */
+.sched-day-head { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.sched-day-list { display: flex; flex-direction: column; gap: 8px; }
+.sched-day-row { display: flex; gap: 10px; align-items: stretch; }
+.sched-day-time {
+  flex: 0 0 88px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  padding: 8px 4px;
+  border-radius: 9px;
+  background: #f3f4f6;
+  text-align: center;
+  font-size: 11.5px;
+  color: var(--ink-2);
+}
+.sched-day-time b { font-size: 13px; color: var(--ink); }
+.sched-day-cards { flex: 1; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.sched-empty { align-self: center; color: var(--ink-2); font-size: 13px; opacity: .5; }
+
+/* 未安排时间地点的课程 */
+.sched-unsched { margin-top: 20px; }
+.sched-unsched-card {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  width: 100%;
+  margin-bottom: 8px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px dashed var(--line);
+  background: var(--card);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  font-size: 13px;
+  cursor: pointer;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.sched-unsched-card b { font-size: 14px; margin-bottom: 2px; }
+.sched-unsched-card span { color: var(--ink-2); }
+.sched-unsched-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+
+/* 课表详情弹窗 */
+#schedModal .modal-box { max-width: 460px; }
+#schedModal .book-detail { flex-direction: column; gap: 4px; }
+#schedModal .book-detail-info h3 { font-size: 19px; }
+
+/* 移动端：单日默认；整周模式横向滚动 */
+@media (max-width: 640px) {
+  #scheduleView .sched-toolbar { position: static; }
+  .sched-stage { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .sched-grid { min-width: 780px; }
+  .sched-cell { min-height: 62px; }
+}
 
