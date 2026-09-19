@@ -201,6 +201,22 @@ button { font-family: inherit; cursor: pointer; }
 
 .topbar-actions { display: flex; align-items: center; gap: 14px; }
 
+/* 手机端导航汉堡按钮（仅 <900px 显示） */
+.nav-toggle {
+  display: none;
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
+.nav-toggle:active { background: rgba(0, 0, 0, .06); }
+
 .sync-time { font-size: 12px; color: var(--ink-2); }
 
 /* 「立即同步」按钮：黑底胶囊 */
@@ -664,33 +680,59 @@ body.is-blog .blog-frame {
 }
 
 /* ---------- 移动端适配 ---------- */
+/* 全局消除移动端点击蓝色高亮闪屏（Android Chrome tap-highlight / 按钮 focus 环） */
+* { -webkit-tap-highlight-color: transparent; }
+button:focus, select:focus, input:focus { outline: none; }
+
 @media (max-width: 900px) {
-  /* 窄屏：侧边栏折叠为顶部横向滑动条 */
+  /* 窄屏：侧边栏改为左侧抽屉（默认隐藏，点汉堡展开 + 遮罩） */
   body { flex-direction: column; }
+  .nav-toggle { display: inline-flex; }
   .sidebar {
-    width: 100%;
-    height: auto;
-    position: sticky;
+    position: fixed;
+    left: 0;
     top: 0;
-    z-index: 60;
-    flex-direction: row;
-    align-items: center;
-    padding: 8px 12px;
-    overflow-x: auto;
-    border-right: none;
-    border-bottom: 1px solid var(--line);
+    bottom: 0;
+    width: 232px;
+    height: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 14px 10px;
+    overflow-y: auto;
+    border-right: 1px solid var(--line);
+    border-bottom: none;
+    background: var(--card);
+    transform: translateX(-100%);
+    transition: transform .22s ease;
+    z-index: 100;
   }
-  .side-nav { flex-direction: row; gap: 6px; }
-  .side-item { width: auto; padding: 8px 14px; white-space: nowrap; }
-  .sidebar-brand { padding: 0 10px 0 0; }
-  .sidebar-brand .brand-name { display: none; }
-  .side-group { flex-direction: row; align-items: center; gap: 6px; }
+  body.nav-open .sidebar {
+    transform: translateX(0);
+    box-shadow: 4px 0 24px -10px rgba(0, 0, 0, .3);
+  }
+  .side-nav { flex-direction: column; gap: 2px; }
+  .side-item { width: 100%; padding: 9px 12px; white-space: nowrap; }
+  .sidebar-brand { padding: 6px 6px 14px; }
+  .sidebar-brand .brand-name { display: inline; }
+  .side-group { flex-direction: column; align-items: stretch; gap: 2px; }
   .side-group .side-arrow { margin-left: 2px; }
-  .side-children { flex-direction: row; gap: 6px; margin: 0; padding-left: 0; border-left: none; }
-  .side-child { padding: 8px 14px; }
+  .side-children { flex-direction: column; gap: 2px; margin: 0; padding-left: 16px; border-left: none; }
+  .side-child { padding: 8px 12px; }
   .side-foot { display: none; }
   .page { width: 100%; }
-  .topbar { position: static; }  /* 顶栏不再 sticky，避免与侧边条双重吸附 */
+  .topbar { position: sticky; }
+  /* 遮罩：点按关闭抽屉 */
+  .nav-mask {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 17, 22, .42);
+    z-index: 90;
+  }
+  body.nav-open .nav-mask { display: block; }
+  /* 顶栏：汉堡 + 标题居中 + 操作区靠右 */
+  .topbar-inner { justify-content: flex-start; }
+  .view-title { flex: 1; text-align: center; padding-left: 0; }
 }
 
 @media (max-width: 640px) {
@@ -703,6 +745,11 @@ body.is-blog .blog-frame {
   .grid.wide { grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
   .grid.mosaic { gap: 12px; }   /* 格子间距；列数与行高由 JS 同步调整 */
   .card-body { padding: 9px 11px 10px; }
+  /* 手机端课表工具栏精简：只留日期切换 + 单日/整周，隐藏周次下拉/今天/学期/周次标签 */
+  #scheduleView #schedWeekSelect,
+  #scheduleView #schedTodayBtn,
+  #scheduleView #schedSemester,
+  #scheduleView .sched-week-tag { display: none; }
 }
 
 /* ============================================================================
@@ -1007,7 +1054,8 @@ body.is-schedule #countLine { display: none; }
 /* 同步操作区（最近同步 + 立即同步）只在 Favorites 及平台分支显示 */
 body.is-library .topbar-actions,
 body.is-theatre .topbar-actions,
-body.is-music .topbar-actions { display: none; }
+body.is-music .topbar-actions,
+body.is-schedule .topbar-actions { display: none; }
 
 /* 详情弹窗：左右两列 —— 左列 封面+时间/评分/标签，右列 标题+导演演员简介 */
 #theatreModal .modal-box { max-width: 660px; }
@@ -1196,6 +1244,7 @@ body.is-music .topbar-actions { display: none; }
   padding: 5px 9px;
   font-size: 15px;
   line-height: 1;
+  white-space: nowrap;
 }
 .sched-day-label {
   min-width: 86px;
@@ -1255,6 +1304,7 @@ body.is-music .topbar-actions { display: none; }
   color: var(--ink-2);
   background: #ecedf0;
   cursor: default;
+  white-space: nowrap;
 }
 .sched-today-tag {
   padding: 1px 6px;
@@ -1263,6 +1313,7 @@ body.is-music .topbar-actions { display: none; }
   color: #fff;
   font-size: 10px;
   font-weight: 600;
+  white-space: nowrap;
 }
 .sched-time {
   align-items: center;
@@ -1273,6 +1324,7 @@ body.is-music .topbar-actions { display: none; }
   font-size: 11.5px;
   line-height: 1.4;
   cursor: default;
+  white-space: nowrap;
 }
 .sched-time b { font-size: 13px; color: var(--ink); }
 /* 今天所在列：表头与整列底色提亮 */
@@ -1327,6 +1379,7 @@ body.is-music .topbar-actions { display: none; }
   text-align: center;
   font-size: 11.5px;
   color: var(--ink-2);
+  white-space: nowrap;
 }
 .sched-day-time b { font-size: 13px; color: var(--ink); }
 .sched-day-cards { flex: 1; display: flex; flex-direction: column; gap: 6px; min-width: 0; }

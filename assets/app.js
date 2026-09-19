@@ -1043,7 +1043,7 @@ function renderSchedGrid() {
   const week = state.schedShowAll ? null : weekOf(state.schedDate);
   const cells = [];
 
-  cells.push('<div class="sched-cell sched-head">节次 / 时间</div>');
+  cells.push('<div class="sched-cell sched-head">节次/时间</div>');
   for (let d = 1; d <= 7; d++) {
     const m = parseDateStr(monday);
     m.setDate(m.getDate() + d - 1);
@@ -1836,6 +1836,10 @@ window.addEventListener('resize', schedViewportChange);
 window.addEventListener('orientationchange', schedViewportChange);
 window.matchMedia('(max-width: 640px)').addEventListener('change', schedViewportChange);
 
+// 手机端导航：汉堡展开/收起侧边栏（抽屉式），点遮罩关闭
+$('#navToggle').addEventListener('click', () => document.body.classList.toggle('nav-open'));
+$('#navMask').addEventListener('click', () => document.body.classList.remove('nav-open'));
+
 // 侧边栏切换（事件委托）：箭头展开/收起 Favorites 二级平台；Blog 为站内视图
 $('#sideNav').addEventListener('click', (e) => {
   const arrow = e.target.closest('.side-arrow');
@@ -1846,6 +1850,9 @@ $('#sideNav').addEventListener('click', (e) => {
   }
   const btn = e.target.closest('.side-item');
   if (!btn || !btn.dataset.view) return;
+
+  // 手机端抽屉：选中菜单项后收起侧边栏
+  document.body.classList.remove('nav-open');
 
   // 切换到任一栏目都回到顶部（SPA 共享同一滚动容器，不重置会残留上一栏的滚动位置）
   window.scrollTo(0, 0);
