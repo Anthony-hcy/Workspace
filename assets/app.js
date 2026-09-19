@@ -1026,10 +1026,10 @@ function schedWeekLabel() {
   return '未开学';
 }
 
-/** 左右箭头切换：查看日期 ±1 天（周次、星期几自动联动） */
+/** 左右箭头切换：单日模式 ±1 天、整周模式 ±1 周（周次、星期几自动联动） */
 function schedShiftDay(delta) {
   const d = parseDateStr(state.schedDate);
-  d.setDate(d.getDate() + delta);
+  d.setDate(d.getDate() + delta * (state.schedMode === 'week' ? 7 : 1));
   state.schedDate = fmtDateStr(d);
   renderSchedule();
 }
@@ -1078,8 +1078,6 @@ function renderSchedDay() {
   const day = dayOfDate(state.schedDate);
   const week = state.schedShowAll ? null : weekOf(state.schedDate);
 
-  $('#schedDayLabel').textContent = schedDateLabel();
-
   const rows = data.periods.map((p) => {
     const list = schedFilterByWeek(idx.get(`${day}-${p.id}`) || [], week);
     return `<div class="sched-day-row">
@@ -1125,12 +1123,16 @@ function renderSchedule() {
   $('#schedCount').textContent = `${data.courses.length} 节次记录 · ${data.semester || ''}`;
   renderSchedUnscheduled();
 
-  // 模式分派：单日/整周两端都可用；单日模式显示星期切换器
+  // 模式分派：单日/整周两端都可用；导航器单日显示日期(±1天)、整周显示周次(±1周)
   $('#schedModeToggle').querySelectorAll('.chip').forEach((c) =>
     c.classList.toggle('is-active', c.dataset.schedMode === state.schedMode));
-  $('#schedDayNav').hidden = state.schedMode !== 'day';
-  if (state.schedMode === 'day') renderSchedDay();
-  else renderSchedGrid();
+  const isWeek = state.schedMode === 'week';
+  $('#schedDayLabel').textContent = isWeek ? schedWeekLabel() : schedDateLabel();
+  // 「全部周次」视图下没有具体周可切，整周模式的箭头禁用
+  $('#schedPrevDay').disabled = isWeek && state.schedShowAll;
+  $('#schedNextDay').disabled = isWeek && state.schedShowAll;
+  if (isWeek) renderSchedGrid();
+  else renderSchedDay();
 }
 
 /** 打开课程详情弹窗（格子卡片 / 未安排卡片共用） */
