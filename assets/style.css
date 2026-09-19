@@ -1275,7 +1275,6 @@ body.is-music .topbar-actions { display: none; }
   transition: transform .15s ease, box-shadow .15s ease;
 }
 .sched-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
-.sched-card.is-dim { opacity: .32; }
 .sched-card-name {
   font-size: 12.5px;
   font-weight: 600;

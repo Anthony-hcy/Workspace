@@ -927,14 +927,18 @@ function schedIndex() {
   return map;
 }
 
-/** 课程卡 HTML；week 为筛选周次（非 'all' 时，该周无课的卡片变淡） */
-function schedCardHTML(c, week) {
+/** 课程卡 HTML */
+function schedCardHTML(c) {
   const [bg, accent] = schedColor(c.name);
-  const dim = week != null && !isWeekActive(c.weeks, week);
-  return `<button type="button" class="sched-card${dim ? ' is-dim' : ''}" data-code="${escapeHtml(c.code || '')}" data-name="${escapeHtml(c.name)}" data-teacher="${escapeHtml(c.teacher || '')}" data-room="${escapeHtml(c.room || '')}" data-weeks="${escapeHtml(c.weeks)}" data-classname="${escapeHtml(c.className || '')}" data-day="${c.day}" data-period="${c.period}" style="--sc-bg:${bg};--sc-accent:${accent}">
+  return `<button type="button" class="sched-card" data-code="${escapeHtml(c.code || '')}" data-name="${escapeHtml(c.name)}" data-teacher="${escapeHtml(c.teacher || '')}" data-room="${escapeHtml(c.room || '')}" data-weeks="${escapeHtml(c.weeks)}" data-classname="${escapeHtml(c.className || '')}" data-day="${c.day}" data-period="${c.period}" style="--sc-bg:${bg};--sc-accent:${accent}">
     <span class="sched-card-name">${escapeHtml(c.name)}</span>
     <span class="sched-card-meta">${escapeHtml(c.room || '')}</span>
   </button>`;
+}
+
+/** 周次筛选：只保留该周有课的课程（'all' 时全部保留） */
+function schedFilterByWeek(list, week) {
+  return week == null ? list : list.filter((c) => isWeekActive(c.weeks, week));
 }
 
 /** 桌面整周网格（也用于手机「整周」模式） */
@@ -954,14 +958,14 @@ function renderSchedGrid() {
   for (const p of data.periods) {
     cells.push(`<div class="sched-cell sched-time"><b>${escapeHtml(p.label)}</b><span>${escapeHtml(p.time)}</span></div>`);
     for (let d = 1; d <= 7; d++) {
-      const list = idx.get(`${d}-${p.id}`) || [];
+      const list = schedFilterByWeek(idx.get(`${d}-${p.id}`) || [], week);
       if (!list.length) {
         cells.push(`<div class="sched-cell${d === td ? ' is-today-col' : ''}"></div>`);
         continue;
       }
       // 当前周有课 → 格子高亮描边，便于一眼看到本周课程
       const thisWeek = cw != null && list.some((c) => isWeekActive(c.weeks, cw));
-      cells.push(`<div class="sched-cell sched-has${thisWeek ? ' is-today' : ''}${d === td ? ' is-today-col' : ''}">${list.map((c) => schedCardHTML(c, week)).join('')}</div>`);
+      cells.push(`<div class="sched-cell sched-has${thisWeek ? ' is-today' : ''}${d === td ? ' is-today-col' : ''}">${list.map((c) => schedCardHTML(c)).join('')}</div>`);
     }
   }
 
@@ -982,10 +986,10 @@ function renderSchedDay() {
   }
 
   const rows = data.periods.map((p) => {
-    const list = idx.get(`${day}-${p.id}`) || [];
+    const list = schedFilterByWeek(idx.get(`${day}-${p.id}`) || [], week);
     return `<div class="sched-day-row">
       <div class="sched-day-time"><b>${escapeHtml(p.label)}</b><span>${escapeHtml(p.time)}</span></div>
-      <div class="sched-day-cards">${list.length ? list.map((c) => schedCardHTML(c, week)).join('') : '<span class="sched-empty">—</span>'}</div>
+      <div class="sched-day-cards">${list.length ? list.map((c) => schedCardHTML(c)).join('') : '<span class="sched-empty">—</span>'}</div>
     </div>`;
   }).join('');
 
