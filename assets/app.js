@@ -941,6 +941,36 @@ function schedFilterByWeek(list, week) {
   return week == null ? list : list.filter((c) => isWeekActive(c.weeks, week));
 }
 
+/** termStart 所在周（第 weekNum 周）第 day 天的日期 */
+function schedDateOf(day, weekNum) {
+  const base = new Date(state.schedule.termStart + 'T00:00:00');
+  base.setDate(base.getDate() + (weekNum - 1) * 7 + (day - 1));
+  return base;
+}
+
+/** 日期 → "M/D" */
+function formatMD(d) {
+  return `${d.getMonth() + 1}/${d.getDate()}`;
+}
+
+/** 星期切换器中间文本：今天态显示真实日期，其他按 termStart 周映射 */
+function schedDayLabel() {
+  const isToday = state.schedDay === 'today';
+  const day = isToday ? todayDay() : Math.min(7, Math.max(1, +state.schedDay));
+  const wn = state.schedWeek === 'all' ? 1 : +state.schedWeek;
+  const d = isToday ? new Date() : schedDateOf(day, wn);
+  return `${isToday ? '今天' : WEEK_NAMES[day - 1]} ${formatMD(d)}`;
+}
+
+/** 星期左右切换（周一~周日循环） */
+function schedShiftDay(delta) {
+  let d = (state.schedDay === 'today' ? todayDay() : +state.schedDay) + delta;
+  if (d < 1) d = 7;
+  if (d > 7) d = 1;
+  state.schedDay = String(d);
+  renderSchedule();
+}
+
 /** 桌面整周网格（也用于手机「整周」模式） */
 function renderSchedGrid() {
   const data = state.schedule;
@@ -948,11 +978,12 @@ function renderSchedGrid() {
   const cw = currentWeek();
   const td = todayDay();
   const week = state.schedWeek !== 'all' ? +state.schedWeek : null;
+  const wn = state.schedWeek === 'all' ? 1 : +state.schedWeek;
   const cells = [];
 
   cells.push('<div class="sched-cell sched-head">节次 / 时间</div>');
   for (let d = 1; d <= 7; d++) {
-    cells.push(`<div class="sched-cell sched-head${d === td ? ' is-today-col' : ''}">${WEEK_NAMES[d - 1]}${d === td ? '<span class="sched-today-tag">今天</span>' : ''}</div>`);
+    cells.push(`<div class="sched-cell sched-head${d === td ? ' is-today-col' : ''}">${WEEK_NAMES[d - 1]}<span class="sched-head-date">${formatMD(schedDateOf(d, wn))}</span>${d === td ? '<span class="sched-today-tag">今天</span>' : ''}</div>`);
   }
 
   for (const p of data.periods) {
@@ -972,7 +1003,7 @@ function renderSchedGrid() {
   $('#schedStage').innerHTML = `<div class="sched-grid${state.schedMode === 'week' ? ' sched-mode-week' : ''}">${cells.join('')}</div>`;
 }
 
-/** 手机单日视图：星期 tab + 当天 13 行列表 */
+/** 单日视图：当天 13 行列表（星期切换用工具栏箭头） */
 function renderSchedDay() {
   const data = state.schedule;
   const idx = schedIndex();
@@ -980,10 +1011,7 @@ function renderSchedDay() {
   const day = state.schedDay === 'today' ? td : Math.min(7, Math.max(1, +state.schedDay));
   const week = state.schedWeek !== 'all' ? +state.schedWeek : null;
 
-  const chips = [`<button type="button" class="chip${state.schedDay === 'today' ? ' is-active' : ''}" data-sched-day="today">今天</button>`];
-  for (let d = 1; d <= 7; d++) {
-    chips.push(`<button type="button" class="chip${state.schedDay !== 'today' && d === day ? ' is-active' : ''}" data-sched-day="${d}">${WEEK_NAMES[d - 1]}</button>`);
-  }
+  $('#schedDayLabel').textContent = schedDayLabel();
 
   const rows = data.periods.map((p) => {
     const list = schedFilterByWeek(idx.get(`${day}-${p.id}`) || [], week);
@@ -993,7 +1021,7 @@ function renderSchedDay() {
     </div>`;
   }).join('');
 
-  $('#schedStage').innerHTML = `<div class="sched-day-head">${chips.join('')}</div><div class="sched-day-list">${rows}</div>`;
+  $('#schedStage').innerHTML = `<div class="sched-day-list">${rows}</div>`;
 }
 
 /** 未安排时间地点的课程卡片 */
@@ -1029,12 +1057,11 @@ function renderSchedule() {
   $('#schedCount').textContent = `${data.courses.length} 节次记录 · ${data.semester || ''}`;
   renderSchedUnscheduled();
 
-  // 视口分派：手机默认单日，可切整周；桌面始终整周网格
-  const mobile = window.matchMedia('(max-width: 640px)').matches;
-  $('#schedModeToggle').hidden = !mobile;
+  // 模式分派：单日/整周两端都可用；单日模式显示星期切换器
   $('#schedModeToggle').querySelectorAll('.chip').forEach((c) =>
     c.classList.toggle('is-active', c.dataset.schedMode === state.schedMode));
-  if (mobile && state.schedMode === 'day') renderSchedDay();
+  $('#schedDayNav').hidden = state.schedMode !== 'day';
+  if (state.schedMode === 'day') renderSchedDay();
   else renderSchedGrid();
 }
 
@@ -1693,14 +1720,16 @@ $('#schedWeekSelect').addEventListener('change', (e) => {
   state.schedWeek = e.target.value;
   renderSchedule();
 });
-// 「今天」：跳到本周并回到今天的单日视图（手机）
+// 星期左右箭头切换
+$('#schedPrevDay').addEventListener('click', () => schedShiftDay(-1));
+$('#schedNextDay').addEventListener('click', () => schedShiftDay(1));
+// 「今天」：回到今天并切回单日视图
 $('#schedTodayBtn').addEventListener('click', () => {
-  const cw = currentWeek();
-  state.schedWeek = cw != null ? String(cw) : 'all';
   state.schedDay = 'today';
+  state.schedMode = 'day';
   renderSchedule();
 });
-// 手机端 单日/整周 切换
+// 单日/整周 切换
 $('#schedModeToggle').addEventListener('click', (e) => {
   const chip = e.target.closest('.chip');
   if (!chip?.dataset?.schedMode) return;
@@ -1709,14 +1738,8 @@ $('#schedModeToggle').addEventListener('click', (e) => {
     c.classList.toggle('is-active', c.dataset.schedMode === state.schedMode));
   renderSchedule();
 });
-// 课表容器事件委托：星期 tab 切换 / 课程卡弹窗
+// 课表容器事件委托：课程卡弹窗
 $('#schedStage').addEventListener('click', (e) => {
-  const tab = e.target.closest('[data-sched-day]');
-  if (tab) {
-    state.schedDay = tab.dataset.schedDay;
-    renderSchedDay();
-    return;
-  }
   const card = e.target.closest('.sched-card, .sched-unsched-card');
   if (card) openSchedDetail(card);
 });

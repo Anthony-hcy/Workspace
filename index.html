@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Workspace · 我的收藏夹</title>
   <meta name="description" content="跨平台收藏夹工作台：自动同步抖音、B站与小 红书的收藏内容" />
-  <link rel="stylesheet" href="assets/style.css?v=20260919b" />
+  <link rel="stylesheet" href="assets/style.css?v=20260919c" />
   <!-- 内联 favicon：一个渐变书签图标，免额外请求 -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%237c5cff'/><stop offset='1' stop-color='%2300c2ff'/></linearGradient></defs><path fill='url(%23g)' d='M6 2h12a2 2 0 0 1 2 2v18l-8-4.8L4 22V4a2 2 0 0 1 2-2z'/></svg>" />
 </head>
@@ -195,12 +195,18 @@
       <div class="schedule" id="scheduleView" hidden>
         <div class="lib-toolbar sched-toolbar">
           <div class="lib-toolbar-row">
+            <!-- 星期左右切换（电脑端/手机端通用）：‹ 周X 日期 › -->
+            <div class="sched-day-nav" id="schedDayNav" title="切换星期">
+              <button type="button" class="page-btn sched-nav-btn" id="schedPrevDay" title="前一天">‹</button>
+              <span class="sched-day-label" id="schedDayLabel"></span>
+              <button type="button" class="page-btn sched-nav-btn" id="schedNextDay" title="后一天">›</button>
+            </div>
             <select id="schedWeekSelect" class="sort-select" title="按周次筛选">
               <option value="all" selected>全部周次</option>
             </select>
-            <button type="button" class="page-btn" id="schedTodayBtn" title="跳转到今天所在周">今天</button>
+            <button type="button" class="page-btn" id="schedTodayBtn" title="回到今天">今天</button>
             <span class="lib-label" id="schedSemester"></span>
-            <div class="chips lib-mode sched-mode" id="schedModeToggle" hidden>
+            <div class="chips lib-mode sched-mode" id="schedModeToggle">
               <button class="chip is-active" data-sched-mode="day">单日</button>
               <button class="chip" data-sched-mode="week">整周</button>
             </div>
@@ -208,7 +214,7 @@
         </div>
         <div class="sched-adjust" id="schedAdjust" hidden></div>
         <p class="lib-count" id="schedCount"></p>
-        <!-- 桌面整周网格 / 手机单日列表共用容器，JS 按 viewport 决定渲染方式 -->
+        <!-- 单日列表 / 整周网格共用容器，JS 按 schedMode 决定渲染方式 -->
         <div class="sched-stage" id="schedStage"></div>
         <!-- 未安排时间地点的课程 -->
         <div class="sched-unsched" id="schedUnscheduled" hidden></div>
@@ -363,7 +369,7 @@
   <div class="toast" id="toast" hidden></div>
 
   <script src="assets/vendor/chart.umd.js?v=20260831"></script>
-  <script src="assets/app.js?v=20260919b"></script>
-  <script src="assets/music-dock.js?v=20260919b"></script>
+  <script src="assets/app.js?v=20260919c"></script>
+  <script src="assets/music-dock.js?v=20260919c"></script>
 </body>
 </html>

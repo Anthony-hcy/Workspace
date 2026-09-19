@@ -1183,7 +1183,36 @@ body.is-music .topbar-actions { display: none; }
   backdrop-filter: blur(6px);
 }
 .sched-semester { margin-left: 2px; }
-.sched-mode { margin-left: auto; }  /* 单日/整周切换靠右，手机才可见 */
+.sched-mode { margin-left: auto; }  /* 单日/整周切换靠右 */
+
+/* 星期切换器（左右箭头 + 周X 日期） */
+.sched-day-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sched-nav-btn {
+  min-width: 30px;
+  padding: 5px 9px;
+  font-size: 15px;
+  line-height: 1;
+}
+.sched-day-label {
+  min-width: 86px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+}
+/* 整周网格表头日期小字 */
+.sched-head-date {
+  display: block;
+  font-size: 10.5px;
+  font-weight: 500;
+  color: var(--ink-2);
+  margin-top: 1px;
+}
 
 /* 调课提示条 */
 .sched-adjust { margin-bottom: 12px; }
@@ -1283,8 +1312,7 @@ body.is-music .topbar-actions { display: none; }
 }
 .sched-card-meta { font-size: 11px; color: var(--ink-2); }
 
-/* 手机单日视图 */
-.sched-day-head { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+/* 单日视图 */
 .sched-day-list { display: flex; flex-direction: column; gap: 8px; }
 .sched-day-row { display: flex; gap: 10px; align-items: stretch; }
 .sched-day-time {
