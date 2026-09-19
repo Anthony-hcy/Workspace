@@ -1,18 +1,18 @@
 {
-  "lastSync": "2026-09-18T00:59:30.098Z",
+  "lastSync": "2026-09-19T00:56:13.001Z",
   "mode": "incremental",
   "sources": {
     "douyin-like": {
-      "count": 588,
+      "count": 593,
       "ok": true,
-      "added": 0,
+      "added": 5,
       "removed": null,
       "incremental": true
     },
     "douyin-collect": {
-      "count": 440,
+      "count": 441,
       "ok": true,
-      "added": 2,
+      "added": 1,
       "removed": null,
       "incremental": true
     },
