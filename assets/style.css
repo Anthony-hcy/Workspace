@@ -8,6 +8,21 @@
 /* 预留滚动条空间：内容变短滚动条消失时，页面宽度不再变化，避免居中标题偏移 */
 html { scrollbar-gutter: stable; }
 
+/* 全局滚动条：浅色细条。避免平板/系统深色主题下，预留的滚动条轨道呈黑色竖线 */
+* {
+  scrollbar-width: thin;                 /* Firefox */
+  scrollbar-color: #d5d8de transparent;
+}
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: #d5d8de;
+  border-radius: 6px;
+  border: 2px solid #f5f6f8;
+}
+::-webkit-scrollbar-thumb:hover { background: #c2c6cd; }
+::-webkit-scrollbar-corner { background: transparent; }
+
 :root {
   --bg: #f5f6f8;              /* 页面底色 */
   --card: #ffffff;            /* 卡片底色 */
