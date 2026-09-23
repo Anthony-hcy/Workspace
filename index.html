@@ -12,7 +12,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Workspace" />
   <link rel="apple-touch-icon" href="assets/img/icon-192.png" />
-  <link rel="stylesheet" href="assets/style.css?v=20260919j" />
+  <link rel="stylesheet" href="assets/style.css?v=20260923b" />
   <!-- favicon：玫瑰双色调图标（duotone-rose-valentine.svg） -->
   <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg" />
 </head>
@@ -158,8 +158,9 @@
       <p class="count-line" id="countLine"></p>
       <section class="grid" id="grid" aria-live="polite" hidden></section>
 
-      <!-- Blog 视图：站内展示 Study 站首页（默认首页，初始可见） -->
-      <iframe class="blog-frame" id="blogFrame" src="https://anthony-hcy.github.io/Study/" title="Blog"></iframe>
+      <!-- Blog 视图：站内展示 Study 站首页（默认首页，初始可见）。
+           src 延迟到 window.load 后才填充（见末尾脚本），避免首屏跨站请求阻塞主文档 -->
+      <iframe class="blog-frame" id="blogFrame" data-src="https://anthony-hcy.github.io/Study/" loading="lazy" title="Blog"></iframe>
 
       <div class="empty" id="emptyBox" hidden></div>
 
@@ -383,7 +384,23 @@
   <div class="toast" id="toast" hidden></div>
 
   <script src="assets/vendor/chart.umd.js?v=20260831"></script>
-  <script src="assets/app.js?v=20260919j"></script>
-  <script src="assets/music-dock.js?v=20260919j"></script>
+  <script src="assets/app.js?v=20260923b"></script>
+  <script src="assets/music-dock.js?v=20260923b"></script>
+
+  <script>
+    /* 首屏优化：主文档加载完成后再填充 Blog iframe 的 src（不阻塞站内内容与课表切换） */
+    window.addEventListener('load', function () {
+      var f = document.getElementById('blogFrame');
+      if (f && !f.getAttribute('src') && f.dataset.src) {
+        f.setAttribute('src', f.dataset.src);
+      }
+    });
+    /* PWA 离线缓存：注册 Service Worker（部署后为 /Workspace/sw.js，scope 覆盖全站） */
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('./sw.js').catch(function () { /* 注册失败不影响页面 */ });
+      });
+    }
+  </script>
 </body>
 </html>

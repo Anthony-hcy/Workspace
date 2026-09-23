@@ -76,6 +76,14 @@ const GRADIENTS = [
   ['#f0a6ca', '#b39ddb'],
 ];
 
+/** 封面 URL 归一化：http → https。本站托管在 HTTPS，iPhone Safari 会拦截 http 混合内容 */
+const toHttps = (u) => (typeof u === 'string' && u.startsWith('http://') ? 'https://' + u.slice(7) : u);
+const normalizeCover = (it) => {
+  if (it?.cover) it.cover = toHttps(it.cover);
+  if (it?.image) it.image = toHttps(it.image);
+  return it;
+};
+
 /* DOM 引用 */
 const $ = (sel) => document.querySelector(sel);
 const grid = $('#grid');
@@ -90,7 +98,17 @@ async function loadData() {
   // ⚠️ 加时间戳参数绕过浏览器/CDN 缓存（Pages 对静态资源缓存 10 分钟，
   //    否则同步完成后打开页面可能仍看到旧数据）
   const bust = `t=${Date.now()}`;
-  const [metaRes, likeRes, collectRes, biliRes, foldersRes, xhhRes, libRes, theatreRes, musicRes, schedRes] = await Promise.allSettled([
+
+  // ① 课表优先：数据量最小（timetable.json），单独先加载，
+  //    切到课表不必等其余 2.5MB 全量数据
+  const schedRes = (await Promise.allSettled([
+    fetch(`data/timetable.json?${bust}`, { cache: 'no-store' }).then((r) => r.json()),
+  ]))[0];
+  state.schedule = schedRes.status === 'fulfilled' && schedRes.value?.courses ? schedRes.value : null;
+  if (state.view === 'schedule') renderSchedule();
+
+  // ② 其余 9 份数据并行加载
+  const [metaRes, likeRes, collectRes, biliRes, foldersRes, xhhRes, libRes, theatreRes, musicRes] = await Promise.allSettled([
     fetch(`data/meta.json?${bust}`, { cache: 'no-store' }).then((r) => r.json()),
     fetch(`data/douyin-like.json?${bust}`, { cache: 'no-store' }).then((r) => r.json()),
     fetch(`data/douyin-collect.json?${bust}`, { cache: 'no-store' }).then((r) => r.json()),
@@ -100,7 +118,6 @@ async function loadData() {
     fetch(`data/library-books.json?${bust}`, { cache: 'no-store' }).then((r) => r.json()),
     fetch(`data/theatre.json?${bust}`, { cache: 'no-store' }).then((r) => r.json()),
     fetch(`data/music.json?${bust}`, { cache: 'no-store' }).then((r) => r.json()),
-    fetch(`data/timetable.json?${bust}`, { cache: 'no-store' }).then((r) => r.json()),
   ]);
 
   // meta：顶栏显示"最近同步时间 + 本次模式"
@@ -111,17 +128,16 @@ async function loadData() {
   }
 
   // 给每个列表的数据打上来源标记，便于筛选和徽章显示
-  const like = likeRes.status === 'fulfilled' && Array.isArray(likeRes.value) ? likeRes.value : [];
-  const collect = collectRes.status === 'fulfilled' && Array.isArray(collectRes.value) ? collectRes.value : [];
-  const bili = biliRes.status === 'fulfilled' && Array.isArray(biliRes.value) ? biliRes.value : [];
+  const like = likeRes.status === 'fulfilled' && Array.isArray(likeRes.value) ? likeRes.value.map(normalizeCover) : [];
+  const collect = collectRes.status === 'fulfilled' && Array.isArray(collectRes.value) ? collectRes.value.map(normalizeCover) : [];
+  const bili = biliRes.status === 'fulfilled' && Array.isArray(biliRes.value) ? biliRes.value.map(normalizeCover) : [];
   const xhsLike = [];      // 小红书内容已按需求剔除（保留代码结构）
   const xhsCollect = [];   // 侧边栏入口保留，但不再加载小红书数据
-  const xhh = xhhRes.status === 'fulfilled' && Array.isArray(xhhRes.value) ? xhhRes.value : [];
+  const xhh = xhhRes.status === 'fulfilled' && Array.isArray(xhhRes.value) ? xhhRes.value.map(normalizeCover) : [];
   state.folders = foldersRes.status === 'fulfilled' && Array.isArray(foldersRes.value) ? foldersRes.value : [];
-  state.library = libRes.status === 'fulfilled' && Array.isArray(libRes.value) ? libRes.value : [];
-  state.theatre = theatreRes.status === 'fulfilled' && Array.isArray(theatreRes.value) ? theatreRes.value : [];
-  state.music = musicRes.status === 'fulfilled' && Array.isArray(musicRes.value) ? musicRes.value : [];
-  state.schedule = schedRes.status === 'fulfilled' && schedRes.value?.courses ? schedRes.value : null;
+  state.library = libRes.status === 'fulfilled' && Array.isArray(libRes.value) ? libRes.value.map(normalizeCover) : [];
+  state.theatre = theatreRes.status === 'fulfilled' && Array.isArray(theatreRes.value) ? theatreRes.value.map(normalizeCover) : [];
+  state.music = musicRes.status === 'fulfilled' && Array.isArray(musicRes.value) ? musicRes.value.map(normalizeCover) : [];
 
   /** 按 id 合并：同一条作品既点赞又收藏时，合并来源而不是重复展示 */
   const map = new Map();

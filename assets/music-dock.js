@@ -8,15 +8,19 @@
  *   ③ 播放列表 = Music 页当前列表（跟随排序/搜索），播完一首自动下一首（v3 原生）
  *   ④ 暴露 window.playSongOnDock(id)：外部点击歌曲后，让播放器播放指定歌曲
  *
- * 说明：v2 脚本只是兼容加载器，会从 jsDelivr 拉真正的 NMPv3；后端为
- * api.hypcvgm.top 的免费代理（nmp.php），免登录拿音频，浏览器端无任何 Cookie。
+ * 说明：v2 脚本只是兼容加载器，已本地化（assets/vendor/），从本地拉 NMPv3 本体；
+ * 后端为 api.hypcvgm.top 的免费代理（nmp.php），免登录拿音频，浏览器端无任何 Cookie。
  * ============================================================================
  */
 (function () {
   'use strict';
 
-  const V2_CSS = 'https://api.hypcvgm.top/NeteaseMiniPlayer/netease-mini-player-v2.css';
-  const V2_JS  = 'https://api.hypcvgm.top/NeteaseMiniPlayer/netease-mini-player-v2.js';
+  // 播放器已本地化到 assets/vendor/（v2 加载器 + v3 本体），不再依赖国外 CDN；
+  // 音频直链仍走 api.hypcvgm.top 的 nmp.php 代理（香港 VPS，国内可直连）。
+  const V2_CSS = 'assets/vendor/netease-mini-player-v2.css';
+  const V2_JS  = 'assets/vendor/netease-mini-player-v2.js';
+  // v2 加载器支持 data-nmpv3-src 指定 v3 地址 → 优先本地加载，jsdelivr/unpkg 仅作兜底
+  const V3_SRC = 'assets/vendor/nmpv3.min.js';
 
   /** 挂载宿主元素并注入 v2 资源（防重复挂载） */
   function ensureMusicDock() {
@@ -41,6 +45,7 @@
 
     const s = document.createElement('script');
     s.src = V2_JS;
+    s.setAttribute('data-nmpv3-src', V3_SRC);
     document.head.appendChild(s);
   }
 
