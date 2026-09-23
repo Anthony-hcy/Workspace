@@ -1,11 +1,11 @@
 {
-  "lastSync": "2026-09-22T01:25:39.609Z",
+  "lastSync": "2026-09-23T01:12:49.205Z",
   "mode": "incremental",
   "sources": {
     "douyin-like": {
-      "count": 594,
+      "count": 598,
       "ok": true,
-      "added": 7,
+      "added": 4,
       "removed": null,
       "incremental": true
     },
