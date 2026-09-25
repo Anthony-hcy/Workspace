@@ -40,7 +40,7 @@
     const headers = { Accept: 'application/json', ...(options.headers || {}) };
     if (options.body) headers['Content-Type'] = 'application/json';
     if (options.method && options.method !== 'GET') headers['X-WS-CSRF'] = admin.csrf;
-    const response = await fetch(path, { cache: 'no-store', ...options, headers });
+    const response = await fetch(path, { cache: 'no-store', credentials: 'same-origin', ...options, headers });
     const body = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(body.error || `请求失败（HTTP ${response.status}）`);
     return body;
