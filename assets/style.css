@@ -241,7 +241,7 @@ button { font-family: inherit; cursor: pointer; }
 
 .sync-time { font-size: 12px; color: var(--ink-2); }
 
-/* 「立即同步」按钮：黑底胶囊 */
+/* 管理页面的同步按钮：黑底胶囊 */
 .btn-sync {
   display: inline-flex;
   align-items: center;
@@ -779,6 +779,53 @@ button:focus, select:focus, input:focus { outline: none; }
   #scheduleView .sched-week-tag { display: none; }
 }
 
+/* 本机管理模式：公开站点默认不显示任何写入控件 */
+.admin-only { display: none !important; }
+body.is-admin .admin-only { display: inline-flex !important; }
+body.is-admin .admin-only[hidden], body.is-admin .admin-write-only[hidden] { display: none !important; }
+body.is-admin .topbar { display: block !important; }
+body.is-admin .topbar-actions { display: flex !important; }
+.admin-controls { align-items: center; gap: 6px; }
+.admin-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #5b4bc4;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.btn-admin-action,
+.btn-stop-admin {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 6px 9px;
+  background: var(--card);
+  color: var(--ink-2);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.btn-admin-action:hover { border-color: #7c5cff; color: #5b4bc4; }
+.btn-stop-admin { color: #b42318; border-color: #f1c2bd; }
+.btn-stop-admin:hover { background: #fff4f2; }
+.admin-dialog .modal-box { max-width: 620px; }
+.admin-label { display: flex; flex-direction: column; gap: 6px; margin: 12px 0; color: var(--ink-2); font-size: 13px; }
+.admin-candidates { display: grid; gap: 8px; max-height: 390px; overflow: auto; margin-top: 12px; }
+.admin-candidate { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px; border: 1px solid var(--line); border-radius: 10px; background: var(--card); color: inherit; text-align: left; cursor: pointer; }
+.admin-candidate:hover, .admin-candidate.is-selected { border-color: #7c5cff; background: #faf9ff; }
+.admin-candidate img, .admin-candidate-cover { width: 42px; height: 58px; flex: 0 0 42px; object-fit: cover; border-radius: 5px; background: #f0f1f4; display: grid; place-items: center; color: var(--ink-2); font-size: 10px; }
+.admin-candidate-info { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.admin-candidate-info b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.admin-candidate-info small, .admin-empty { color: var(--ink-2); font-size: 12px; }
+@media (max-width: 640px) {
+  .admin-controls { flex-wrap: wrap; justify-content: flex-end; }
+  .admin-badge { display: none; }
+  body.is-admin .lib-toolbar-row { align-items: stretch; }
+}
+
 /* ============================================================================
    Library 书架（封面 / 书脊 双模式 + 标签分类 + 详情弹窗）
    ============================================================================ */
@@ -1078,7 +1125,7 @@ body.is-schedule #countLine { display: none; }
 /* ============================================================================
    Theatre 影视（电影 / 剧集 / 动漫）：复用 Library 封面网格与详情弹窗样式
    ============================================================================ */
-/* 同步操作区（最近同步 + 立即同步）只在 Favorites 及平台分支显示 */
+/* 同步操作区默认只在本机管理模式显示 */
 body.is-library .topbar-actions,
 body.is-theatre .topbar-actions,
 body.is-music .topbar-actions,

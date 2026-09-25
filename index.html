@@ -12,7 +12,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Workspace" />
   <link rel="apple-touch-icon" href="assets/img/icon-192.png" />
-  <link rel="stylesheet" href="assets/style.css?v=20260923b" />
+  <link rel="stylesheet" href="assets/style.css?v=20260925a" />
   <!-- favicon：玫瑰双色调图标（duotone-rose-valentine.svg） -->
   <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg" />
 </head>
@@ -119,10 +119,13 @@
         <span class="view-title" id="viewTitle">Blog · 我的博客</span>
         <div class="topbar-actions">
           <span class="sync-time" id="syncTime" title="数据最近同步时间">—</span>
-          <button class="btn-sync" id="btnSync" title="手动触发一次云端同步（约 1~2 分钟）">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg>
-            <span id="btnSyncText">立即同步</span>
-          </button>
+          <div class="admin-controls admin-only" id="adminControls" hidden>
+            <span class="admin-badge" id="adminStatus">本机管理</span>
+            <button class="btn-admin-action admin-only" id="adminAuthButton" title="使用 Windows Hello 或 Passkey 解锁">解锁管理</button>
+            <button class="btn-sync admin-write-only" id="adminFavoritesSync" title="触发 Favorites 同步">同步收藏</button>
+            <button class="btn-sync admin-write-only" id="adminMusicSync" title="触发 Music 抓取">刷新音乐</button>
+            <button class="btn-stop-admin" id="adminShutdown" title="关闭本机管理进程">关闭管理进程</button>
+          </div>
         </div>
       </div>
     </header>
@@ -189,6 +192,7 @@
               <option value="rating-desc">评分最高</option>
             </select>
             <input type="search" id="libSearch" class="search lib-search" placeholder="搜索书名或作者…" />
+            <button type="button" class="btn-admin-action admin-only admin-write-only" id="libraryAdminAdd" hidden>＋添加书籍</button>
           </div>
         </div>
         <p class="lib-count" id="libCount"></p>
@@ -250,6 +254,7 @@
             </select>
             <input type="search" id="theatreSearch" class="search lib-search" placeholder="搜索片名、导演或国家…" />
             <button type="button" class="charts-toggle" id="chartsToggle" title="弹出观影统计图表">📊 观影统计</button>
+            <button type="button" class="btn-admin-action admin-only admin-write-only" id="theatreAdminAdd" hidden>＋添加影视</button>
           </div>
         </div>
 
@@ -278,6 +283,7 @@
               <option value="artist-asc">歌手 A-Z</option>
             </select>
             <input type="search" id="musicSearch" class="search lib-search" placeholder="搜索歌名或歌手…" />
+            <button type="button" class="btn-admin-action admin-only admin-write-only" id="musicAdminRefresh" hidden>↻ 抓取歌曲</button>
           </div>
         </div>
         <p class="lib-count" id="musicCount"></p>
@@ -302,6 +308,18 @@
             <button type="button" class="btn-ghost" id="theatreClose">关闭</button>
           </div>
         </div>
+      </dialog>
+
+      <!-- 本机管理操作弹窗：只由 localhost 管理服务启用 -->
+      <dialog class="modal admin-dialog" id="adminDialog">
+        <form class="modal-box" id="adminForm">
+          <h3 id="adminDialogTitle">本机管理</h3>
+          <div id="adminDialogBody"></div>
+          <div class="modal-actions">
+            <button type="button" class="btn-ghost" id="adminDialogCancel">取消</button>
+            <button type="button" class="btn-primary" id="adminDialogSubmit">搜索</button>
+          </div>
+        </form>
       </dialog>
 
       <!-- 观影统计图表弹窗（Obsidian Charts 方案：上排 环状+雷达，下排 折线全宽） -->
@@ -362,30 +380,12 @@
     </footer>
   </div>
 
-  <!-- PAT 设置弹窗（首次点「立即同步」时出现） -->
-  <dialog class="modal" id="patModal">
-    <form method="dialog" class="modal-box">
-      <h3>配置同步凭据</h3>
-      <p class="modal-desc">
-        首次使用需粘贴一个 GitHub Token（仅保存在<b>本机浏览器</b> localStorage，
-        不上传、不进仓库）。<br>
-        创建路径：GitHub → Settings → Developer settings →
-        Fine-grained tokens → 新建，仅授权
-        <code>Anthony-hcy/Favorites</code> 仓库的 <code>Actions: Read and write</code> 权限。
-      </p>
-      <input type="password" id="patInput" class="modal-input" placeholder="github_pat_… 或 ghp_…" autocomplete="off" />
-      <div class="modal-actions">
-        <button type="button" class="btn-ghost" id="patCancel">取消</button>
-        <button type="button" class="btn-primary" id="patSave">保存并同步</button>
-      </div>
-    </form>
-  </dialog>
-
   <div class="toast" id="toast" hidden></div>
 
   <script src="assets/vendor/chart.umd.js?v=20260831"></script>
-  <script src="assets/app.js?v=20260923b"></script>
+  <script src="assets/app.js?v=20260925a"></script>
   <script src="assets/music-dock.js?v=20260923b"></script>
+  <script src="assets/admin.js?v=20260925a"></script>
 
   <script>
     /* 首屏优化：主文档加载完成后再填充 Blog iframe 的 src（不阻塞站内内容与课表切换） */

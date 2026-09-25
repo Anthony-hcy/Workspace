@@ -12,8 +12,7 @@
  *      每页恰好装满一块板，条数动态）；抖音/B站单平台视图仍为固定每页 24 张
  *   5. 封面热链直连抖音 CDN（referrerpolicy=no-referrer 绕过防盗链），
  *      加载失败自动回退为按 id 生成的渐变占位图
- *   6. 「立即同步」按钮 → 调 GitHub API 触发私有仓库的 Actions 工作流，
- *      Token 只存本机 localStorage，不进代码仓库
+ *   6. 同步与内容写入由 localhost 管理页面负责；公开页面只读取静态数据
  * ============================================================================
  */
 
@@ -27,9 +26,6 @@ const CONFIG = {
   BRANCH: 'main',                     // 工作流所在分支
   PAGE_SIZE: 24,                      // 每页显示的卡片数量
 };
-
-const API_BASE = `https://api.github.com/repos/${CONFIG.GITHUB_OWNER}/${CONFIG.PRIVATE_REPO}`;
-const PAT_KEY = 'ws_github_pat';      // localStorage 键名
 
 /* ---------------------------------------------------------------------------
  * 全局状态
@@ -257,7 +253,7 @@ function renderPage() {
   updateCountLine();
   emptyBox.hidden = state.filtered.length !== 0;
   if (state.filtered.length === 0) {
-    emptyBox.innerHTML = '<strong>◌</strong>没有匹配的作品<br><span style="font-size:12px">试试切换筛选条件，或先点右上角「立即同步」拉取数据</span>';
+    emptyBox.innerHTML = '<strong>◌</strong>没有匹配的作品<br><span style="font-size:12px">试试切换筛选条件；需要更新数据时请打开本机管理页面</span>';
   }
 }
 
@@ -606,101 +602,7 @@ function renderRows(slice) {
 }
 
 /* ---------------------------------------------------------------------------
- * 五、「立即同步」按钮 → GitHub Actions workflow_dispatch
- * ------------------------------------------------------------------------- */
-const btnSync = $('#btnSync');
-const btnSyncText = $('#btnSyncText');
-
-btnSync.addEventListener('click', () => {
-  const pat = localStorage.getItem(PAT_KEY);
-  if (!pat) {
-    openPatModal();       // 第一次使用：先要 Token
-  } else {
-    triggerSync(pat);
-  }
-});
-
-async function triggerSync(pat) {
-  if (state.syncing) return;
-  state.syncing = true;
-  btnSync.disabled = true;
-  btnSync.classList.add('is-busy');
-  btnSyncText.textContent = '同步中…';
-  showToast('已触发云端同步，通常需要 1~2 分钟');
-
-  try {
-    // 1. 触发工作流（dispatches 接口成功时返回 204 无内容）
-    const res = await fetch(`${API_BASE}/actions/workflows/${CONFIG.WORKFLOW_FILE}/dispatches`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${pat}`,
-        Accept: 'application/vnd.github+json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ ref: CONFIG.BRANCH }),
-    });
-    if (res.status === 401) throw new Error('Token 无效或已过期，请重新配置');
-    if (res.status === 403) throw new Error('Token 权限不足，需要 Actions: Read and write');
-    if (!res.ok) throw new Error(`触发失败（HTTP ${res.status}）`);
-
-    // 2. 轮询最新一次运行的状态，直到完成（最长等 5 分钟）
-    await pollRun(pat, Date.now());
-    showToast('同步完成！即将刷新页面…');
-    setTimeout(() => location.reload(), 1200);
-  } catch (err) {
-    showToast(err.message, true);
-    resetSyncBtn();
-  }
-}
-
-/** 每 10 秒查询一次 Actions 运行状态 */
-async function pollRun(pat, startTime) {
-  const deadline = startTime + 5 * 60 * 1000; // 最长等待 5 分钟
-  while (Date.now() < deadline) {
-    await new Promise((r) => setTimeout(r, 10000));
-    const res = await fetch(`${API_BASE}/actions/runs?per_page=3`, {
-      headers: { Authorization: `Bearer ${pat}`, Accept: 'application/vnd.github+json' },
-    });
-    if (!res.ok) continue; // 网络抖动就下一轮再说
-    const { workflow_runs } = await res.json();
-    // 找到本次触发之后创建的运行记录
-    const run = workflow_runs.find((r) => new Date(r.created_at).getTime() >= startTime - 5000);
-    if (run && run.status === 'completed') {
-      if (run.conclusion !== 'success') throw new Error('同步运行失败，常见原因：Cookie 过期，请更新 Secrets');
-      return;
-    }
-    btnSyncText.textContent = '同步中…';   // 保持忙碌态
-  }
-  throw new Error('等待超时，可稍后刷新页面查看结果');
-}
-
-function resetSyncBtn() {
-  state.syncing = false;
-  btnSync.disabled = false;
-  btnSync.classList.remove('is-busy');
-  btnSyncText.textContent = '立即同步';
-}
-
-/* ---------- PAT 弹窗 ---------- */
-const patModal = $('#patModal');
-
-function openPatModal() {
-  patModal.showModal();
-  $('#patInput').focus();
-}
-
-$('#patCancel').addEventListener('click', () => patModal.close());
-
-$('#patSave').addEventListener('click', () => {
-  const pat = $('#patInput').value.trim();
-  if (!pat) return showToast('请输入 Token', true);
-  localStorage.setItem(PAT_KEY, pat);
-  patModal.close();
-  triggerSync(pat);   // 存完直接开始第一次同步
-});
-
-/* ---------------------------------------------------------------------------
- * 六、Toast 提示
+ * 五、Toast 提示
  * ------------------------------------------------------------------------- */
 let toastTimer;
 function showToast(msg, isError = false) {
@@ -1987,7 +1889,7 @@ $('#pageInput').addEventListener('keydown', (e) => {
   if (state.all.length === 0) {
     emptyBox.innerHTML =
       '<strong>◌</strong>还没有数据<br><span style="font-size:12px">' +
-      '首次部署请参考 README 配置 Cookie 与 Secrets，然后点击右上角「立即同步」</span>';
+      '首次部署请参考 README 配置 Cookie 与 Secrets，然后打开本机管理页面</span>';
     emptyBox.hidden = false;
   }
 

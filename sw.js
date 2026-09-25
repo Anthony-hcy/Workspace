@@ -19,7 +19,7 @@
  */
 'use strict';
 
-const VERSION = '20260923b';
+const VERSION = '20260925a';
 const CACHE = `workspace-sw-${VERSION}`;
 
 /** 预缓存清单（相对 sw.js 所在目录解析；缺失文件容错跳过） */
@@ -29,6 +29,7 @@ const PRECACHE = [
   'manifest.webmanifest',
   'assets/style.css',
   'assets/app.js',
+  'assets/admin.js',
   'assets/music-dock.js',
   'assets/vendor/chart.umd.js',
   'assets/vendor/netease-mini-player-v2.css',
