@@ -19,7 +19,7 @@
  */
 'use strict';
 
-const VERSION = '20260925d';
+const VERSION = '20260925e';
 const CACHE = `workspace-sw-${VERSION}`;
 
 /** 预缓存清单（相对 sw.js 所在目录解析；缺失文件容错跳过） */
@@ -88,6 +88,10 @@ self.addEventListener('fetch', (event) => {
 
   // data/*.json 与导航请求 → stale-while-revalidate
   // data 请求带 ?t= 时间戳防缓存，按 pathname 匹配（详见文件头注释）
+  if (url.hostname === 'localhost' && url.pathname.startsWith('/data/')) {
+    event.respondWith(fetch(req));
+    return;
+  }
   if (url.pathname.startsWith('/data/') || req.mode === 'navigate') {
     event.respondWith(staleWhileRevalidate(req, pathKey(url.pathname)));
     return;
