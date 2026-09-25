@@ -196,7 +196,16 @@
       button.disabled = true;
       button.textContent = '等待验证…';
       try { await authenticate(); }
-      catch (error) { showToast(error.message, true); button.disabled = false; button.textContent = admin.mode === 'auth-register' ? '注册 Passkey' : '使用 Passkey 解锁'; }
+      catch (error) {
+        if (admin.mode === 'auth-login' && error.message === '尚未注册 Passkey') {
+          openAuthDialog('auth-register');
+          showToast('当前管理服务尚未注册 Passkey，请先注册本机凭据', true);
+          return;
+        }
+        showToast(error.message, true);
+        button.disabled = false;
+        button.textContent = admin.mode === 'auth-register' ? '注册 Passkey' : '使用 Passkey 解锁';
+      }
       return;
     }
     if (!admin.selected) return searchCandidates();
