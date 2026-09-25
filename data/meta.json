@@ -1,20 +1,16 @@
 {
-  "lastSync": "2026-09-24T01:02:22.138Z",
+  "lastSync": "2026-09-25T01:08:56.711Z",
   "mode": "incremental",
   "sources": {
     "douyin-like": {
-      "count": 648,
-      "ok": true,
-      "added": 39,
-      "removed": null,
-      "incremental": true
+      "count": 0,
+      "ok": false,
+      "error": "找不到「抖音-点赞」Tab —— 抖音页面可能已改版，或 Cookie 未生效"
     },
     "douyin-collect": {
-      "count": 444,
-      "ok": true,
-      "added": 14,
-      "removed": null,
-      "incremental": true
+      "count": 0,
+      "ok": false,
+      "error": "page.goto: Timeout 45000ms exceeded.\nCall log:\n  - navigating to \"https://www.douyin.com/user/self\", waiting until \"domcontentloaded\"\n"
     },
     "xiaoheihe-collect": {
       "count": 39,
@@ -24,5 +20,5 @@
       "incremental": false
     }
   },
-  "ok": true
+  "ok": false
 }
