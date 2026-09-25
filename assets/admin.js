@@ -48,9 +48,7 @@
 
   async function refreshPublicMeta() {
     try {
-      const response = await fetch('https://raw.githubusercontent.com/Anthony-hcy/Workspace/main/data/meta.json?t=' + Date.now(), { cache: 'no-store' });
-      if (!response.ok) return;
-      const meta = await response.json();
+      const meta = await api('/api/public-meta');
       if (!meta?.lastSync) return;
       const date = new Date(meta.lastSync);
       const mode = meta.mode === 'full' ? '全量' : '增量';
@@ -327,7 +325,7 @@
       setAdminVisible(true);
       admin.csrf = status.csrf;
       setAuthenticated(Boolean(status.authenticated));
-      refreshPublicMeta();
+      setTimeout(refreshPublicMeta, 1000);
       if (status.setupRequired) {
         openAuthDialog('auth-register');
       }
