@@ -46,6 +46,19 @@
     return body;
   }
 
+  async function refreshPublicMeta() {
+    try {
+      const response = await fetch('https://raw.githubusercontent.com/Anthony-hcy/Workspace/main/data/meta.json?t=' + Date.now(), { cache: 'no-store' });
+      if (!response.ok) return;
+      const meta = await response.json();
+      if (!meta?.lastSync) return;
+      const date = new Date(meta.lastSync);
+      const mode = meta.mode === 'full' ? '全量' : '增量';
+      const syncTime = $('#syncTime');
+      if (syncTime) syncTime.textContent = `公开数据最近同步：${date.toLocaleString('zh-CN', { hour12: false })} · ${mode}`;
+    } catch {}
+  }
+
   function renderCandidateList() {
     const list = $('#adminCandidates');
     if (!list) return;
@@ -85,6 +98,7 @@
       </label>`}
       <div class="admin-candidates" id="adminCandidates"><p class="admin-empty">输入关键词后点击搜索。</p></div>`;
     $('#adminDialogSubmit').textContent = '搜索';
+    $('#adminDialogSubmit').disabled = false;
     $('#adminDialog').showModal();
     $('#adminSearchInput').focus();
   }
@@ -98,6 +112,24 @@
       ? '首次使用请通过 Windows Hello、指纹、PIN 或安全密钥注册。凭据只保存在本机管理服务中。'
       : '请使用已经注册的 Windows Hello、指纹、PIN 或安全密钥确认是你本人。'}</p>`;
     $('#adminDialogSubmit').textContent = register ? '注册 Passkey' : '使用 Passkey 解锁';
+    $('#adminDialogSubmit').disabled = false;
+    $('#adminDialog').showModal();
+  }
+
+  function openSyncModeDialog() {
+    admin.mode = 'favorites-sync-mode';
+    admin.selected = null;
+    $('#adminDialogTitle').textContent = '同步收藏';
+    $('#adminDialogBody').innerHTML = `
+      <p class="modal-desc">选择本次同步方式。增量同步保留已取消内容，全量同步会重新校对并清理已取消内容。</p>
+      <label class="admin-label">同步方式
+        <select class="sort-select admin-category" id="adminSyncMode">
+          <option value="incremental" selected>增量同步（推荐）</option>
+          <option value="full">全量同步</option>
+        </select>
+      </label>`;
+    $('#adminDialogSubmit').textContent = '开始同步';
+    $('#adminDialogSubmit').disabled = false;
     $('#adminDialog').showModal();
   }
 
@@ -208,6 +240,12 @@
       }
       return;
     }
+    if (admin.mode === 'favorites-sync-mode') {
+      const fullSync = $('#adminSyncMode').value === 'full';
+      $('#adminDialog').close();
+      startWorkflow('favorites', fullSync);
+      return;
+    }
     if (!admin.selected) return searchCandidates();
     const button = $('#adminDialogSubmit');
     button.disabled = true;
@@ -227,8 +265,7 @@
     }
   }
 
-  async function startWorkflow(type) {
-    const fullSync = type === 'favorites' && confirm('是否执行全量同步？全量同步会校对并清理已取消的内容。');
+  async function startWorkflow(type, fullSync = false) {
     try {
       const job = await api('/api/jobs', { method: 'POST', body: JSON.stringify({ type, fullSync }) });
       showToast(type === 'music' ? '已触发音乐抓取' : '已触发收藏同步');
@@ -271,7 +308,7 @@
     $('#libraryAdminAdd')?.addEventListener('click', () => openSearchDialog('library'));
     $('#theatreAdminAdd')?.addEventListener('click', () => openSearchDialog('theatre'));
     $('#musicAdminRefresh')?.addEventListener('click', () => startWorkflow('music'));
-    $('#adminFavoritesSync')?.addEventListener('click', () => startWorkflow('favorites'));
+    $('#adminFavoritesSync')?.addEventListener('click', openSyncModeDialog);
     $('#adminMusicSync')?.addEventListener('click', () => startWorkflow('music'));
     $('#adminShutdown')?.addEventListener('click', shutdown);
     $('#adminAuthButton')?.addEventListener('click', () => openAuthDialog('auth-login'));
@@ -290,6 +327,7 @@
       setAdminVisible(true);
       admin.csrf = status.csrf;
       setAuthenticated(Boolean(status.authenticated));
+      refreshPublicMeta();
       if (status.setupRequired) {
         openAuthDialog('auth-register');
       }
