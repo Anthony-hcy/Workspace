@@ -4833,12 +4833,17 @@
   },
   {
     "id": "26426348",
-    "title": "回头遇到爱",
+    "title": "回头遇到爱 Love Finds You in Charm",
     "category": "movie",
     "score": 7.3,
-    "director": [],
+    "director": [
+      "Bryar Freed"
+    ],
     "actor": [
-      "蒂凡尼·多庞特"
+      "Danielle Chuchran",
+      "Trevor Donovan",
+      "Tiffany Dupont",
+      "Drew Fuller"
     ],
     "country": [
       "美国"
@@ -4852,8 +4857,11 @@
     "runtime": "92分钟",
     "episodes": "",
     "intro": "Young Emma Miller (Danielle Chuchran) would appear to be lucky. This beautiful Amish girl has a loving family and the community's most eligible young man, Jacob (Kellen Boyle), wants to marry her. But she has more on her mind than buggies, bonnets and making her special goat cheese - Emma is secretly obsessed with Jane Austin's Pride and Prejudice and restlessly longs for adven...",
-    "image": "assets/img/theatre/p2261444832.webp",
-    "doubanUrl": "https://movie.douban.com/subject/26426348/"
+    "image": "assets/img/theatre/26426348.jpg",
+    "doubanUrl": "https://movie.douban.com/subject/26426348/",
+    "genres": [
+      "剧情"
+    ]
   },
   {
     "id": "1292365",
@@ -11102,9 +11110,9 @@
   },
   {
     "id": "37472449",
-    "title": "诡秘之主特别篇：白银城篇·猎物篇",
+    "title": "诡秘之主 特别篇：白银城篇·猎物篇",
     "category": "anime",
-    "score": 0,
+    "score": null,
     "director": [
       "熊可"
     ],
@@ -11116,9 +11124,10 @@
       "赵爽",
       "李诗萌",
       "图特哈蒙",
-      "沈依杭",
+      "沈话桑",
       "孔天畅",
-      "唐明冬"
+      "唐明冬",
+      "陈曙阳"
     ],
     "country": [
       "中国大陆"
@@ -11129,14 +11138,20 @@
       "悬疑",
       "奇幻"
     ],
-    "datePublished": "2026-06-20",
+    "datePublished": "2026-06-20(中国大陆)",
     "year": 2026,
     "currentDate": "2026-07-14",
-    "runtime": "26分钟",
+    "runtime": "",
     "episodes": "3",
     "intro": "克莱恩（愚者）在灰雾之上召开塔罗会时，聆听到了新的祈求。他将祈求者戴里克从神弃之地白银城拉上灰雾，通过戴里克的讲述了解到了这个神秘城邦白银城的故事。戴里克希望愚者可以帮助自己，拯救白银城，愚者予以了正向回应，并让戴里克从22张塔罗牌中选择自己的那张，戴里克选择了“太阳”作为自己的代号。之后，“倒吊人”阿尔杰提出了自己的交易需求，需要“正义”奥黛丽运用自己的人脉尽可能的在鲁恩国首都贝克兰德收集海盗七将军之一——齐林格斯的信息。并希望能获得愚者的帮助杀了齐林格斯。为此奥黛丽结识了佛尔思、休这二位非凡者，帮助寻找齐林格斯。最终，克莱恩找到自己的老师阿兹克，并借他的力量帮助塔罗会的各位完成了此事。",
-    "image": "assets/img/theatre/诡秘之主特别篇：白银城篇·猎物篇.webp",
-    "doubanUrl": "https://movie.douban.com/subject/37472449/"
+    "image": "assets/img/theatre/37472449.jpg",
+    "doubanUrl": "https://movie.douban.com/subject/37472449/",
+    "genres": [
+      "动作",
+      "动画",
+      "悬疑",
+      "奇幻"
+    ]
   },
   {
     "id": "35314632",
@@ -11670,7 +11685,7 @@
     "id": "36589693",
     "title": "将夜",
     "category": "anime",
-    "score": 0,
+    "score": null,
     "director": [
       "王裕仁",
       "李永勤"
@@ -11691,14 +11706,20 @@
       "奇幻",
       "武侠"
     ],
-    "datePublished": "2026-04-23",
+    "datePublished": "2026-04-23(中国大陆)",
     "year": 2026,
     "currentDate": "2026-06-18",
-    "runtime": "23分钟",
+    "runtime": "",
     "episodes": "19",
     "intro": "这是昊天治下的世界，有很多不可知之地，不可知之人，还有一段关于永夜的末日预言。外来者宁缺身负不为人知的过去，与在死人堆中捡到的弃婴桑桑相依为命，亡命天涯。三把刀、一把伞，渭城的轻雨中，少年与少女，走进了天下。",
-    "image": "assets/img/theatre/将夜.webp",
-    "doubanUrl": "https://movie.douban.com/subject/36589693/"
+    "image": "assets/img/theatre/36589693.jpg",
+    "doubanUrl": "https://movie.douban.com/subject/36589693/",
+    "genres": [
+      "动作",
+      "动画",
+      "奇幻",
+      "武侠"
+    ]
   },
   {
     "id": "36053256",
