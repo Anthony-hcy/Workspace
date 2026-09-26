@@ -213,7 +213,7 @@
     button.textContent = '处理中…';
     try {
       const payload = admin.mode === 'library'
-        ? { id: admin.selected.id, query: admin.selected.title }
+        ? { id: admin.selected.id, query: admin.selected.title, coverUrl: admin.selected.coverUrl || '' }
         : { ...admin.selected, category: $('#adminCategory').value };
       const result = await api(`/api/${admin.mode}/add`, { method: 'POST', body: JSON.stringify(payload) });
       $('#adminDialog').close();
