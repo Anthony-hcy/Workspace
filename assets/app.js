@@ -1325,6 +1325,8 @@ function renderCharts(filtered) {
 function openTheatre(id) {
   const t = state.theatre.find((x) => x.id === id);
   if (!t) return;
+  $('#theatreModal').dataset.theatreId = t.id;
+  $('#theatreModal').dataset.theatreCurrentDate = t.currentDate || '';
   const join = (arr, n) => (arr || []).slice(0, n).join('、') || '—';
   const tagHtml = (t.tags || []).map((g) =>
     `<span class="tag">${escapeHtml(g)}</span>`).join(' ');

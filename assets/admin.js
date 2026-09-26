@@ -1,11 +1,9 @@
-/* 本机管理模式：公开 GitHub Pages 不提供 /api/status，因此所有控件默认隐藏。 */
+/* 本机管理模式：只有监听在回环地址的服务才会启用写入控件。 */
 (function () {
   'use strict';
 
   const admin = {
     enabled: false,
-    authenticated: false,
-    csrf: '',
     mode: '',
     candidates: [],
     selected: null,
@@ -20,26 +18,16 @@
   function setAdminVisible(visible) {
     admin.enabled = visible;
     document.body.classList.toggle('is-admin', visible);
-    document.querySelectorAll('.admin-only').forEach((element) => {
+    document.querySelectorAll('.admin-only, .admin-write-only').forEach((element) => {
       element.hidden = !visible;
     });
-  }
-
-  function setAuthenticated(authenticated) {
-    admin.authenticated = authenticated;
-    document.querySelectorAll('.admin-write-only').forEach((element) => {
-      element.hidden = !authenticated;
-    });
-    const unlock = $('#adminAuthButton');
-    if (unlock) unlock.hidden = authenticated;
     const badge = $('#adminStatus');
-    if (badge) badge.textContent = authenticated ? '本机管理 · 已解锁' : '本机管理 · 未解锁';
+    if (badge) badge.textContent = visible ? '本机管理 · 已启动' : '本机管理';
   }
 
   async function api(path, options = {}) {
     const headers = { Accept: 'application/json', ...(options.headers || {}) };
     if (options.body) headers['Content-Type'] = 'application/json';
-    if (options.method && options.method !== 'GET') headers['X-WS-CSRF'] = admin.csrf;
     const response = await fetch(path, { cache: 'no-store', credentials: 'same-origin', ...options, headers });
     const body = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(body.error || `请求失败（HTTP ${response.status}）`);
@@ -101,19 +89,6 @@
     $('#adminSearchInput').focus();
   }
 
-  function openAuthDialog(mode) {
-    admin.mode = mode;
-    admin.selected = null;
-    const register = mode === 'auth-register';
-    $('#adminDialogTitle').textContent = register ? '注册本机 Passkey' : '解锁本机管理';
-    $('#adminDialogBody').innerHTML = `<p class="modal-desc">${register
-      ? '首次使用请通过 Windows Hello、指纹、PIN 或安全密钥注册。凭据只保存在本机管理服务中。'
-      : '请使用已经注册的 Windows Hello、指纹、PIN 或安全密钥确认是你本人。'}</p>`;
-    $('#adminDialogSubmit').textContent = register ? '注册 Passkey' : '使用 Passkey 解锁';
-    $('#adminDialogSubmit').disabled = false;
-    $('#adminDialog').showModal();
-  }
-
   function openSyncModeDialog() {
     admin.mode = 'favorites-sync-mode';
     admin.selected = null;
@@ -131,72 +106,22 @@
     $('#adminDialog').showModal();
   }
 
-  function base64urlToBytes(value) {
-    const normalized = String(value || '').replace(/-/g, '+').replace(/_/g, '/').padEnd(Math.ceil(String(value || '').length / 4) * 4, '=');
-    const binary = atob(normalized);
-    return Uint8Array.from(binary, (char) => char.charCodeAt(0));
-  }
-
-  function bytesToBase64url(value) {
-    const bytes = new Uint8Array(value);
-    let binary = '';
-    bytes.forEach((byte) => { binary += String.fromCharCode(byte); });
-    return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
-  }
-
-  function registrationOptions(options) {
-    return {
-      ...options,
-      challenge: base64urlToBytes(options.challenge),
-      user: { ...options.user, id: base64urlToBytes(options.user.id) },
-      excludeCredentials: (options.excludeCredentials || []).map((item) => ({ ...item, id: base64urlToBytes(item.id) })),
-    };
-  }
-
-  function authenticationOptions(options) {
-    return {
-      ...options,
-      challenge: base64urlToBytes(options.challenge),
-      allowCredentials: (options.allowCredentials || []).map((item) => ({ ...item, id: base64urlToBytes(item.id) })),
-    };
-  }
-
-  function credentialResponse(credential, registration) {
-    const response = credential.response;
-    const result = {
-      id: credential.id,
-      rawId: bytesToBase64url(credential.rawId),
-      type: credential.type,
-      response: {
-        clientDataJSON: bytesToBase64url(response.clientDataJSON),
-      },
-    };
-    if (registration) {
-      result.response.attestationObject = bytesToBase64url(response.attestationObject);
-      if (response.getTransports) result.response.transports = response.getTransports();
-    } else {
-      result.response.authenticatorData = bytesToBase64url(response.authenticatorData);
-      result.response.signature = bytesToBase64url(response.signature);
-      result.response.userHandle = response.userHandle ? bytesToBase64url(response.userHandle) : null;
-    }
-    return result;
-  }
-
-  async function authenticate() {
-    if (!window.PublicKeyCredential || !navigator.credentials) throw new Error('当前浏览器不支持 Windows Hello/Passkey');
-    const register = admin.mode === 'auth-register';
-    const options = await api(register ? '/api/auth/register/options' : '/api/auth/login/options');
-    const credential = register
-      ? await navigator.credentials.create({ publicKey: registrationOptions(options) })
-      : await navigator.credentials.get({ publicKey: authenticationOptions(options) });
-    if (!credential) throw new Error('未完成 Passkey 操作');
-    const result = await api(register ? '/api/auth/register/verify' : '/api/auth/login/verify', {
-      method: 'POST', body: JSON.stringify(credentialResponse(credential, register)),
-    });
-    admin.csrf = result.csrf || '';
-    setAuthenticated(true);
-    $('#adminDialog').close();
-    showToast(register ? 'Passkey 注册完成，管理页面已解锁' : '管理页面已解锁');
+  function openTheatreEditDialog() {
+    const modal = $('#theatreModal');
+    const id = modal?.dataset.theatreId || '';
+    if (!id) return showToast('请先打开一部影视的详情', true);
+    admin.mode = 'theatre-edit';
+    admin.selected = null;
+    const currentDate = modal.dataset.theatreCurrentDate || new Date().toISOString().slice(0, 10);
+    $('#adminDialogTitle').textContent = '修改观看时间';
+    $('#adminDialogBody').innerHTML = `
+      <p class="modal-desc">保存后会更新本地影视源文件，重新生成 Theatre 数据并发布到公开站点。</p>
+      <label class="admin-label">观看日期
+        <input class="modal-input" id="theatreWatchDate" type="date" value="${escapeHtml(currentDate)}">
+      </label>`;
+    $('#adminDialogSubmit').textContent = '保存并发布';
+    $('#adminDialogSubmit').disabled = false;
+    $('#adminDialog').showModal();
   }
 
   async function searchCandidates() {
@@ -221,20 +146,23 @@
   }
 
   async function addSelected() {
-    if (admin.mode === 'auth-register' || admin.mode === 'auth-login') {
+    if (admin.mode === 'theatre-edit') {
       const button = $('#adminDialogSubmit');
+      const id = $('#theatreModal')?.dataset.theatreId || '';
+      const currentDate = $('#theatreWatchDate')?.value || '';
+      if (!currentDate) return showToast('请选择观看日期', true);
       button.disabled = true;
-      button.textContent = '等待验证…';
-      try { await authenticate(); }
-      catch (error) {
-        if (admin.mode === 'auth-login' && error.message === '尚未注册 Passkey') {
-          openAuthDialog('auth-register');
-          showToast('当前管理服务尚未注册 Passkey，请先注册本机凭据', true);
-          return;
-        }
+      button.textContent = '保存中…';
+      try {
+        const job = await api('/api/theatre/update', { method: 'POST', body: JSON.stringify({ id, currentDate }) });
+        $('#adminDialog').close();
+        $('#theatreModal')?.close();
+        showToast('观看时间已保存，正在生成并发布…');
+        watchJob(job.id);
+      } catch (error) {
         showToast(error.message, true);
         button.disabled = false;
-        button.textContent = admin.mode === 'auth-register' ? '注册 Passkey' : '使用 Passkey 解锁';
+        button.textContent = '保存并发布';
       }
       return;
     }
@@ -317,11 +245,11 @@
     $('#libraryAdminAdd')?.addEventListener('click', () => openSearchDialog('library'));
     $('#theatreAdminAdd')?.addEventListener('click', () => openSearchDialog('theatre'));
     $('#theatreAdminRepair')?.addEventListener('click', repairTheatre);
+    $('#theatreEdit')?.addEventListener('click', openTheatreEditDialog);
     $('#musicAdminRefresh')?.addEventListener('click', () => startWorkflow('music'));
     $('#adminFavoritesSync')?.addEventListener('click', openSyncModeDialog);
     $('#adminMusicSync')?.addEventListener('click', () => startWorkflow('music'));
     $('#adminShutdown')?.addEventListener('click', shutdown);
-    $('#adminAuthButton')?.addEventListener('click', () => openAuthDialog('auth-login'));
     $('#adminDialogCancel')?.addEventListener('click', () => $('#adminDialog').close());
     $('#adminDialogSubmit')?.addEventListener('click', addSelected);
     $('#adminDialog')?.addEventListener('click', (event) => {
@@ -335,12 +263,7 @@
       const status = await api('/api/status');
       if (!status.admin) return;
       setAdminVisible(true);
-      admin.csrf = status.csrf;
-      setAuthenticated(Boolean(status.authenticated));
       setTimeout(refreshPublicMeta, 1000);
-      if (status.setupRequired) {
-        openAuthDialog('auth-register');
-      }
     } catch {
       setAdminVisible(false);
     }

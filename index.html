@@ -121,7 +121,6 @@
           <span class="sync-time" id="syncTime" title="数据最近同步时间">—</span>
           <div class="admin-controls admin-only" id="adminControls" hidden>
             <span class="admin-badge" id="adminStatus">本机管理</span>
-            <button class="btn-admin-action admin-only" id="adminAuthButton" title="使用 Windows Hello 或 Passkey 解锁">解锁管理</button>
             <button class="btn-sync admin-write-only" id="adminFavoritesSync" title="触发 Favorites 同步">同步收藏</button>
             <button class="btn-sync admin-write-only" id="adminMusicSync" title="触发 Music 抓取">刷新音乐</button>
             <button class="btn-stop-admin" id="adminShutdown" title="关闭本机管理进程">关闭管理进程</button>
@@ -306,6 +305,7 @@
         <div class="modal-box book-modal">
           <div id="theatreDetail"></div>
           <div class="modal-actions">
+            <button type="button" class="btn-admin-action admin-only admin-write-only" id="theatreEdit" hidden>编辑观看时间</button>
             <button type="button" class="btn-ghost" id="theatreClose">关闭</button>
           </div>
         </div>
@@ -386,7 +386,7 @@
   <script src="assets/vendor/chart.umd.js?v=20260831"></script>
   <script src="assets/app.js?v=20260925a"></script>
   <script src="assets/music-dock.js?v=20260923b"></script>
-  <script src="assets/admin.js?v=20260925f"></script>
+  <script src="assets/admin.js?v=20260925g"></script>
 
   <script>
     /* 首屏优化：主文档加载完成后再填充 Blog iframe 的 src（不阻塞站内内容与课表切换） */
