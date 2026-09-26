@@ -4833,12 +4833,17 @@
   },
   {
     "id": "26426348",
-    "title": "回头遇到爱",
+    "title": "回头遇到爱 Love Finds You in Charm",
     "category": "movie",
     "score": 7.3,
-    "director": [],
+    "director": [
+      "Bryar Freed"
+    ],
     "actor": [
-      "蒂凡尼·多庞特"
+      "Danielle Chuchran",
+      "Trevor Donovan",
+      "Tiffany Dupont",
+      "Drew Fuller"
     ],
     "country": [
       "美国"
@@ -4852,8 +4857,11 @@
     "runtime": "92分钟",
     "episodes": "",
     "intro": "Young Emma Miller (Danielle Chuchran) would appear to be lucky. This beautiful Amish girl has a loving family and the community's most eligible young man, Jacob (Kellen Boyle), wants to marry her. But she has more on her mind than buggies, bonnets and making her special goat cheese - Emma is secretly obsessed with Jane Austin's Pride and Prejudice and restlessly longs for adven...",
-    "image": "assets/img/theatre/p2261444832.webp",
-    "doubanUrl": "https://movie.douban.com/subject/26426348/"
+    "image": "assets/img/theatre/26426348.jpg",
+    "doubanUrl": "https://movie.douban.com/subject/26426348/",
+    "genres": [
+      "剧情"
+    ]
   },
   {
     "id": "1292365",
@@ -11102,9 +11110,9 @@
   },
   {
     "id": "37472449",
-    "title": "诡秘之主特别篇：白银城篇·猎物篇",
+    "title": "诡秘之主 特别篇：白银城篇·猎物篇",
     "category": "anime",
-    "score": 0,
+    "score": null,
     "director": [
       "熊可"
     ],
@@ -11116,9 +11124,10 @@
       "赵爽",
       "李诗萌",
       "图特哈蒙",
-      "沈依杭",
+      "沈话桑",
       "孔天畅",
-      "唐明冬"
+      "唐明冬",
+      "陈曙阳"
     ],
     "country": [
       "中国大陆"
@@ -11129,14 +11138,20 @@
       "悬疑",
       "奇幻"
     ],
-    "datePublished": "2026-06-20",
+    "datePublished": "2026-06-20(中国大陆)",
     "year": 2026,
     "currentDate": "2026-07-14",
-    "runtime": "26分钟",
+    "runtime": "",
     "episodes": "3",
     "intro": "克莱恩（愚者）在灰雾之上召开塔罗会时，聆听到了新的祈求。他将祈求者戴里克从神弃之地白银城拉上灰雾，通过戴里克的讲述了解到了这个神秘城邦白银城的故事。戴里克希望愚者可以帮助自己，拯救白银城，愚者予以了正向回应，并让戴里克从22张塔罗牌中选择自己的那张，戴里克选择了“太阳”作为自己的代号。之后，“倒吊人”阿尔杰提出了自己的交易需求，需要“正义”奥黛丽运用自己的人脉尽可能的在鲁恩国首都贝克兰德收集海盗七将军之一——齐林格斯的信息。并希望能获得愚者的帮助杀了齐林格斯。为此奥黛丽结识了佛尔思、休这二位非凡者，帮助寻找齐林格斯。最终，克莱恩找到自己的老师阿兹克，并借他的力量帮助塔罗会的各位完成了此事。",
-    "image": "assets/img/theatre/诡秘之主特别篇：白银城篇·猎物篇.webp",
-    "doubanUrl": "https://movie.douban.com/subject/37472449/"
+    "image": "assets/img/theatre/37472449.jpg",
+    "doubanUrl": "https://movie.douban.com/subject/37472449/",
+    "genres": [
+      "动作",
+      "动画",
+      "悬疑",
+      "奇幻"
+    ]
   },
   {
     "id": "35314632",
@@ -11670,7 +11685,7 @@
     "id": "36589693",
     "title": "将夜",
     "category": "anime",
-    "score": 0,
+    "score": null,
     "director": [
       "王裕仁",
       "李永勤"
@@ -11691,14 +11706,20 @@
       "奇幻",
       "武侠"
     ],
-    "datePublished": "2026-04-23",
+    "datePublished": "2026-04-23(中国大陆)",
     "year": 2026,
     "currentDate": "2026-06-18",
-    "runtime": "23分钟",
+    "runtime": "",
     "episodes": "19",
     "intro": "这是昊天治下的世界，有很多不可知之地，不可知之人，还有一段关于永夜的末日预言。外来者宁缺身负不为人知的过去，与在死人堆中捡到的弃婴桑桑相依为命，亡命天涯。三把刀、一把伞，渭城的轻雨中，少年与少女，走进了天下。",
-    "image": "assets/img/theatre/将夜.webp",
-    "doubanUrl": "https://movie.douban.com/subject/36589693/"
+    "image": "assets/img/theatre/36589693.jpg",
+    "doubanUrl": "https://movie.douban.com/subject/36589693/",
+    "genres": [
+      "动作",
+      "动画",
+      "奇幻",
+      "武侠"
+    ]
   },
   {
     "id": "36053256",
@@ -13132,5 +13153,100 @@
     "intro": "在惨烈的“涩谷事变”结束后，东京沦为咒灵横行的废墟。五条悟因被封印而被剥夺一切权利，咒术高层趁机下达严酷指令：重启虎杖悠仁的死刑，并指派特级咒术师乙骨忧太担任执行人。 与此同时，幕后黑手羂索开启了名为“死灭回游”的残酷生存游戏。这场游戏强制全国数以千计的术师在特定结界内互相残杀，旨在以此产生的巨大能量推动人类的“进化”。为了营救被卷入游戏的伏黑惠之姐津美纪，并寻求从内部破解狱门疆、释放五条悟的方法，虎杖与伙伴们毅然踏入充满未知威胁的结界。在混乱的战场上，他们不仅要面对古代术师的跨时空阻击，还要在不断变化的规则中寻找一线生机。",
     "image": "assets/img/theatre/p2928402160.webp",
     "doubanUrl": "https://movie.douban.com/subject/36714178/"
+  },
+  {
+    "id": "10437779",
+    "title": "新世界 신세계",
+    "category": "movie",
+    "score": 8.9,
+    "director": [
+      "朴勋政"
+    ],
+    "actor": [
+      "李政宰",
+      "崔岷植",
+      "黄政民",
+      "宋智孝",
+      "朴成雄",
+      "金秉玉",
+      "金胤成"
+    ],
+    "country": [
+      "韩国"
+    ],
+    "tags": [
+      "剧情",
+      "犯罪"
+    ],
+    "datePublished": "2013-02-21(韩国)",
+    "year": 2013,
+    "currentDate": "2026-09-19",
+    "runtime": "135分钟",
+    "episodes": "",
+    "intro": "金门集团会长、暴力组织在虎派大佬石东出遭遇车祸身亡，该事件在黑白两道引起不小震荡。为了遏制金门集团进一步向合法领域渗透并持续壮大，警方及时提出“新世界计划”，旨在干预金门集团继任大佬的选举。而围绕会长头衔，金门旗下三号人物华侨出身的丁青（黄正民 饰）和四号人物常务理事李仲久（朴圣雄 饰）展开一连串明争暗斗。在危机四伏的当下，警方姜科长（崔岷植 饰）命令卧底十年之久的李子成（李政宰 饰）左右选举结果。子成六年前和丁青结识，并且得到对方的器重和信任。早已厌倦黑道生活的子成无奈受命，却无疑将自己投入了凶险非常的黑色漩涡之中。\n                                    \n                                　　充满鲜血与欲望的战场，新世界何日来临？",
+    "image": "assets/img/theatre/10437779.jpg",
+    "doubanUrl": "https://movie.douban.com/subject/10437779/"
+  },
+  {
+    "id": "27081753",
+    "title": "机智牢房生活 슬기로운 감빵생활",
+    "category": "series",
+    "score": 9.4,
+    "director": [
+      "申元浩"
+    ],
+    "actor": [
+      "朴海秀",
+      "郑敬淏",
+      "郑秀晶",
+      "林华映",
+      "丁海寅",
+      "郑雄仁",
+      "金圣喆",
+      "李奎炯",
+      "郑敏圣",
+      "朴浩山",
+      "姜昇润",
+      "金景南",
+      "崔武成",
+      "崔胜元",
+      "成东日",
+      "金汉钟",
+      "周锡泰",
+      "姜基栋",
+      "朴亨洙",
+      "李道谦",
+      "申在河",
+      "廉惠兰",
+      "林哲亨",
+      "芮秀贞",
+      "李浩哲",
+      "刘宰明",
+      "申隣雅",
+      "崔广日",
+      "张赫镇",
+      "金基楠",
+      "李太善",
+      "徐智勋"
+    ],
+    "country": [
+      "韩国"
+    ],
+    "tags": [
+      "剧情",
+      "喜剧"
+    ],
+    "datePublished": "2017-11-22(韩国)",
+    "year": 2017,
+    "currentDate": "2026-09-26",
+    "runtime": "",
+    "episodes": "16",
+    "intro": "该剧是讲述超级巨星棒球选手金济赫一夜之间变成阶下囚，以及监狱里的人们的生活的黑色喜剧，\n                                    \n                                　　该剧内容以监狱为背景，通过犯人、监狱管教、家属等角色展现各自的独特个性和存在感，展现给大家监狱这个特殊背景下并不沉重的故事。",
+    "image": "assets/img/theatre/27081753.jpg",
+    "doubanUrl": "https://movie.douban.com/subject/27081753/",
+    "genres": [
+      "剧情",
+      "喜剧"
+    ]
   }
 ]
