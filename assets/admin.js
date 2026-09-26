@@ -248,7 +248,6 @@
     $('#theatreEdit')?.addEventListener('click', openTheatreEditDialog);
     $('#musicAdminRefresh')?.addEventListener('click', () => startWorkflow('music'));
     $('#adminFavoritesSync')?.addEventListener('click', openSyncModeDialog);
-    $('#adminMusicSync')?.addEventListener('click', () => startWorkflow('music'));
     $('#adminShutdown')?.addEventListener('click', shutdown);
     $('#adminDialogCancel')?.addEventListener('click', () => $('#adminDialog').close());
     $('#adminDialogSubmit')?.addEventListener('click', addSelected);
