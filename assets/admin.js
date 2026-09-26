@@ -86,7 +86,19 @@
     $('#adminDialogSubmit').textContent = '搜索';
     $('#adminDialogSubmit').disabled = false;
     $('#adminDialog').showModal();
-    $('#adminSearchInput').focus();
+    const input = $('#adminSearchInput');
+    input.addEventListener('input', () => {
+      admin.selected = null;
+      $('#adminDialogSubmit').textContent = '搜索';
+      document.querySelectorAll('#adminCandidates .admin-candidate').forEach((item) => item.classList.remove('is-selected'));
+    });
+    input.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        searchCandidates();
+      }
+    });
+    input.focus();
   }
 
   function openSyncModeDialog() {
@@ -136,7 +148,7 @@
       admin.candidates = data.results || [];
       admin.selected = null;
       renderCandidateList();
-      button.textContent = '选择结果后添加';
+      button.textContent = '搜索';
     } catch (error) {
       showToast(error.message, true);
       button.textContent = '搜索';
