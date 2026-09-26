@@ -66,7 +66,7 @@
     }
     list.innerHTML = admin.candidates.map((item, index) => `
       <button type="button" class="admin-candidate ${admin.selected?.id === item.id ? 'is-selected' : ''}" data-candidate-index="${index}">
-        ${item.cover ? `<img src="${escapeHtml(item.cover)}" alt="" loading="lazy">` : '<span class="admin-candidate-cover">无图</span>'}
+        <span class="admin-candidate-poster">${item.cover ? `<img src="${escapeHtml(item.cover)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.hidden=true; this.nextElementSibling.hidden=false">` : ''}<span class="admin-candidate-cover-fallback" ${item.cover ? 'hidden' : ''}>海报</span></span>
         <span class="admin-candidate-info">
           <b>${escapeHtml(item.title)}</b>
           <small>${escapeHtml(item.year || item.abstract || item.type || '')}${item.score ? ` · 豆瓣 ${item.score}` : ''}</small>
@@ -273,6 +273,17 @@
     }
   }
 
+  async function repairTheatre() {
+    if (!confirm('修复 Theatre 中缺少海报或详情的影视？')) return;
+    try {
+      const job = await api('/api/theatre/repair', { method: 'POST', body: '{}' });
+      showToast('已开始修复影视信息');
+      watchJob(job.id);
+    } catch (error) {
+      showToast(error.message, true);
+    }
+  }
+
   async function watchJob(id) {
     clearInterval(admin.jobTimer);
     admin.jobTimer = setInterval(async () => {
@@ -305,6 +316,7 @@
   function bind() {
     $('#libraryAdminAdd')?.addEventListener('click', () => openSearchDialog('library'));
     $('#theatreAdminAdd')?.addEventListener('click', () => openSearchDialog('theatre'));
+    $('#theatreAdminRepair')?.addEventListener('click', repairTheatre);
     $('#musicAdminRefresh')?.addEventListener('click', () => startWorkflow('music'));
     $('#adminFavoritesSync')?.addEventListener('click', openSyncModeDialog);
     $('#adminMusicSync')?.addEventListener('click', () => startWorkflow('music'));
