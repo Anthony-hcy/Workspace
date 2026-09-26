@@ -232,7 +232,7 @@
         if (job.status === 'running') return;
         clearInterval(admin.jobTimer);
         if (job.status === 'completed') {
-          showToast('任务完成，页面即将刷新');
+          showToast(job.type === 'favorites' ? '同步完成：Workspace 与本地数据都已刷新' : '任务完成，页面即将刷新');
           setTimeout(() => location.reload(), 1000);
         } else showToast(job.message || '任务失败', true);
       } catch (error) {

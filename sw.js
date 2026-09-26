@@ -19,7 +19,7 @@
  */
 'use strict';
 
-const VERSION = '20260925h';
+const VERSION = '20260925k';
 const CACHE = `workspace-sw-${VERSION}`;
 
 /** 预缓存清单（相对 sw.js 所在目录解析；缺失文件容错跳过） */
