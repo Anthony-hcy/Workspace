@@ -8,6 +8,7 @@
     candidates: [],
     selected: null,
     jobTimer: null,
+    localRefreshTimer: null,
   };
 
   const $ = (selector) => document.querySelector(selector);
@@ -43,6 +44,28 @@
       const syncTime = $('#syncTime');
       if (syncTime) syncTime.textContent = `公开数据最近同步：${date.toLocaleString('zh-CN', { hour12: false })} · ${mode}`;
     } catch {}
+  }
+
+  async function refreshLocalSnapshot() {
+    try {
+      const result = await api('/api/refresh-local');
+      const marker = 'workspace-local-refresh-reload';
+      if (result.changed?.length && !sessionStorage.getItem(marker)) {
+        sessionStorage.setItem(marker, '1');
+        location.reload();
+        return true;
+      }
+      sessionStorage.removeItem(marker);
+    } catch {}
+    return false;
+  }
+
+  function startLocalRefreshPolling() {
+    if (admin.localRefreshTimer) clearInterval(admin.localRefreshTimer);
+    admin.localRefreshTimer = setInterval(async () => {
+      if (document.hidden) return;
+      await refreshLocalSnapshot();
+    }, 5 * 60 * 1000);
   }
 
   function renderCandidateList() {
@@ -274,7 +297,9 @@
       const status = await api('/api/status');
       if (!status.admin) return;
       setAdminVisible(true);
+      if (await refreshLocalSnapshot()) return;
       setTimeout(refreshPublicMeta, 1000);
+      startLocalRefreshPolling();
     } catch {
       setAdminVisible(false);
     }
