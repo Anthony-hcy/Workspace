@@ -703,5 +703,20 @@
     "coverOverride": "assets/img/books/知音漫客5期.jpg",
     "doubanUrl": "https://book.douban.com/subject/3737382/",
     "createdAt": 1787925250637
+  },
+  {
+    "id": "大奉打更人",
+    "query": "大奉打更人",
+    "title": "大奉打更人",
+    "author": "卖报小郎君",
+    "publisher": "追梦人出版社、中国文学艺术出版社",
+    "intro": "这个世界，有儒；有道；有佛；有妖；有术士。\n警校毕业的许七安幽幽醒来，发现自己身处牢狱之中，三日后流放边陲……他起初的目的只是自保，顺便在这个没有人权的社会里当个富家翁悠闲度日。\n…………\n多年后，许七安回首前尘，身后是早已逝去的敌人，以及累累白骨。\n滚滚长江东逝水，浪花淘尽英雄。是非成败转头空。青山依旧在，几度夕阳红。",
+    "rating": 6.7,
+    "bigTag": "其他",
+    "tags": [],
+    "cover": "",
+    "coverOverride": "",
+    "doubanUrl": "https://book.douban.com/subject/35285918/",
+    "createdAt": 1790413035456
   }
 ]

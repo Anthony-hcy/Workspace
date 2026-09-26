@@ -198,5 +198,9 @@
     "coverOverride": "assets/img/books/知音漫客5期.jpg",
     "doubanId": "3737382",
     "author": "知音漫客"
+  },
+  {
+    "query": "大奉打更人",
+    "doubanId": "35285918"
   }
 ]
