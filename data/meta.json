@@ -1,9 +1,9 @@
 {
-  "lastSync": "2026-10-01T01:48:01.766Z",
+  "lastSync": "2026-10-02T01:58:13.875Z",
   "mode": "incremental",
   "sources": {
     "douyin-like": {
-      "count": 622,
+      "count": 623,
       "ok": true,
       "added": 1,
       "removed": null,
@@ -12,7 +12,7 @@
     "douyin-collect": {
       "count": 444,
       "ok": true,
-      "added": 1,
+      "added": 0,
       "removed": null,
       "incremental": true
     },
