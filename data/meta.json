@@ -1,20 +1,20 @@
 {
-  "lastSync": "2026-10-19T00:04:48.332Z",
+  "lastSync": "2026-10-19T00:44:56.711Z",
   "mode": "incremental",
   "sources": {
     "douyin-like": {
       "count": 655,
       "ok": true,
-      "added": 655,
-      "removed": 0,
-      "incremental": false
+      "added": 0,
+      "removed": null,
+      "incremental": true
     },
     "douyin-collect": {
       "count": 441,
       "ok": true,
-      "added": 441,
-      "removed": 0,
-      "incremental": false
+      "added": 0,
+      "removed": null,
+      "incremental": true
     },
     "xiaoheihe-collect": {
       "count": 53,
