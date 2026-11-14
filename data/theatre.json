@@ -13662,5 +13662,23 @@
       "犯罪",
       "西部"
     ]
+  },
+  {
+    "id": "1301026",
+    "title": "革命往事",
+    "category": "movie",
+    "score": null,
+    "director": [],
+    "actor": [],
+    "country": [],
+    "tags": [],
+    "datePublished": "",
+    "year": 1971,
+    "currentDate": "2026-11-14",
+    "runtime": "",
+    "episodes": "",
+    "intro": "",
+    "image": "assets/img/theatre/1301026.jpg",
+    "doubanUrl": "https://movie.douban.com/subject/1301026/"
   }
 ]
