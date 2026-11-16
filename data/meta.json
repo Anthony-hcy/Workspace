@@ -1,25 +1,25 @@
 {
-  "lastSync": "2026-11-15T02:21:16.337Z",
+  "lastSync": "2026-11-16T01:45:07.610Z",
   "mode": "incremental",
   "sources": {
     "douyin-like": {
-      "count": 718,
+      "count": 722,
       "ok": true,
-      "added": 3,
-      "removed": null,
-      "incremental": true
+      "added": 722,
+      "removed": 0,
+      "incremental": false
     },
     "douyin-collect": {
       "count": 445,
       "ok": true,
-      "added": 0,
-      "removed": null,
-      "incremental": true
+      "added": 445,
+      "removed": 0,
+      "incremental": false
     },
     "xiaoheihe-collect": {
       "count": 70,
       "ok": true,
-      "added": 2,
+      "added": 0,
       "removed": null,
       "incremental": true
     }
